@@ -3,6 +3,9 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
+apply plugin: 'com.github.dcendents.android-maven'
+group = 'com.github.rever-ai'
+
 
 android {
     compileSdkVersion 29
