@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#4285F4</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#000</color>
+    <color name="colorTextGray">#b2ffffff</color>
+    <color name="colorTextDarkGray">#78000000</color>
+    <color name="colorButtonGray">#61000000</color>
+    <color name="colorTabUnselected">#000000</color>
+    <color name="colorSemiTransparent">#4c000000</color>
+    <color name="colorTabSelected">#fff</color>
+
+    <color name="colorDarkGreen">#54948B</color>
+    <color name="colorRed">#E3645A</color>
+    <color name="colorViolet">#4E5B98</color>
+
+    <color name="colorBlack">#000000</color>
+    <color name="colorWhite">#FFFFFF</color>
+
+    <color name="colorUserTabUnselected">#CC8F8D8D</color>
+
+    <color name="mdtp_accent_color">#3499F3</color>
+    <color name="mdtp_accent_color_dark">#1F6BAF</color>
+
+    <color name="calenderColor">#ff825c</color>
+
+    <color name="sleepColor">#232838</color>
+
+    <!--new design colors-->
+
+    <color name="primaryColorBlack">#000000</color>
+    <color name="secondaryColorBlack">#CC000000</color>
+    <color name="tertiaryColorBlack">#66000000</color>
+    <color name="fortyPercentColorBlack">#66000000</color>
+    <color name="twentyPercentColorBlack">#33000000</color>
+
+    <color name="primaryColorRed">#ff5353</color>
+
+    <color name="primaryColorWhite">#FFFFFF</color>
+    <color name="secondaryColorWhite">#CCFFFFFF</color>
+    <color name="fortyPercentColorWhite">#66FFFFFF</color>
+
+    <color name="primaryColorOrange">#ff7c00</color>
+
+    <color name="primaryColorBlue">#232838</color>
+    <color name="primaryColorBlue2">#342d72</color>
+    <color name="secondaryColorBlue2">#CC342D72</color>
+
+    <color name="primaryColorSkyBlue">#3499f3</color>
+    <color name="secondaryColorSkyBlue">#E63499F3</color>
+
+    <color name="primaryColorRadish">#ea8460</color>
+
+    <color name="primaryColorRadish2">#ff825c</color>
+    <color name="secondaryColorRadish2">#CCFF825C</color>
+
+    <color name="primaryColorViolet">#342d72</color>
+
+    <color name="primaryColorGrey">#5a6175</color>
+
+</resources>
