@@ -16,7 +16,6 @@ import com.google.android.gms.cast.framework.CastContext
 
 class AudioPlayerActivity : BaseActivity() {
     lateinit var playerViewModel: PlayerViewModel
-    private var mCastContext: CastContext? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +26,7 @@ class AudioPlayerActivity : BaseActivity() {
 
         setupPlayer()
         setupUI()
-        mCastContext = CastContext.getSharedInstance(this)
+
         setCastButton()
 
     }
@@ -95,7 +94,6 @@ class AudioPlayerActivity : BaseActivity() {
 
     private fun setCastButton() {
         CastButtonFactory.setUpMediaRouteButton(this, activity_audio_player_mediaroute_btn)
-
     }
 
 }
