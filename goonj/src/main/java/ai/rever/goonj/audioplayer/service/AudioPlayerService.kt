@@ -41,7 +41,7 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
             mSessionManager.unsuspend()
 
             Log.d(TAG,mPlayer.toString())
-            if(route?.isDefault == true) {
+            if(route?.isDefault == true || route?.isDefault == true) {
                 mSessionManager.setRemotePlayerSelected(false)
                 mSessionManager.resume()
             } else {
@@ -53,6 +53,11 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
         override fun onRouteUnselected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             Log.d(TAG, "onRouteUnselected: route=$route")
 
+            if(route?.isDefault == true || route?.isBluetooth == true ) {
+                mSessionManager.setRemotePlayerSelected(true)
+            } else {
+                mSessionManager.setRemotePlayerSelected(false)
+            }
             mSessionManager.suspend()
         }
     }

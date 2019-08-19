@@ -20,24 +20,28 @@ object Samples {
             "audio_3",
             "Talkies",
             "If it talks like a duck and walks like a duck.",
-             R.mipmap.ic_album_art
+             R.mipmap.ic_album_art,
+             "https://img.discogs.com/Bss063QHQ7k0sRwejSQWTJ-iKGI=/fit-in/600x573/filters:strip_icc():format(jpeg):mode_rgb():quality(90)/discogs-images/R-900642-1182343816.jpeg.jpg"
         ), Sample(
             "https://storage.googleapis.com/automotive-media/Jazz_In_Paris.mp3",
             "audio_1",
             "Jazz in Paris",
             "Jazz for the masses",
-            R.mipmap.ic_album_art
+            R.mipmap.ic_album_art,
+            "https://i.ebayimg.com/images/g/MMgAAOSwXi9b6BJ3/s-l640.jpg"
         ), Sample(
             "https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
             "audio_2",
             "The messenger",
             "Hipster guide to London",
-            R.mipmap.ic_album_art
+            R.mipmap.ic_album_art,
+            "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
         )
     )
 
     class Sample(
-        val url: String, val mediaId: String, val title: String, val description: String, val bitmapResource: Int
+        val url: String, val mediaId: String, val title: String, val description: String, val bitmapResource: Int,
+        val albumArtUrl : String? = ""
     ) : Serializable {
         var state = MediaItemStatus.PLAYBACK_STATE_PENDING
         var position: Long = 0

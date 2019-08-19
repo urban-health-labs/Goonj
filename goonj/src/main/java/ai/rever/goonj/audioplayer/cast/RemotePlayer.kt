@@ -10,12 +10,20 @@ import androidx.mediarouter.media.RemotePlaybackClient
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.util.Samples
 import ai.rever.goonj.audioplayer.util.isPlaying
+import android.net.Uri
 import androidx.core.net.toUri
+import com.google.android.gms.cast.MediaMetadata
 import java.util.ArrayList
+import com.google.android.gms.common.images.WebImage
+import com.google.android.gms.cast.framework.media.RemoteMediaClient
+import android.R.attr.duration
+import com.google.android.gms.cast.MediaInfo
+import com.google.android.gms.cast.framework.CastContext
+
 
 class RemotePlayer(var mContext: Context) : AudioPlayer() {
 
-    private var TAG = "RemotePlayer"
+    private var TAG = "REMOTE_PLAYER"
     private var DEBUG = true
     private var mRoute: MediaRouter.RouteInfo? = null
     private var mEnqueuePending: Boolean = false
@@ -78,6 +86,8 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
                 if (item.state == MediaItemStatus.PLAYBACK_STATE_PAUSED) {
                     pause()
                 }
+
+                setMediaMetadata(item)
                 mCallback.onPlaylistChanged()
                 isPlaying.value = true
             }
@@ -86,6 +96,29 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
                 logError("play: failed", error , code)
             }
         })
+    }
+
+    fun setMediaMetadata(item: Samples.Sample){
+        val musicMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
+
+        musicMetadata.putString(MediaMetadata.KEY_TITLE, item.title)
+        musicMetadata.putString(MediaMetadata.KEY_ARTIST, item.description)
+        musicMetadata.addImage(WebImage(Uri.parse(item.albumArtUrl)))
+
+        val castSession = CastContext.getSharedInstance(mContext).sessionManager.currentCastSession
+
+        try {
+            val mediaInfo = MediaInfo.Builder(item.url)
+                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                .setContentType("audio/*")
+                .setMetadata(musicMetadata)
+                .build()
+            val remoteMediaClient = castSession.remoteMediaClient
+            remoteMediaClient.load(mediaInfo, true, 0)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
     }
 
     override fun seek(item: Samples.Sample) {

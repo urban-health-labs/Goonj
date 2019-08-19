@@ -108,7 +108,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
             }
         } else {
             if(isRemote) {
-                // select an item from playlist that isn't played
+                // play an item from playlist that isn't played
                 mPlayer?.play(mPlaylist[2])
             }
         }
