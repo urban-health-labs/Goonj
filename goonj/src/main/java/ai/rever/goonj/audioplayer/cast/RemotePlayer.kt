@@ -8,16 +8,15 @@ import androidx.mediarouter.media.MediaRouter
 import androidx.mediarouter.media.MediaSessionStatus
 import androidx.mediarouter.media.RemotePlaybackClient
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
-import ai.rever.goonj.audioplayer.util.Samples
+import ai.rever.goonj.audioplayer.models.Samples
 import ai.rever.goonj.audioplayer.util.isPlaying
 import android.net.Uri
 import androidx.core.net.toUri
 import com.google.android.gms.cast.MediaMetadata
 import java.util.ArrayList
 import com.google.android.gms.common.images.WebImage
-import com.google.android.gms.cast.framework.media.RemoteMediaClient
-import android.R.attr.duration
 import com.google.android.gms.cast.MediaInfo
+import com.google.android.gms.cast.MediaLoadRequestData
 import com.google.android.gms.cast.framework.CastContext
 
 
@@ -98,7 +97,7 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
         })
     }
 
-    fun setMediaMetadata(item: Samples.Sample){
+    private fun setMediaMetadata(item: Samples.Sample){
         val musicMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
 
         musicMetadata.putString(MediaMetadata.KEY_TITLE, item.title)
@@ -114,7 +113,13 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
                 .setMetadata(musicMetadata)
                 .build()
             val remoteMediaClient = castSession.remoteMediaClient
-            remoteMediaClient.load(mediaInfo, true, 0)
+
+            val mediaLoadRequestData = MediaLoadRequestData.Builder()
+                .setMediaInfo(mediaInfo)
+                .setAutoplay(true)
+                .build()
+
+            remoteMediaClient.load(mediaLoadRequestData)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -294,6 +299,15 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
 
     override fun getTrackPosition(): Long? {
         return null
+    }
+
+    override fun customiseNotification(
+        useNavigationAction: Boolean,
+        usePlayPauseAction: Boolean,
+        fastForwardIncrementMs: Long,
+        rewindIncrementMs: Long
+    ) {
+        // Do nothing
     }
 
     private fun enqueueInternal(item: Samples.Sample) {

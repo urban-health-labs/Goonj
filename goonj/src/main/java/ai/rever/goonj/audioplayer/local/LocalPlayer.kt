@@ -15,7 +15,9 @@ import androidx.core.net.toUri
 import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.audioplayer.download.DownloadUtil
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
+import ai.rever.goonj.audioplayer.models.Samples
 import ai.rever.goonj.audioplayer.util.*
+import android.annotation.SuppressLint
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -47,7 +49,16 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
     var playList : MutableList<Samples.Sample> = mutableListOf()
 
     companion object{
-        fun getInstance(service: Service) = LocalPlayer(service)
+        @SuppressLint("StaticFieldLeak")
+        var INSTANCE : LocalPlayer? = null
+
+        fun getInstance(service: Service): AudioPlayer {
+            if(INSTANCE == null){
+                INSTANCE = LocalPlayer(service)
+            }
+
+            return INSTANCE!!
+        }
     }
 
     private val listener = object : Player.EventListener {
@@ -105,7 +116,7 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
      * @param fastForwardIncrementMs Set forward increment in milliseconds. 0 ms will hide it
      * @param rewindIncrementMs Set rewind increment in milliseconds. 0 ms will hide it
      */
-    fun setupNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean,
+    override fun customiseNotification(useNavigationAction: Boolean , usePlayPauseAction: Boolean,
                                   fastForwardIncrementMs: Long, rewindIncrementMs: Long){
 
         playerNotificationManager.setUseNavigationActions(useNavigationAction)

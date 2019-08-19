@@ -10,6 +10,7 @@ const val ACTION_NEXT = "ly.blissful.bliss.action.NEXT"
 const val ACTION_ADD_AUDIO_TO_PLAYLIST = "ly.blissful.bliss.action.ADD_AUDIO_TO_PLAYLIST"
 const val ACTION_ADD_PLAYLIST = "ly.blissful.bliss.action.ACTION_ADD_PLAYLIST"
 const val ACTION_START_NEW_SESSION = "ly.blissful.bliss.action.ACTION_START_NEW_SESSION"
+const val ACTION_CUSTOMIZE_NOTIFICATION = "ly.blissful.bliss.action.ACTION_CUSTOMIZE_NOTIFICATION"
 
 // Notification
 const val REMOVE_NOTIFICATION_FOREGROUND = 0
@@ -29,3 +30,8 @@ val PLAYBACK_NOTIFICATION_ID = 1
 val MEDIA_SESSION_TAG = "audio_demo"
 val DOWNLOAD_CHANNEL_ID = "download_channel"
 val DOWNLOAD_NOTIFICATION_ID = 2
+
+val USE_NAV_ACTION = "use_nav_action"
+val USE_PLAY_PAUSE = "use_play_pause"
+val FAST_FORWARD_INC = "fast_forward_inc"
+val REWIND_INC = "rewind_inc"

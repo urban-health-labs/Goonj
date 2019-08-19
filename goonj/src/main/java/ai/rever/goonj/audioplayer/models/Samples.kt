@@ -1,4 +1,4 @@
-package ai.rever.goonj.audioplayer.util
+package ai.rever.goonj.audioplayer.models
 
 import ai.rever.goonj.R
 import android.content.Context
@@ -15,13 +15,13 @@ import java.io.Serializable
 object Samples {
 
     val SAMPLES = arrayOf(
-         Sample(
+        Sample(
             "https://storage.googleapis.com/automotive-media/Talkies.mp3",
             "audio_3",
             "Talkies",
             "If it talks like a duck and walks like a duck.",
-             R.mipmap.ic_album_art,
-             "https://img.discogs.com/Bss063QHQ7k0sRwejSQWTJ-iKGI=/fit-in/600x573/filters:strip_icc():format(jpeg):mode_rgb():quality(90)/discogs-images/R-900642-1182343816.jpeg.jpg"
+            R.mipmap.ic_album_art,
+            "https://img.discogs.com/Bss063QHQ7k0sRwejSQWTJ-iKGI=/fit-in/600x573/filters:strip_icc():format(jpeg):mode_rgb():quality(90)/discogs-images/R-900642-1182343816.jpeg.jpg"
         ), Sample(
             "https://storage.googleapis.com/automotive-media/Jazz_In_Paris.mp3",
             "audio_1",

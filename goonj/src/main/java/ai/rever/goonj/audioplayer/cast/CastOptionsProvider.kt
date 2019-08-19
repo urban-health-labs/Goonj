@@ -24,12 +24,13 @@ class CastOptionsProvider : OptionsProvider {
                 .setActions(buttonActions, compatButtonActionsIndices)
                 .build()
 
+        val castMediaOptions = CastMediaOptions.Builder()
+            .setNotificationOptions(notificationOptions)
+            .build()
+
         return CastOptions.Builder()
             .setReceiverApplicationId(CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID)
-            .setCastMediaOptions(
-                CastMediaOptions.Builder()
-                    .setNotificationOptions(notificationOptions)
-                    .build())
+            .setCastMediaOptions(castMediaOptions)
             .build()
     }
 

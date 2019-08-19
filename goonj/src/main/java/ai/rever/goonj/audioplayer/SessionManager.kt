@@ -2,7 +2,7 @@ package ai.rever.goonj.audioplayer
 
 import android.util.Log
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
-import ai.rever.goonj.audioplayer.util.Samples
+import ai.rever.goonj.audioplayer.models.Samples
 import java.util.ArrayList
 
 class SessionManager(private val mName: String) : AudioPlayer.Callback {
@@ -112,6 +112,15 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
                 mPlayer?.play(mPlaylist[2])
             }
         }
+    }
+
+    fun customiseNotification(useNavigationAction: Boolean ,
+                              usePlayPauseAction: Boolean ,
+                              fastForwardIncrementMs: Long ,
+                              rewindIncrementMs: Long ){
+
+        mPlayer?.customiseNotification(useNavigationAction,usePlayPauseAction,
+            fastForwardIncrementMs, rewindIncrementMs)
     }
 
     // Player.Callback

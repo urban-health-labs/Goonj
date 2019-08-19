@@ -1,5 +1,6 @@
 package ai.rever.goonjexample
 
+import ai.rever.goonj.audioplayer.models.Samples
 import ai.rever.goonj.audioplayer.service.AudioPlayerService
 import ai.rever.goonj.audioplayer.util.*
 import android.content.Context
@@ -41,6 +42,21 @@ class PlayerViewModel : ViewModel(){
     private fun performPlayerAction(context: Context,action: String){
         var intent = Intent(context,AudioPlayerService::class.java)
         intent.action = action
+        context.startService(intent)
+    }
+
+    @JvmOverloads
+    fun customizeNotification(context: Context, useNavigationAction: Boolean = true,
+                                      usePlayPauseAction: Boolean = true,
+                                      fastForwardIncrementMs: Long = 0L,
+                                      rewindIncrementMs: Long = 0L){
+        val intent = Intent(context, AudioPlayerService::class.java)
+        intent.action = ACTION_CUSTOMIZE_NOTIFICATION
+        intent.putExtra(USE_NAV_ACTION,useNavigationAction)
+        intent.putExtra(USE_PLAY_PAUSE,usePlayPauseAction)
+        intent.putExtra(FAST_FORWARD_INC, fastForwardIncrementMs)
+        intent.putExtra(REWIND_INC, rewindIncrementMs)
+
         context.startService(intent)
     }
 

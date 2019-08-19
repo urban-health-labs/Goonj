@@ -1,7 +1,6 @@
 package ai.rever.goonj.audioplayer.download
 
 import ai.rever.goonj.R
-import ai.rever.goonj.audioplayer.util.Samples
 import android.content.Context
 import androidx.core.net.toUri
 import com.google.android.exoplayer2.database.ExoDatabaseProvider

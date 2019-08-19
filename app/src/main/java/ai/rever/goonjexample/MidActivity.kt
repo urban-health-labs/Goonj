@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_mid.*
 import ai.rever.goonj.audioplayer.download.DownloadUtil.addDownload
-import ai.rever.goonj.audioplayer.util.Samples.SAMPLES
+import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
 
 class MidActivity : AppCompatActivity() {
 

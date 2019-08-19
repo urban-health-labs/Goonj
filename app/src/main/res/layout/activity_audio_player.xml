@@ -314,4 +314,15 @@
                     android:indeterminateTintMode="src_atop"/>
         </LinearLayout>
     </LinearLayout>
+
+    <fragment
+            android:id="@+id/castMiniController"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            class="com.google.android.gms.cast.framework.media.widget.MiniControllerFragment" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

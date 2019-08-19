@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.mediarouter.media.*
 import ai.rever.goonj.audioplayer.SessionManager
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
+import ai.rever.goonj.audioplayer.models.Samples
 import io.reactivex.Observable
 
 class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeListener {
@@ -147,6 +148,16 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
                 ACTION_START_NEW_SESSION ->{
                     mSessionManager.startNewSession()
                 }
+                ACTION_CUSTOMIZE_NOTIFICATION ->{
+                    val useNavigationAction = intent.getBooleanExtra(USE_NAV_ACTION,true)
+                    val usePlayPauseAction = intent.getBooleanExtra(USE_PLAY_PAUSE, true)
+                    val fastForwardIncrementMs = intent.getLongExtra(FAST_FORWARD_INC, 0L)
+                    val rewindIncrementMs = intent.getLongExtra(REWIND_INC, 0L)
+
+                    mSessionManager.customiseNotification(useNavigationAction,usePlayPauseAction,
+                        fastForwardIncrementMs,rewindIncrementMs)
+                }
+
             }
         }
         super.onStartCommand(intent, flags, startId)

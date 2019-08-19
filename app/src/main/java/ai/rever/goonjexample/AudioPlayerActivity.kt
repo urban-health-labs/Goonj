@@ -1,6 +1,6 @@
 package ai.rever.goonjexample
 
-import ai.rever.goonj.audioplayer.util.Samples.SAMPLES
+import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
 import ai.rever.goonj.audioplayer.util.isPlaying
 import android.os.Bundle
 import androidx.lifecycle.Observer
@@ -11,7 +11,6 @@ import android.view.KeyEvent
 import android.content.Context
 import android.view.KeyEvent.*
 import com.google.android.gms.cast.framework.CastButtonFactory
-import com.google.android.gms.cast.framework.CastContext
 
 
 class AudioPlayerActivity : BaseActivity() {
@@ -24,6 +23,7 @@ class AudioPlayerActivity : BaseActivity() {
 
         playerViewModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java)
 
+        customizeNotification()
         setupPlayer()
         setupUI()
 
@@ -50,6 +50,9 @@ class AudioPlayerActivity : BaseActivity() {
         }
     }
 
+    private fun customizeNotification(){
+        playerViewModel.customizeNotification(this,false)
+    }
     private fun setupPlayer() {
         playerViewModel.startNewSession(this)
         playerViewModel.addAudioToPlaylist(this, SAMPLES[0])
