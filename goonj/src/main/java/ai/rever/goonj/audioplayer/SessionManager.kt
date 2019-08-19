@@ -89,11 +89,29 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         mPlayer?.setVolume(volume)
     }
     fun startNewSession(){
+        mPlaylist = mutableListOf()
         mPlayer?.startNewSession()
     }
 
     fun getTrackPosition(): Long?{
         return mPlayer?.getTrackPosition()
+    }
+
+    fun suspend(){
+        mPlayer?.pause()
+    }
+
+    fun unsuspend(){
+        if(mPlayer?.isQueuingSupported() == true) {
+            for (item in mPlaylist) {
+                mPlayer?.enqueue(item)
+            }
+        } else {
+            if(isRemote) {
+                // select an item from playlist that isn't played
+                mPlayer?.play(mPlaylist[2])
+            }
+        }
     }
 
     // Player.Callback

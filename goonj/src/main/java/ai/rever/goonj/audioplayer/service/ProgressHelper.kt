@@ -16,6 +16,7 @@ fun AudioPlayerService.setupProgressObserver() {
 }
 
 fun AudioPlayerService.addProgressObserver() {
+    val TAG = "PROGRESS"
 
     playbackObserver = object : io.reactivex.Observer<Long> {
         override fun onNext(position: Long) {

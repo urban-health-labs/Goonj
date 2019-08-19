@@ -34,16 +34,18 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
     private val mediaRouterCallback = object : MediaRouter.Callback(){
         override fun onRouteSelected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             Log.d(TAG, "onRouteSelected: route=$route")
+            Log.d(TAG,"Playlist Size: ${mSessionManager.playlist.size}")
 
             mPlayer = AudioPlayer.create(this@AudioPlayerService,route)
             mSessionManager.setPlayer(mPlayer!!)
+            mSessionManager.unsuspend()
 
             Log.d(TAG,mPlayer.toString())
             if(route?.isDefault == true) {
                 mSessionManager.setRemotePlayerSelected(false)
                 mSessionManager.resume()
             } else {
-                mSessionManager.add(mSessionManager.playlist[0])
+                Log.d(TAG,"Playlist Size: ${mSessionManager.playlist.size}")
                 mSessionManager.setRemotePlayerSelected(true)
             }
         }
@@ -51,6 +53,7 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
         override fun onRouteUnselected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             Log.d(TAG, "onRouteUnselected: route=$route")
 
+            mSessionManager.suspend()
         }
     }
 

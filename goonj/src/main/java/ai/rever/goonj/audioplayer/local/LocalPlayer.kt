@@ -31,7 +31,7 @@ import com.google.android.exoplayer2.util.Util
 
 class LocalPlayer (var service: Service) : AudioPlayer(){
 
-    val TAG = "PLAYER"
+    val TAG = "LOCAL_PLAYER"
     private val DEBUG = true
 
     var exoPlayer : SimpleExoPlayer
@@ -131,7 +131,7 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
         mediaSessionConnector?.setPlayer(exoPlayer)
     }
 
-    fun addAudioPlaylist(vararg audioList: Samples.Sample) {
+    private fun addAudioPlaylist(vararg audioList: Samples.Sample) {
         Log.d(TAG,"setupDataSource Local")
         for(audio in audioList){
             val mediaSource =  ProgressiveMediaSource.Factory(cacheDataSourceFactory)
@@ -140,6 +140,7 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
             playList.add(audio)
         }
         exoPlayer.prepare(concatenatingMediaSource)
+        exoPlayer.playWhenReady = true
     }
 
     override fun startNewSession(){
@@ -244,6 +245,7 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
     override fun resume() {
         if (DEBUG) {
             Log.d(TAG, "resume")
+            Log.d(TAG,"Playlist Size: ${playList.size}")
         }
         exoPlayer.playWhenReady = true
     }
