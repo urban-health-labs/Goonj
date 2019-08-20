@@ -3,6 +3,8 @@ package ai.rever.goonj.audioplayer
 import android.util.Log
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
+import androidx.mediarouter.media.MediaItemStatus
 import java.util.ArrayList
 
 class SessionManager(private val mName: String) : AudioPlayer.Callback {
@@ -18,8 +20,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     val sessionId: String?
         get() = if (mSessionValid) mSessionId.toString() else null
 
-    val currentItem: Samples.Sample?
-        get() = if (mPlaylist.isEmpty()) null else mPlaylist[0]
+    var currentItem: Samples.Sample? = if (mPlaylist.isEmpty()) null else mPlaylist[0]
 
 
     // Returns the cached playlist (note this is not responsible for updating it)
@@ -58,7 +59,8 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
             mPlayer?.enqueue(item)
         }
         else {
-            mPlayer?.play(item)
+            //mPlayer?.play(item)
+            getItemForRemotePlayback()
             mPaused = false
         }
         return item
@@ -109,7 +111,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         } else {
             if(isRemote) {
                 // play an item from playlist that isn't played
-                mPlayer?.play(mPlaylist[2])
+                getItemForRemotePlayback()
             }
         }
     }
@@ -123,13 +125,27 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
             fastForwardIncrementMs, rewindIncrementMs)
     }
 
+    private fun getItemForRemotePlayback(){
+        for(item in playlist){
+            Log.d(TAG,"STATUS: ${item.state}")
+            if(item.state != MediaItemStatus.PLAYBACK_STATE_FINISHED){
+                item.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
+                currentItem = item
+                mPlayer?.play(item)
+                break
+            }
+        }
+    }
+
     // Player.Callback
     override fun onError() {
 
     }
 
     override fun onCompletion() {
-
+        Log.e(TAG,"Finished: ${currentItem?.title}")
+        currentItem?.state = MediaItemStatus.PLAYBACK_STATE_FINISHED
+        getItemForRemotePlayback()
     }
 
     override fun onPlaylistChanged() {

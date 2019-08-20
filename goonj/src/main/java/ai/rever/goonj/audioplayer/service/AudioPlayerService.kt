@@ -167,21 +167,17 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
     override fun onAudioFocusChange(focusState: Int) {
         when (focusState) {
             AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                Log.d(TAG, "AUDIOFOCUS_REQUEST_GRANTED")
                 mSessionManager.setVolume(1f)
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
-                Log.d(TAG, "AUDIOFOCUS_LOSS")
                 mSessionManager.pause()
                 removeAudioFocus()
 
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-                Log.d(TAG, "AUDIOFOCUS_LOSS_TRANSIENT")
                 mSessionManager.setVolume(0.1f)
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                Log.d(TAG, "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK")
                 mSessionManager.setVolume(0.1f)
             }
         }
