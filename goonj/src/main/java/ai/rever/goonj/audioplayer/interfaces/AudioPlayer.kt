@@ -6,6 +6,7 @@ import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.audioplayer.cast.RemotePlayer
 import ai.rever.goonj.audioplayer.local.LocalPlayer
 import ai.rever.goonj.audioplayer.models.Samples
+import java.lang.ref.WeakReference
 
 abstract class AudioPlayer {
 
@@ -60,7 +61,7 @@ abstract class AudioPlayer {
                     MediaControlIntent.CATEGORY_REMOTE_PLAYBACK
                 )
             ) {
-                player = RemotePlayer(context)
+                player = RemotePlayer.getInstance(WeakReference(context))
             } else {
                 player = LocalPlayer.getInstance(context)
             }

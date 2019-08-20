@@ -30,11 +30,17 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import java.lang.ref.WeakReference
 
-class LocalPlayer (var service: Service) : AudioPlayer(){
+
+
+class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlayer(){
+
 
     val TAG = "LOCAL_PLAYER"
     private val DEBUG = true
+
+    val service: Service? get() = weakReferenceService.get()
 
     var exoPlayer : SimpleExoPlayer
     lateinit var playerNotificationManager: PlayerNotificationManager
@@ -42,7 +48,7 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
     var mediaSession: MediaSessionCompat? = null
     var mediaSessionConnector : MediaSessionConnector? = null
 
-    var context : Context = service
+    var context : Context? = service
     private var concatenatingMediaSource = ConcatenatingMediaSource()
     private lateinit var cacheDataSourceFactory : CacheDataSourceFactory
 
@@ -54,7 +60,7 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
 
         fun getInstance(service: Service): AudioPlayer {
             if(INSTANCE == null){
-                INSTANCE = LocalPlayer(service)
+                INSTANCE = LocalPlayer(WeakReference(service))
             }
 
             return INSTANCE!!
@@ -86,11 +92,16 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
 
     private fun setupDataSource(){
         Log.d(TAG,"setupDataSource Local")
-        val dataSourceFactory = DefaultDataSourceFactory(context,
-            Util.getUserAgent(context,context.getString(R.string.app_name)))
+        context?.let {context ->
+            val dataSourceFactory = DefaultDataSourceFactory(
+                context,
+                Util.getUserAgent(context, context.getString(R.string.app_name))
+            )
 
-        cacheDataSourceFactory = CacheDataSourceFactory(
-            DownloadUtil.getCache(context), dataSourceFactory, CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+            cacheDataSourceFactory = CacheDataSourceFactory(
+                DownloadUtil.getCache(context), dataSourceFactory, CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR
+            )
+        }
     }
 
     private fun addAudioListener(){
@@ -156,19 +167,19 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
 
     override fun startNewSession(){
         Log.d(TAG,"setupDataSource Local")
-        playList = mutableListOf()
-        concatenatingMediaSource = ConcatenatingMediaSource()
+        playList.clear()
+        concatenatingMediaSource.clear()
     }
 
     private val notificationListener = object : PlayerNotificationManager.NotificationListener {
         override fun onNotificationStarted(notificationId: Int, notification: Notification) {
             notification.contentIntent = PendingIntent.getActivity(
-                service.baseContext, PLAYBACK_NOTIFICATION_ID,
+                service?.baseContext, PLAYBACK_NOTIFICATION_ID,
                 //Intent(context, AudioPlayerActivity::class.java),
                 Intent(),
                 PendingIntent.FLAG_CANCEL_CURRENT
             )
-            service.startForeground(notificationId, notification)
+            service?.startForeground(notificationId, notification)
         }
 
         override fun onNotificationCancelled(notificationId: Int) {
@@ -184,8 +195,7 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
 
         @Nullable
         override fun createCurrentContentIntent(player: Player): PendingIntent? {
-            val intent = Intent()
-            return PendingIntent.getActivity(service,0,intent,PendingIntent.FLAG_UPDATE_CURRENT)
+            return PendingIntent.getActivity(service,0, Intent(), PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
         @Nullable
@@ -195,9 +205,7 @@ class LocalPlayer (var service: Service) : AudioPlayer(){
 
         @Nullable
         override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback): Bitmap {
-            return Samples.getBitmap(
-                context, playList[player.currentWindowIndex].bitmapResource
-            )
+            return Samples.getBitmap(context, playList[player.currentWindowIndex].bitmapResource)!!
         }
     }
 

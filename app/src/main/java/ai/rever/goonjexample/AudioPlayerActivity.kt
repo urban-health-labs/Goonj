@@ -58,6 +58,7 @@ class AudioPlayerActivity : BaseActivity() {
         playerViewModel.addAudioToPlaylist(this, SAMPLES[0])
         playerViewModel.addAudioToPlaylist(this, SAMPLES[1])
         playerViewModel.addAudioToPlaylist(this, SAMPLES[2])
+        playerViewModel.addAudioToPlaylist(this, SAMPLES[3])
     }
 
     override fun onBackPressed() {

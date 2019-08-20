@@ -9,7 +9,6 @@ import java.util.ArrayList
 
 class SessionManager(private val mName: String) : AudioPlayer.Callback {
     private var mSessionId: Int = 0
-    private var mItemId: Int = 0
     var mPaused: Boolean = false
     private var mSessionValid: Boolean = false
     private var mPlayer: AudioPlayer? = null
@@ -48,22 +47,18 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         return mSessionValid
     }
 
-    fun add(item: Samples.Sample): Samples.Sample {
+    fun add(item: Samples.Sample) {
         Log.d(TAG,item.toString())
 
         mPlaylist.add(item)
-        mItemId++
 
         // if player supports queuing, enqueue the item now
         if (mPlayer?.isQueuingSupported() == true) {
             mPlayer?.enqueue(item)
-        }
-        else {
-            //mPlayer?.play(item)
-            getItemForRemotePlayback()
+        } else {
+            playItemOnRemotePlayer()
             mPaused = false
         }
-        return item
     }
 
     fun pause() {
@@ -91,7 +86,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         mPlayer?.setVolume(volume)
     }
     fun startNewSession(){
-        mPlaylist = mutableListOf()
+        mPlaylist.clear()
         mPlayer?.startNewSession()
     }
 
@@ -111,7 +106,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         } else {
             if(isRemote) {
                 // play an item from playlist that isn't played
-                getItemForRemotePlayback()
+                playItemOnRemotePlayer()
             }
         }
     }
@@ -125,27 +120,29 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
             fastForwardIncrementMs, rewindIncrementMs)
     }
 
-    private fun getItemForRemotePlayback(){
-        for(item in playlist){
-            Log.d(TAG,"STATUS: ${item.state}")
-            if(item.state != MediaItemStatus.PLAYBACK_STATE_FINISHED){
-                item.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
-                currentItem = item
-                mPlayer?.play(item)
-                break
-            }
+    private fun playItemOnRemotePlayer(){
+        currentItem = playlist.first {
+            Log.d(TAG,"STATUS: ${it.state}")
+            it.state != MediaItemStatus.PLAYBACK_STATE_FINISHED
+        }
+        currentItem?.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
+        currentItem?.let {
+            mPlayer?.play(it)
+            //mPlayer?.enqueue(it)
         }
     }
 
     // Player.Callback
     override fun onError() {
-
+        Log.e(TAG,"===============> Error")
     }
 
+
     override fun onCompletion() {
-        Log.e(TAG,"Finished: ${currentItem?.title}")
+        Log.e(TAG,"==============> Finished: ${currentItem?.title}")
         currentItem?.state = MediaItemStatus.PLAYBACK_STATE_FINISHED
-        getItemForRemotePlayback()
+        playItemOnRemotePlayer ()
+        //mPlayer?.play(SAMPLES[3])
     }
 
     override fun onPlaylistChanged() {
@@ -154,9 +151,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
     override fun onPlaylistReady() {
         // Notify activity to update Ui
-        if (mCallback != null) {
-            mCallback?.onStatusChanged()
-        }
+        mCallback?.onStatusChanged()
     }
 
     // provide a callback interface to tell the UI when significant state changes occur

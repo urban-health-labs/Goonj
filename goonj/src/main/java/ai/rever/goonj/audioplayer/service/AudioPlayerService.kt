@@ -18,7 +18,6 @@ import io.reactivex.Observable
 class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeListener {
 
     val TAG = "AUDIO_PLAYER_SERvICE"
-    lateinit var player: SimpleExoPlayer
     lateinit var audioManager: AudioManager
 
     lateinit var context: Context
@@ -37,8 +36,10 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
             Log.d(TAG, "onRouteSelected: route=$route")
             Log.d(TAG,"Playlist Size: ${mSessionManager.playlist.size}")
 
-            mPlayer = AudioPlayer.create(this@AudioPlayerService,route)
-            mSessionManager.setPlayer(mPlayer!!)
+            mPlayer = AudioPlayer.create(this@AudioPlayerService, route)
+            mPlayer?.let {
+                mSessionManager.setPlayer(it)
+            }
             mSessionManager.unsuspend()
 
             Log.d(TAG,mPlayer.toString())
@@ -102,15 +103,18 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
 
     }
 
-    override fun onStart(intent: Intent?, startId: Int) {
-        super.onStart(intent, startId)
-        mSelector?.also { selector ->
-            mediaRouter?.addCallback(selector, mediaRouterCallback,
-                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
-        }
-    }
+
+
+//    override fun onStart(intent: Intent?, startId: Int) {
+//        super.onStart(intent, startId)
+//        mSelector?.also { selector ->
+//            mediaRouter?.addCallback(selector, mediaRouterCallback,
+//                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
+//        }
+//    }
 
     override fun onDestroy() {
+        removeObserver()
         removeAudioFocus()
         mediaRouter?.removeCallback(mediaRouterCallback)
         super.onDestroy()
@@ -122,28 +126,29 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (!(intent == null || intent.action == null)) {
-            when (intent.action) {
+        mSelector?.also { selector ->
+            mediaRouter?.addCallback(selector, mediaRouterCallback,
+                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
+        }
+        intent?.action?.let{
+            when (it) {
                 ACTION_RESUME_SESSION -> {
                     mSessionManager.resume()
                 }
                 ACTION_PAUSE_SESSION -> {
-                    mSessionManager.pause()
                     if(!mSessionManager.isRemote) {
                         stopForeground(true)
                     }
+                    mSessionManager.pause()
                 }
                 ACTION_STOP -> {
                     mSessionManager.pause()
                     stopForeground(true)
-
-                }
-                ACTION_NEXT -> {
-                    // NEXT action
                 }
                 ACTION_ADD_AUDIO_TO_PLAYLIST -> {
-                    val audio = intent.getSerializableExtra(audioURLKey) as Samples.Sample
-                    mSessionManager.add(audio)
+                    (intent.getSerializableExtra(audioURLKey) as? Samples.Sample)?.let {sample ->
+                        mSessionManager.add(sample)
+                    }
                 }
                 ACTION_START_NEW_SESSION ->{
                     mSessionManager.startNewSession()
@@ -151,13 +156,13 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
                 ACTION_CUSTOMIZE_NOTIFICATION ->{
                     val useNavigationAction = intent.getBooleanExtra(USE_NAV_ACTION,true)
                     val usePlayPauseAction = intent.getBooleanExtra(USE_PLAY_PAUSE, true)
-                    val fastForwardIncrementMs = intent.getLongExtra(FAST_FORWARD_INC, 0L)
-                    val rewindIncrementMs = intent.getLongExtra(REWIND_INC, 0L)
+                    val fastForwardIncrementMs = intent.getLongExtra(FAST_FORWARD_INC, -1L)
+                    val rewindIncrementMs = intent.getLongExtra(REWIND_INC, -1L)
 
                     mSessionManager.customiseNotification(useNavigationAction,usePlayPauseAction,
                         fastForwardIncrementMs,rewindIncrementMs)
                 }
-
+                else -> {}
             }
         }
         super.onStartCommand(intent, flags, startId)

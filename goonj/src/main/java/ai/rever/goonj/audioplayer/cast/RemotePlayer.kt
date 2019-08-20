@@ -1,5 +1,6 @@
 package ai.rever.goonj.audioplayer.cast
 
+import ai.rever.goonj.BuildConfig
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -18,9 +19,42 @@ import com.google.android.gms.common.images.WebImage
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadRequestData
 import com.google.android.gms.cast.framework.CastContext
+import java.lang.ref.WeakReference
 
 
-class RemotePlayer(var mContext: Context) : AudioPlayer() {
+fun logEvent(tag: String = "unknown_tag", message: String) {
+    if (BuildConfig.DEBUG) {
+        Log.e(tag, message)
+    }
+}
+
+open class SingletonHolder<out T: Any, in A>(creator: (A) -> T) {
+    private var creator: ((A) -> T)? = creator
+    @Volatile private var instance: T? = null
+
+    fun getInstance(arg: A): T {
+        val i = instance
+        if (i != null) {
+            return i
+        }
+
+        return synchronized(this) {
+            val i2 = instance
+            if (i2 != null) {
+                i2
+            } else {
+                val created = creator!!(arg)
+                instance = created
+                creator = null
+                created
+            }
+        }
+    }
+}
+
+class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>) : AudioPlayer() {
+
+    companion object : SingletonHolder<RemotePlayer, WeakReference<Context>>(::RemotePlayer)
 
     private var TAG = "REMOTE_PLAYER"
     private var DEBUG = true
@@ -30,6 +64,7 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
     private val mTempQueue = ArrayList<Samples.Sample>()
 
     private var mClient: RemotePlaybackClient? = null
+    private val mContext: Context? get() = contextWeakReference.get()
 
     override fun isRemotePlayback(): Boolean {
         return true
@@ -42,7 +77,7 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
     override fun connect(route: MediaRouter.RouteInfo?) {
         mRoute = route
         mClient = RemotePlaybackClient(mContext, route)
-        mClient?.setStatusCallback(mStatusCallback)
+//        mClient?.setStatusCallback(mStatusCallback)
 
         if (DEBUG) {
             Log.d(
@@ -69,6 +104,8 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
         if (DEBUG) {
             Log.d(TAG, "play: item=$item")
         }
+        //startSession(item)
+        mClient?.setStatusCallback(mStatusCallback)
         mClient?.play(item.url.toUri(), "audio/mp3", null, 0, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
                 data: Bundle?,
@@ -104,24 +141,25 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
         musicMetadata.putString(MediaMetadata.KEY_ARTIST, item.description)
         musicMetadata.addImage(WebImage(Uri.parse(item.albumArtUrl)))
 
-        val castSession = CastContext.getSharedInstance(mContext).sessionManager.currentCastSession
+        mContext?.let{
+            val castSession = CastContext.getSharedInstance(it).sessionManager.currentCastSession
+            try {
+                val mediaInfo = MediaInfo.Builder(item.url)
+                    .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                    .setContentType("audio/*")
+                    .setMetadata(musicMetadata)
+                    .build()
+                val remoteMediaClient = castSession.remoteMediaClient
 
-        try {
-            val mediaInfo = MediaInfo.Builder(item.url)
-                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                .setContentType("audio/*")
-                .setMetadata(musicMetadata)
-                .build()
-            val remoteMediaClient = castSession.remoteMediaClient
+                val mediaLoadRequestData = MediaLoadRequestData.Builder()
+                    .setMediaInfo(mediaInfo)
+                    .setAutoplay(true)
+                    .build()
 
-            val mediaLoadRequestData = MediaLoadRequestData.Builder()
-                .setMediaInfo(mediaInfo)
-                .setAutoplay(true)
-                .build()
-
-            remoteMediaClient.load(mediaLoadRequestData)
-        } catch (e: Exception) {
-            e.printStackTrace()
+                remoteMediaClient.load(mediaLoadRequestData)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
     }
@@ -201,6 +239,7 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
     }
 
     override fun resume() {
+        // Todo: find following code meaning
         if (mClient?.hasSession() != true) {
             // ignore if no session
             return
@@ -432,7 +471,7 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
         }
     }
 
-    private val mStatusCallback = object : RemotePlaybackClient.StatusCallback() {
+    private val mStatusCallback get() = object : RemotePlaybackClient.StatusCallback() {
         override fun onItemStatusChanged(
             data: Bundle?,
             sessionId: String?,
@@ -467,6 +506,7 @@ class RemotePlayer(var mContext: Context) : AudioPlayer() {
     }
 
     private fun setPlayerState(isRemotePlaying : Boolean){
+        Log.d(TAG,"PLAYER_STATE: $isRemotePlaying")
         isPlaying.value = isRemotePlaying
     }
 

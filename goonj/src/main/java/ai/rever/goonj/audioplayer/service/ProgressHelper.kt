@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 fun AudioPlayerService.setupProgressObserver() {
     playbackObservable = Observable.interval(500, TimeUnit.MILLISECONDS)
         .observeOn(AndroidSchedulers.mainThread())
-        .takeWhile { isPlaying.value!! && mSessionManager.getTrackPosition()!= null }
+        .takeWhile { isPlaying.value?: false && mSessionManager.getTrackPosition()!= null }
         .map { mSessionManager.getTrackPosition() }
     addProgressObserver()
 }
@@ -39,5 +39,8 @@ fun AudioPlayerService.addProgressObserver() {
 
     playbackObservable.subscribeOn(AndroidSchedulers.mainThread())
         .subscribe(playbackObserver)
+}
 
+fun AudioPlayerService.removeObserver() {
+    playbackObservable.unsubscribeOn(AndroidSchedulers.mainThread())
 }

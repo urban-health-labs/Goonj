@@ -33,14 +33,14 @@ class PlayerViewModel : ViewModel(){
     }
 
     fun addAudioToPlaylist(context: Context, audioSample: Samples.Sample){
-        var intent = Intent(context, AudioPlayerService::class.java)
+        val intent = Intent(context, AudioPlayerService::class.java)
         intent.action = ACTION_ADD_AUDIO_TO_PLAYLIST
         intent.putExtra(audioURLKey,audioSample)
         context.startService(intent)
     }
 
     private fun performPlayerAction(context: Context,action: String){
-        var intent = Intent(context,AudioPlayerService::class.java)
+        val intent = Intent(context,AudioPlayerService::class.java)
         intent.action = action
         context.startService(intent)
     }
