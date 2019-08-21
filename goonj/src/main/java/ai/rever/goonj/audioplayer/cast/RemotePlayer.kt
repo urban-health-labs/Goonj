@@ -21,13 +21,6 @@ import com.google.android.gms.cast.MediaLoadRequestData
 import com.google.android.gms.cast.framework.CastContext
 import java.lang.ref.WeakReference
 
-
-fun logEvent(tag: String = "unknown_tag", message: String) {
-    if (BuildConfig.DEBUG) {
-        Log.e(tag, message)
-    }
-}
-
 open class SingletonHolder<out T: Any, in A>(creator: (A) -> T) {
     private var creator: ((A) -> T)? = creator
     @Volatile private var instance: T? = null

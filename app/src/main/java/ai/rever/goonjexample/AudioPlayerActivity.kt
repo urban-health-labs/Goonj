@@ -1,5 +1,8 @@
 package ai.rever.goonjexample
 
+import ai.rever.goonj.audioplayer.analytics.analyticsObservable
+import ai.rever.goonj.audioplayer.analytics.analyticsObserver
+import ai.rever.goonj.audioplayer.analytics.isLoggable
 import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
 import ai.rever.goonj.audioplayer.util.isPlaying
 import android.os.Bundle
@@ -11,6 +14,7 @@ import android.view.KeyEvent
 import android.content.Context
 import android.view.KeyEvent.*
 import com.google.android.gms.cast.framework.CastButtonFactory
+import io.reactivex.android.schedulers.AndroidSchedulers
 
 
 class AudioPlayerActivity : BaseActivity() {
@@ -28,6 +32,9 @@ class AudioPlayerActivity : BaseActivity() {
         setupUI()
 
         setCastButton()
+
+        isLoggable = true
+        analyticsObservable.subscribe(analyticsObserver)
 
     }
 
@@ -51,7 +58,7 @@ class AudioPlayerActivity : BaseActivity() {
     }
 
     private fun customizeNotification(){
-        playerViewModel.customizeNotification(this,false)
+        //playerViewModel.customizeNotification(this,false)
     }
     private fun setupPlayer() {
         playerViewModel.startNewSession(this)
@@ -90,14 +97,17 @@ class AudioPlayerActivity : BaseActivity() {
                 return true
             }
             else ->
-                // return false;
-                // Update based on @Rene comment below:
                 return super.onKeyDown(keyCode, event)
         }
     }
 
     private fun setCastButton() {
         CastButtonFactory.setUpMediaRouteButton(this, activity_audio_player_mediaroute_btn)
+    }
+
+    override fun onDestroy() {
+        analyticsObservable.unsubscribeOn(AndroidSchedulers.mainThread())
+        super.onDestroy()
     }
 
 }
