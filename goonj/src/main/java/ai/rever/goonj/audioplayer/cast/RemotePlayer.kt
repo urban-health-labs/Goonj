@@ -1,6 +1,6 @@
 package ai.rever.goonj.audioplayer.cast
 
-import ai.rever.goonj.BuildConfig
+import ai.rever.goonj.audioplayer.analytics.*
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -338,9 +338,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         usePlayPauseAction: Boolean,
         fastForwardIncrementMs: Long,
         rewindIncrementMs: Long
-    ) {
-        // Do nothing
-    }
+    ){}
 
     private fun enqueueInternal(item: Samples.Sample) {
         throwIfQueuingUnsupported()
@@ -446,10 +444,16 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
             }
             Log.d(TAG, "$message: $result")
         }
+
+        val map = mutableMapOf(MESSAGE to message, SESSION_ID to sessionId, SESSION_STATUS to sessionStatus,
+            ITEM_ID to itemId, ITEM_STATUS to itemStatus)
+        logEventBehaviour(true, PlayerAnalyticsEnum.REMOTE_LOG_STATUS, map)
     }
 
     private fun logError(message: String?, error: String?, code: Int) {
         Log.d(TAG, "$message: error=$error, code=$code")
+        val map = mutableMapOf(MESSAGE to message, ERROR_REMOTE to error, ERROR_REMOTE_CODE to code)
+        logEventBehaviour(true, PlayerAnalyticsEnum.REMOTE_LOG_ERROR, map)
     }
 
     private fun throwIfNoSession() {
@@ -480,9 +484,9 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
             }
 
             if(itemStatus?.playbackState == MediaItemStatus.PLAYBACK_STATE_PAUSED){
-                setPlayerState(false)
+                setPlayerStateRemote(false)
             } else if(itemStatus?.playbackState == MediaItemStatus.PLAYBACK_STATE_PLAYING){
-                setPlayerState(true)
+                setPlayerStateRemote(true)
             }
         }
 
@@ -498,11 +502,10 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         }
     }
 
-    private fun setPlayerState(isRemotePlaying : Boolean){
-        Log.d(TAG,"PLAYER_STATE: $isRemotePlaying")
+    private fun setPlayerStateRemote(isRemotePlaying : Boolean){
+        val map = mutableMapOf(IS_REMOTE_PLAYING to isRemotePlaying)
+        logEventBehaviour(true, PlayerAnalyticsEnum.SET_PLAYER_STATE_REMOTE, map)
         isPlaying.value = isRemotePlaying
     }
-
-
 
 }

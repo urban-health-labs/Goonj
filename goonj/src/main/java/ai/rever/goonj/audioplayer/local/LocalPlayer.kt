@@ -151,27 +151,27 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     private val analyticsListener = object : AnalyticsListener{
         override fun onSeekProcessed(eventTime: AnalyticsListener.EventTime?) {
             val map = mutableMapOf(EVENT_TIME to eventTime)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_SEEK_PROCESSED, map)
+            logEventBehaviour(false,PlayerAnalyticsEnum.ON_SEEK_PROCESSED, map)
         }
 
         override fun onPlayerError(eventTime: AnalyticsListener.EventTime?, error: ExoPlaybackException?) {
             val map = mutableMapOf(EVENT_TIME to eventTime, ERROR to error)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_PLAYER_ERROR, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_PLAYER_ERROR, map)
         }
 
         override fun onSeekStarted(eventTime: AnalyticsListener.EventTime?) {
             val map = mutableMapOf(EVENT_TIME to eventTime)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_SEEK_STARTED, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_SEEK_STARTED, map)
         }
 
         override fun onLoadingChanged(eventTime: AnalyticsListener.EventTime?, isLoading: Boolean) {
             val map = mutableMapOf(EVENT_TIME to eventTime, IS_LOADING to isLoading)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_LOADING_CHANGED, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_LOADING_CHANGED, map)
         }
 
         override fun onVolumeChanged(eventTime: AnalyticsListener.EventTime?, volume: Float) {
             val map = mutableMapOf(EVENT_TIME to eventTime, VOLUME to volume)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_VOLUME_CHANGED, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_VOLUME_CHANGED, map)
 
 
         }
@@ -182,19 +182,19 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             mediaLoadData: MediaSourceEventListener.MediaLoadData?
         ) {
             val map = mutableMapOf(EVENT_TIME to eventTime, LOAD_EVENT_INFO to loadEventInfo, MEDIA_LOAD_EVENT to mediaLoadData)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_LOAD_COMPLETED,map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_LOAD_COMPLETED,map)
         }
 
         override fun onMetadata(eventTime: AnalyticsListener.EventTime?, metadata: Metadata?) {
             val map = mutableMapOf(EVENT_TIME to eventTime, METADATA to metadata)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_METADATA,map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_METADATA,map)
         }
     }
     private val eventListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
 
             val map = mutableMapOf(PLAY_WHEN_READY to playWhenReady, PLAYBACK_STATE to playbackState)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_PLAYER_STATE_CHANGED, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_PLAYER_STATE_CHANGED, map)
 
             if (playWhenReady && playbackState == Player.STATE_READY) {
                 isPlaying.postValue(true)
@@ -208,36 +208,36 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {
 
             val map = mutableMapOf(PLAYBACK_PARAMETERS to playbackParameters)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_PLAYBACK_PARAMETERS_CHANGED, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_PLAYBACK_PARAMETERS_CHANGED, map)
         }
 
         override fun onTracksChanged(trackGroups: TrackGroupArray?, trackSelections: TrackSelectionArray?) {
             val map = mutableMapOf(TRACK_GROUPS to trackGroups, TRACK_SELECTIONS to trackSelections)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_TRACKS_CHANGED, map)        }
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_TRACKS_CHANGED, map)        }
 
         override fun onLoadingChanged(isLoading: Boolean) {
             val map = mutableMapOf(IS_LOADING to isLoading)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_LOADING_CHANGED, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_LOADING_CHANGED, map)
         }
 
         override fun onPositionDiscontinuity(reason: Int) {
             val map = mutableMapOf(REASON to reason)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_POSITION_DISCONTINUITY, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_POSITION_DISCONTINUITY, map)
         }
 
         override fun onRepeatModeChanged(repeatMode: Int) {
             val map = mutableMapOf(REPEAT_MODE to repeatMode)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_REPEAT_MODE_CHANGED, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_REPEAT_MODE_CHANGED, map)
         }
 
         override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
             val map = mutableMapOf(SHUFFLE_MODE_ENABLED to shuffleModeEnabled)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_SHUFFLE_MODE_ENABLED_CHANGED , map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_SHUFFLE_MODE_ENABLED_CHANGED , map)
         }
 
         override fun onTimelineChanged(timeline: Timeline?, manifest: Any?, reason: Int) {
             val map = mutableMapOf(TIMELINE to timeline, MANIFEST to manifest, REASON to reason)
-            logEventBehaviour(PlayerAnalyticsEnum.ON_TIMELINE_CHANGED, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_TIMELINE_CHANGED, map)
         }
     }
 

@@ -9,13 +9,6 @@ import io.reactivex.subjects.BehaviorSubject
 
 var isLoggable = false
 
-fun logEvent(tag: String = "unknown_tag", message: String) {
-    if (BuildConfig.DEBUG) {
-        //Log.e(tag, message)
-    }
-}
-
-
 private fun logAnalyticsEvent(message : String?, error : Boolean ?= false){
     val TAG = "ANALYTICS"
     if(error == true){
@@ -41,7 +34,10 @@ enum class PlayerAnalyticsEnum{
     ON_POSITION_DISCONTINUITY,
     ON_REPEAT_MODE_CHANGED,
     ON_SHUFFLE_MODE_ENABLED_CHANGED,
-    ON_TIMELINE_CHANGED
+    ON_TIMELINE_CHANGED,
+    REMOTE_LOG_STATUS,
+    REMOTE_LOG_ERROR,
+    SET_PLAYER_STATE_REMOTE
 }
 
 const val EVENT_TIME = "AnalyticsListener.EventTime"
@@ -62,13 +58,28 @@ const val REPEAT_MODE = "RepeatMode"
 const val SHUFFLE_MODE_ENABLED = "ShuffleModeEnabled"
 const val TIMELINE = "Timeline"
 const val MANIFEST = "Manifest"
+const val MESSAGE = "Message"
+const val SESSION_ID = "SessionID"
+const val SESSION_STATUS = "SessionStatus"
+const val ITEM_ID = "ItemID"
+const val ITEM_STATUS = "ItemStatus"
+const val ERROR_REMOTE = "ErrorRemote"
+const val ERROR_REMOTE_CODE = "ErrorRemoteCode"
+const val IS_REMOTE_PLAYING = "IsRemotePlaying"
 
 data class AnalyticsModel(
+    val isRemote : Boolean,
     val type : PlayerAnalyticsEnum,
     val parameter: Map<String, Any?>
 ){
     override fun toString() : String{
-        return "${type.name}  $parameter"
+
+        var playerType = if(isRemote){
+            "REMOTE"
+        } else {
+            "LOCAL"
+        }
+        return "$playerType ${type.name}  $parameter"
     }
 
 }
@@ -97,8 +108,8 @@ val analyticsObserver = object : Observer<AnalyticsModel> {
     }
 }
 
-fun logEventBehaviour(behaviour: PlayerAnalyticsEnum, data: Map<String,Any?>){
-    analyticsSubjectBehaviour.onNext(AnalyticsModel(behaviour, data))
+fun logEventBehaviour(isRemote: Boolean, behaviour: PlayerAnalyticsEnum, data: Map<String,Any?>){
+    analyticsSubjectBehaviour.onNext(AnalyticsModel(isRemote,behaviour, data))
 }
 
 
