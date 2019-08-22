@@ -20,6 +20,10 @@ import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
 import ai.rever.goonj.audioplayer.util.*
 import android.annotation.SuppressLint
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.os.Build
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.analytics.AnalyticsListener
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
@@ -34,7 +38,7 @@ import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import java.lang.ref.WeakReference
 
-class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlayer(){
+class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlayer(),  AudioManager.OnAudioFocusChangeListener {
 
 
     val TAG = "LOCAL_PLAYER"
@@ -145,10 +149,10 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         exoPlayer.playWhenReady = true
     }
 
-    private val analyticsListener = object : AnalyticsListener{
+    private val analyticsListener = object : AnalyticsListener {
         override fun onSeekProcessed(eventTime: AnalyticsListener.EventTime?) {
             val map = mutableMapOf(EVENT_TIME to eventTime)
-            logEventBehaviour(false,PlayerAnalyticsEnum.ON_SEEK_PROCESSED, map)
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_SEEK_PROCESSED, map)
         }
 
         override fun onPlayerError(eventTime: AnalyticsListener.EventTime?, error: ExoPlaybackException?) {
@@ -185,16 +189,19 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             logEventBehaviour(false, PlayerAnalyticsEnum.ON_METADATA,map)
         }
     }
+
     private val eventListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             val map = mutableMapOf(PLAY_WHEN_READY to playWhenReady, PLAYBACK_STATE to playbackState)
             logEventBehaviour(false, PlayerAnalyticsEnum.ON_PLAYER_STATE_CHANGED, map)
 
             if (playWhenReady && playbackState == Player.STATE_READY) {
+                requestAudioFocus()
                 isPlaying.postValue(true)
             } else if (playWhenReady) {
 
             } else {
+                removeAudioFocus()
                 isPlaying.postValue(false)
             }
         }
@@ -380,6 +387,46 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     override fun getTrackPosition(): Long? {
         return exoPlayer.currentPosition
     }
+
+    lateinit var audioManager : AudioManager
+    lateinit var playbackAttributes: AudioAttributes
+    lateinit var focusRequest: AudioFocusRequest
+    var mPlaybackDelayed = false
+    var mResumeOnFocusGain = false
+    val mFocusLock = Object()
+
+    override fun onAudioFocusChange(focusState: Int) {
+        when (focusState) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                if(mPlaybackDelayed || mResumeOnFocusGain){
+                    synchronized(mFocusLock){
+                        mPlaybackDelayed = false
+                        mResumeOnFocusGain = false
+                    }
+                    exoPlayer.volume = 1f
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                synchronized(mFocusLock) {
+                    mResumeOnFocusGain = false
+                    mPlaybackDelayed = false
+                }
+                pause()
+                removeAudioFocus()
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                exoPlayer.volume = 0.1f
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                synchronized(mFocusLock){
+                    mResumeOnFocusGain = exoPlayer.playWhenReady
+                    mPlaybackDelayed = false
+                }
+                exoPlayer.volume = 0.1f
+            }
+        }
+    }
+
     init {
         exoPlayer = ExoPlayerFactory.newSimpleInstance(context)
         exoPlayer.playWhenReady = true

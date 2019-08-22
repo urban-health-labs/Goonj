@@ -3,23 +3,18 @@ package ai.rever.goonj.audioplayer.service
 import ai.rever.goonj.audioplayer.util.*
 import android.content.Intent
 import android.os.IBinder
-import com.google.android.exoplayer2.SimpleExoPlayer
 import android.content.Context
-import android.media.AudioManager
 import android.util.Log
 import androidx.lifecycle.LifecycleService
-import androidx.lifecycle.Observer
 import androidx.mediarouter.media.*
 import ai.rever.goonj.audioplayer.SessionManager
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
 import io.reactivex.Observable
 
-class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeListener {
+class AudioPlayerService : LifecycleService() {
 
-    val TAG = "AUDIO_PLAYER_SERvICE"
-    lateinit var audioManager: AudioManager
-
+    val TAG = "AUDIO_PLAYER_SERVICE"
     lateinit var context: Context
 
     lateinit var playbackObservable: Observable<Long>
@@ -68,19 +63,8 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
         super.onCreate()
         context = this
 
-        requestAudioFocus()
         setupProgressObserver()
 
-        isPlaying.observe(this, Observer { isPlaying ->
-            if (isPlaying) {
-                requestAudioFocus()
-                addProgressObserver()
-            } else {
-                removeAudioFocus()
-            }
-        })
-
-        // Get the media router service.
         mediaRouter = MediaRouter.getInstance(this)
         mSelector = MediaRouteSelector.Builder()
             .addControlCategory(MediaControlIntent.CATEGORY_LIVE_AUDIO)
@@ -90,6 +74,8 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
 
         mPlayer = AudioPlayer.create(this, mediaRouter?.selectedRoute)
         mSessionManager.setPlayer(mPlayer!!)
+
+        //                TODO: cHECK REQUIREMENT
         mSessionManager.setCallback(object : SessionManager.Callback {
             override fun onStatusChanged() {
                 //updateUi()
@@ -103,19 +89,8 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
 
     }
 
-
-
-//    override fun onStart(intent: Intent?, startId: Int) {
-//        super.onStart(intent, startId)
-//        mSelector?.also { selector ->
-//            mediaRouter?.addCallback(selector, mediaRouterCallback,
-//                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
-//        }
-//    }
-
     override fun onDestroy() {
         removeObserver()
-        removeAudioFocus()
         mediaRouter?.removeCallback(mediaRouterCallback)
         super.onDestroy()
     }
@@ -168,35 +143,4 @@ class AudioPlayerService : LifecycleService(), AudioManager.OnAudioFocusChangeLi
         super.onStartCommand(intent, flags, startId)
         return START_NOT_STICKY
     }
-
-    override fun onAudioFocusChange(focusState: Int) {
-        when (focusState) {
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                mSessionManager.setVolume(1f)
-            }
-            AudioManager.AUDIOFOCUS_LOSS -> {
-                mSessionManager.pause()
-                removeAudioFocus()
-
-            }
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-                mSessionManager.setVolume(0.1f)
-            }
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                mSessionManager.setVolume(0.1f)
-            }
-        }
-    }
-
-    private fun requestAudioFocus(): Boolean {
-        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
-        return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-        //Could not gain focus
-    }
-
-    private fun removeAudioFocus(): Boolean {
-        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED == audioManager.abandonAudioFocus(this)
-    }
-
 }

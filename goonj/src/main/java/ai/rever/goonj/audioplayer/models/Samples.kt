@@ -17,8 +17,8 @@ object Samples {
 
     val SAMPLES = arrayOf(
         Sample(
-            //"https://storage.googleapis.com/automotive-media/Talkies.mp3",
-            "https://raw.githubusercontent.com/rever-ai/SampleMusic/master/David_H_Porter_-_Mozarts_Rondo_No_3_in_A_Minor_K_511.mp3",
+            "https://storage.googleapis.com/automotive-media/Talkies.mp3",
+            //"https://raw.githubusercontent.com/rever-ai/SampleMusic/master/David_H_Porter_-_Mozarts_Rondo_No_3_in_A_Minor_K_511.mp3",
             "audio_1",
             "Talkies",
             //"If it talks like a duck and walks like a duck.",
@@ -26,8 +26,8 @@ object Samples {
             R.mipmap.ic_album_art,
             "https://img.discogs.com/Bss063QHQ7k0sRwejSQWTJ-iKGI=/fit-in/600x573/filters:strip_icc():format(jpeg):mode_rgb():quality(90)/discogs-images/R-900642-1182343816.jpeg.jpg"
         ), Sample(
-            //"https://storage.googleapis.com/automotive-media/Jazz_In_Paris.mp3",
-            "https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Menstruation_Sisters_-_14_-_top_gun.mp3",
+            "https://storage.googleapis.com/automotive-media/Jazz_In_Paris.mp3",
+            //"https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Menstruation_Sisters_-_14_-_top_gun.mp3",
             "audio_2",
             "Jazz in Paris",
             //"Jazz for the masses",
@@ -35,23 +35,23 @@ object Samples {
             R.mipmap.ic_album_art,
             "https://i.ebayimg.com/images/g/MMgAAOSwXi9b6BJ3/s-l640.jpg"
         ), Sample(
-            //"https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
-            "https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Manueljgrotesque_-_24_-_grotesque25.mp3",
+            "https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
+            //"https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Manueljgrotesque_-_24_-_grotesque25.mp3",
             "audio_3",
             "The messenger",
             //"Hipster guide to London",
             "Three",
             R.mipmap.ic_album_art,
             "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
-        ), Sample(
-            //"https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
-            "https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Hard_TON_-_07_-_Choc-ice_Dance.mp3",
-            "audio_4",
-            "The messenger",
-            //"Hipster guide to London",
-            "Four",
-            R.mipmap.ic_album_art,
-            "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
+//        ), Sample(
+//            //"https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
+//            "https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Hard_TON_-_07_-_Choc-ice_Dance.mp3",
+//            "audio_4",
+//            "The messenger",
+//            //"Hipster guide to London",
+//            "Four",
+//            R.mipmap.ic_album_art,
+//            "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
         )
     )
 
