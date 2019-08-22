@@ -1,6 +1,5 @@
 package ai.rever.goonj.audioplayer.analytics
 
-import ai.rever.goonj.BuildConfig
 import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.Observer

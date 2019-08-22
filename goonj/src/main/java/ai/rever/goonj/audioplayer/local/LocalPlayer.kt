@@ -3,7 +3,6 @@ package ai.rever.goonj.audioplayer.local
 import ai.rever.goonj.BuildConfig
 import ai.rever.goonj.R
 import ai.rever.goonj.audioplayer.analytics.*
-import ai.rever.goonj.audioplayer.analytics.logEvent
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
@@ -71,8 +70,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     private fun onSetup(){
         Log.d(TAG,"onSetup Local")
         setupDataSource()
-        //addAudioListener()
-
         initNotification()
         setupMediaSession()
         addListeners()
@@ -172,8 +169,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         override fun onVolumeChanged(eventTime: AnalyticsListener.EventTime?, volume: Float) {
             val map = mutableMapOf(EVENT_TIME to eventTime, VOLUME to volume)
             logEventBehaviour(false, PlayerAnalyticsEnum.ON_VOLUME_CHANGED, map)
-
-
         }
 
         override fun onLoadCompleted(
@@ -192,7 +187,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
     private val eventListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-
             val map = mutableMapOf(PLAY_WHEN_READY to playWhenReady, PLAYBACK_STATE to playbackState)
             logEventBehaviour(false, PlayerAnalyticsEnum.ON_PLAYER_STATE_CHANGED, map)
 
@@ -206,7 +200,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         }
 
         override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {
-
             val map = mutableMapOf(PLAYBACK_PARAMETERS to playbackParameters)
             logEventBehaviour(false, PlayerAnalyticsEnum.ON_PLAYBACK_PARAMETERS_CHANGED, map)
         }
@@ -247,13 +240,11 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
 
     private fun removeListeners(){
-
         exoPlayer.removeAnalyticsListener(analyticsListener)
         exoPlayer.removeListener(eventListener)
     }
 
     override fun startNewSession(){
-        Log.d(TAG,"setupDataSource Local")
         playList.clear()
         concatenatingMediaSource.clear()
     }

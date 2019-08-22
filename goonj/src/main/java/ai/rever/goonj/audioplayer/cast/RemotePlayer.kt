@@ -1,5 +1,6 @@
 package ai.rever.goonj.audioplayer.cast
 
+import ai.rever.goonj.BuildConfig
 import ai.rever.goonj.audioplayer.analytics.*
 import android.content.Context
 import android.os.Bundle
@@ -50,7 +51,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     companion object : SingletonHolder<RemotePlayer, WeakReference<Context>>(::RemotePlayer)
 
     private var TAG = "REMOTE_PLAYER"
-    private var DEBUG = true
+    private var DEBUG = BuildConfig.DEBUG
     private var mRoute: MediaRouter.RouteInfo? = null
     private var mEnqueuePending: Boolean = false
     private var mStatsInfo = ""
@@ -97,7 +98,6 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         if (DEBUG) {
             Log.d(TAG, "play: item=$item")
         }
-        //startSession(item)
         mClient?.setStatusCallback(mStatusCallback)
         mClient?.play(item.url.toUri(), "audio/mp3", null, 0, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
@@ -451,7 +451,6 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     private fun logError(message: String?, error: String?, code: Int) {
-        Log.d(TAG, "$message: error=$error, code=$code")
         val map = mutableMapOf(MESSAGE to message, ERROR_REMOTE to error, ERROR_REMOTE_CODE to code)
         logEventBehaviour(true, PlayerAnalyticsEnum.REMOTE_LOG_ERROR, map)
     }
@@ -476,7 +475,6 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
             itemId: String?,
             itemStatus: MediaItemStatus?
         ) {
-            logStatus("onItemStatusChanged", sessionId, sessionStatus, itemId, itemStatus)
             if (itemStatus?.playbackState == MediaItemStatus.PLAYBACK_STATE_FINISHED) {
                 mCallback.onCompletion()
             } else if (itemStatus?.playbackState == MediaItemStatus.PLAYBACK_STATE_ERROR) {
