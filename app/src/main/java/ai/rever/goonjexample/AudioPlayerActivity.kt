@@ -5,6 +5,7 @@ import ai.rever.goonj.audioplayer.analytics.analyticsObservable
 import ai.rever.goonj.audioplayer.analytics.analyticsObserver
 import ai.rever.goonj.audioplayer.analytics.isLoggable
 import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
+import ai.rever.goonj.audioplayer.util.currentPlayingItem
 import ai.rever.goonj.audioplayer.util.isPlaying
 import android.os.Bundle
 import androidx.lifecycle.Observer
@@ -15,9 +16,12 @@ import android.content.Context
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.cast.framework.CastButtonFactory
+import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
 
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
+
+    val TAG = "AUDIO_PLAYER_ACTIVITY"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,10 +42,10 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     private fun setupUI() {
 
         isPlaying.observe(this, Observer { isAudioPlaying ->
-            activity_audio_player_play_pause_session_toggle_btn.isChecked = !isAudioPlaying
+            audioPlayerPlayPauseToggleBtn.isChecked = !isAudioPlaying
         })
 
-        activity_audio_player_play_pause_session_toggle_btn.setOnCheckedChangeListener { _, paused ->
+        audioPlayerPlayPauseToggleBtn.setOnCheckedChangeListener { _, paused ->
             if (paused) {
                 pause(this)
             } else {
@@ -49,9 +53,12 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             }
         }
 
-        activity_audio_player_seek_back_img_btn.setOnClickListener {
-            next(this)
-        }
+        currentPlayingItem.observe(this, Observer { currentItem ->
+            Picasso.get().load(currentItem?.albumArtUrl).into(audioPlayerAlbumArtIV)
+            audioPlayerAlbumTitleTv.text = currentItem?.title
+            audioPlayerAlbumArtistTv.text = currentItem?.artist
+        })
+
     }
 
     private fun customizeNotification(){
@@ -99,7 +106,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     }
 
     private fun setCastButton() {
-        CastButtonFactory.setUpMediaRouteButton(this, activity_audio_player_mediaroute_btn)
+        CastButtonFactory.setUpMediaRouteButton(this, audioPlayerMRB)
     }
 
     override fun onDestroy() {

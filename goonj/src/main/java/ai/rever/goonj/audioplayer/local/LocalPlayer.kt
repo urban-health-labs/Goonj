@@ -206,7 +206,8 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
         override fun onTracksChanged(trackGroups: TrackGroupArray?, trackSelections: TrackSelectionArray?) {
             val map = mutableMapOf(TRACK_GROUPS to trackGroups, TRACK_SELECTIONS to trackSelections)
-            logEventBehaviour(false, PlayerAnalyticsEnum.ON_TRACKS_CHANGED, map)        }
+            logEventBehaviour(false, PlayerAnalyticsEnum.ON_TRACKS_CHANGED, map)
+        }
 
         override fun onLoadingChanged(isLoading: Boolean) {
             val map = mutableMapOf(IS_LOADING to isLoading)
@@ -268,6 +269,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
     private val notificationAdapter = object : PlayerNotificationManager.MediaDescriptionAdapter {
         override fun getCurrentContentTitle(player: Player): String {
+            currentPlayingItem.postValue(playList[player.currentWindowIndex])
             return playList[player.currentWindowIndex].title
         }
 
@@ -278,7 +280,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
         @Nullable
         override fun getCurrentContentText(player: Player): String? {
-            return playList[player.currentWindowIndex].description
+            return playList[player.currentWindowIndex].artist
         }
 
         @Nullable

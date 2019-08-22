@@ -11,6 +11,7 @@ import androidx.mediarouter.media.MediaSessionStatus
 import androidx.mediarouter.media.RemotePlaybackClient
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.util.currentPlayingItem
 import ai.rever.goonj.audioplayer.util.isPlaying
 import android.net.Uri
 import androidx.core.net.toUri
@@ -98,6 +99,8 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         if (DEBUG) {
             Log.d(TAG, "play: item=$item")
         }
+
+        currentPlayingItem.value = item
         mClient?.setStatusCallback(mStatusCallback)
         mClient?.play(item.url.toUri(), "audio/mp3", null, 0, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
@@ -131,7 +134,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         val musicMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
 
         musicMetadata.putString(MediaMetadata.KEY_TITLE, item.title)
-        musicMetadata.putString(MediaMetadata.KEY_ARTIST, item.description)
+        musicMetadata.putString(MediaMetadata.KEY_ARTIST, item.artist)
         musicMetadata.addImage(WebImage(Uri.parse(item.albumArtUrl)))
 
         mContext?.let{

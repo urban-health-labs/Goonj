@@ -2,7 +2,6 @@ package ai.rever.goonj.audioplayer.models
 
 import ai.rever.goonj.R
 import android.content.Context
-import android.graphics.drawable.BitmapDrawable
 import androidx.annotation.DrawableRes
 import android.graphics.Bitmap
 import android.support.v4.media.MediaDescriptionCompat
@@ -57,7 +56,7 @@ object Samples {
     )
 
     class Sample(
-        val url: String, val mediaId: String, val title: String, val description: String, val bitmapResource: Int,
+        val url: String, val mediaId: String, val title: String, val artist: String, val bitmapResource: Int,
         val albumArtUrl : String? = ""
     ) : Serializable {
         var state = MediaItemStatus.PLAYBACK_STATE_PENDING
@@ -67,7 +66,7 @@ object Samples {
         var remoteItemId: String? = null
 
         override fun toString(): String {
-            return "$title Description: $description URL: $url"
+            return "$title Description: $artist URL: $url"
         }
     }
 
@@ -76,7 +75,7 @@ object Samples {
         val mediaDescriptionBuilder =  MediaDescriptionCompat.Builder()
             .setMediaId(sample.mediaId)
             .setTitle(sample.title)
-            .setDescription(sample.description)
+            .setDescription(sample.artist)
             .setExtras(extras)
 
         context?.let {

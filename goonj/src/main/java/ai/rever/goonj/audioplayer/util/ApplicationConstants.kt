@@ -1,5 +1,6 @@
 package ai.rever.goonj.audioplayer.util
 
+import ai.rever.goonj.audioplayer.models.Samples
 import androidx.lifecycle.MutableLiveData
 
 // Audio LocalPlayer Helper
@@ -23,6 +24,8 @@ val audioURLKey = "audio_url"
 
 // Audio Service
 val isPlaying : MutableLiveData<Boolean> = MutableLiveData()
+
+val currentPlayingItem : MutableLiveData<Samples.Sample?> = MutableLiveData()
 
 //
 val PLAYBACK_CHANNEL_ID = "playback_channel"
