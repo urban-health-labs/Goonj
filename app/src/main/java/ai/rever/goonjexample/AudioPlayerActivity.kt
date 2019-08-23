@@ -59,6 +59,13 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             audioPlayerAlbumArtistTv.text = currentItem?.artist
         })
 
+        audioPlayerForward10s.setOnClickListener {
+            seek(this,5000)
+        }
+
+        audioPlayerRewind10s.setOnClickListener {
+            seek(this, -3000)
+        }
     }
 
     private fun customizeNotification(){

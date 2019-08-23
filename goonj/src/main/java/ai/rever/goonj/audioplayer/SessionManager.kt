@@ -21,6 +21,9 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
     var currentItem: Samples.Sample? = if (mPlaylist.isEmpty()) null else mPlaylist[0]
 
+    val getSession : List<Samples.Sample>
+        get() = mPlaylist
+
 
     // Returns the cached playlist (note this is not responsible for updating it)
     val playlist: List<Samples.Sample>
@@ -72,6 +75,13 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         mPaused = false
         mPlayer?.resume()
 
+    }
+
+    fun seek(positionMs : Long){
+        if(isRemote){
+
+        }
+        mPlayer?.seekTo(positionMs)
     }
 
     fun addItemToPlaylist(sample: Samples.Sample){

@@ -7,6 +7,7 @@ import android.content.Intent
 class GoonjExample: Application() {
     override fun onCreate() {
         super.onCreate()
-        startService( Intent(this, AudioPlayerService::class.java))
+        val serviceIntent = Intent(this, AudioPlayerService::class.java)
+        startService(serviceIntent)
     }
 }

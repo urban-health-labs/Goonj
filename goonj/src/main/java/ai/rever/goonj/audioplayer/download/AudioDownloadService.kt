@@ -20,7 +20,7 @@ class AudioDownloadService : DownloadService(
     R.string.channel_download_name
 ) {
 
-    // Todo: Create a pending intent for download
+    // Todo: Create a pending audioPlayerActivity for download
     override fun getForegroundNotification(downloads: MutableList<Download>?): Notification =
         DownloadNotificationHelper(this, DOWNLOAD_CHANNEL_ID)
             .buildProgressNotification(R.drawable.exo_icon_play, null, null, downloads)

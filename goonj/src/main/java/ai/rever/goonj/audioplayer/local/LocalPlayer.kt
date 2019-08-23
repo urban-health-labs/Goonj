@@ -23,7 +23,6 @@ import android.annotation.SuppressLint
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.os.Build
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.analytics.AnalyticsListener
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
@@ -43,7 +42,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
     val TAG = "LOCAL_PLAYER"
     private val DEBUG = BuildConfig.DEBUG
-
     val service: Service? get() = weakReferenceService.get()
 
     private var exoPlayer : SimpleExoPlayer
@@ -90,6 +88,46 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             cacheDataSourceFactory = CacheDataSourceFactory(
                 DownloadUtil.getCache(context), dataSourceFactory, CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR
             )
+        }
+    }
+
+
+    private val notificationListener = object : PlayerNotificationManager.NotificationListener {
+        override fun onNotificationStarted(notificationId: Int, notification: Notification) {
+            notification.contentIntent = PendingIntent.getActivity(
+                service?.baseContext, PLAYBACK_NOTIFICATION_ID,
+                Intent(),
+
+                PendingIntent.FLAG_CANCEL_CURRENT
+            )
+            service?.startForeground(notificationId, notification)
+        }
+
+        override fun onNotificationCancelled(notificationId: Int) {
+            pause()
+            //service.stopSelf()
+        }
+    }
+
+    private val notificationAdapter = object : PlayerNotificationManager.MediaDescriptionAdapter {
+        override fun getCurrentContentTitle(player: Player): String {
+            currentPlayingItem.postValue(playList[player.currentWindowIndex])
+            return playList[player.currentWindowIndex].title
+        }
+
+        @Nullable
+        override fun createCurrentContentIntent(player: Player): PendingIntent? {
+            return PendingIntent.getActivity(service,0, Intent(), PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        @Nullable
+        override fun getCurrentContentText(player: Player): String? {
+            return playList[player.currentWindowIndex].artist
+        }
+
+        @Nullable
+        override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback): Bitmap {
+            return Samples.getBitmap(context, playList[player.currentWindowIndex].bitmapResource)!!
         }
     }
 
@@ -257,45 +295,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         concatenatingMediaSource.clear()
     }
 
-    private val notificationListener = object : PlayerNotificationManager.NotificationListener {
-        override fun onNotificationStarted(notificationId: Int, notification: Notification) {
-            notification.contentIntent = PendingIntent.getActivity(
-                service?.baseContext, PLAYBACK_NOTIFICATION_ID,
-                //Intent(context, AudioPlayerActivity::class.java),
-                Intent(),
-                PendingIntent.FLAG_CANCEL_CURRENT
-            )
-            service?.startForeground(notificationId, notification)
-        }
-
-        override fun onNotificationCancelled(notificationId: Int) {
-            pause()
-            //service.stopSelf()
-        }
-    }
-
-    private val notificationAdapter = object : PlayerNotificationManager.MediaDescriptionAdapter {
-        override fun getCurrentContentTitle(player: Player): String {
-            currentPlayingItem.postValue(playList[player.currentWindowIndex])
-            return playList[player.currentWindowIndex].title
-        }
-
-        @Nullable
-        override fun createCurrentContentIntent(player: Player): PendingIntent? {
-            return PendingIntent.getActivity(service,0, Intent(), PendingIntent.FLAG_UPDATE_CURRENT)
-        }
-
-        @Nullable
-        override fun getCurrentContentText(player: Player): String? {
-            return playList[player.currentWindowIndex].artist
-        }
-
-        @Nullable
-        override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback): Bitmap {
-            return Samples.getBitmap(context, playList[player.currentWindowIndex].bitmapResource)!!
-        }
-    }
-
     override fun isRemotePlayback(): Boolean {
         return false
     }
@@ -330,15 +329,8 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         exoPlayer.playWhenReady = true
     }
 
-    override fun seek(item: Samples.Sample) {
-        if (DEBUG) {
-            Log.d(TAG, "seek: item=$item")
-        }
-        exoPlayer.seekTo(item.position)
-    }
-
-    override fun getStatus(item: Samples.Sample, update: Boolean) {
-        Log.d(TAG,"Status")
+    override fun seekTo(positionMs: Long) {
+        exoPlayer.seekTo(exoPlayer.currentPosition + positionMs)
     }
 
     override fun pause() {

@@ -100,6 +100,7 @@ class AudioPlayerService : LifecycleService() {
         return null
     }
 
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         mSelector?.also { selector ->
             mediaRouter?.addCallback(selector, mediaRouterCallback,
@@ -119,6 +120,10 @@ class AudioPlayerService : LifecycleService() {
                 ACTION_STOP -> {
                     mSessionManager.pause()
                     stopForeground(true)
+                }
+                ACTION_SEEK_TO -> {
+                    val positionMs = intent.getLongExtra(SEEK_TO,0)
+                    mSessionManager.seek(positionMs)
                 }
                 ACTION_ADD_AUDIO_TO_PLAYLIST -> {
                     (intent.getSerializableExtra(audioURLKey) as? Samples.Sample)?.let {sample ->
@@ -143,4 +148,6 @@ class AudioPlayerService : LifecycleService() {
         super.onStartCommand(intent, flags, startId)
         return START_NOT_STICKY
     }
+
+
 }

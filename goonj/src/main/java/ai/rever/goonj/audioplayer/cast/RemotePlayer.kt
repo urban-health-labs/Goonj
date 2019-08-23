@@ -55,7 +55,6 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     private var DEBUG = BuildConfig.DEBUG
     private var mRoute: MediaRouter.RouteInfo? = null
     private var mEnqueuePending: Boolean = false
-    private var mStatsInfo = ""
     private val mTempQueue = ArrayList<Samples.Sample>()
 
     private var mClient: RemotePlaybackClient? = null
@@ -160,11 +159,13 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
 
     }
 
-    override fun seek(item: Samples.Sample) {
-        seekInternal(item)
+    override fun seekTo(positionMs: Long) {
+        currentPlayingItem.value?.let {
+            getStatus(it, true, positionMs)
+        }
     }
 
-    override fun getStatus(item: Samples.Sample, update: Boolean) {
+    override fun getStatus(item: Samples.Sample, seek: Boolean, positionMs: Long) {
 
         if (mClient?.hasSession() != true || item.remoteItemId == null) {
             // if session is not valid or item id not assigend yet.
@@ -173,7 +174,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         }
 
         if (DEBUG) {
-            Log.d(TAG, "getStatus: item=$item, update=$update")
+            Log.d(TAG, "getStatus: item=$item, seek=$seek")
         }
         mClient?.getStatus(item.remoteItemId, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
@@ -194,16 +195,24 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
                     item.duration = itemStatus.contentDuration
                     item.timestamp = itemStatus.timestamp
                 }
-                if (update) {
-                    mCallback.onPlaylistReady()
+                if (seek) {
+                    if((item.position + positionMs) < 0 ) {
+                        item.position = 0
+                    }
+                    else if((item.position + positionMs) < item.duration ) {
+                        item.position = item.position + positionMs
+                    } else {
+                        item.position = item.duration - 1000
+                    }
+                    seekInternal(item)
                 }
             }
 
             override fun onError(error: String?, code: Int, data: Bundle?) {
                 logError("getStatus: failed", error, code)
-                if (update) {
-                    mCallback.onPlaylistReady()
-                }
+//                if (seek) {
+//                    mCallback.onPlaylistReady()
+//                }
             }
         })
     }
@@ -335,13 +344,6 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     override fun getTrackPosition(): Long? {
         return null
     }
-
-    override fun customiseNotification(
-        useNavigationAction: Boolean,
-        usePlayPauseAction: Boolean,
-        fastForwardIncrementMs: Long,
-        rewindIncrementMs: Long
-    ){}
 
     private fun enqueueInternal(item: Samples.Sample) {
         throwIfQueuingUnsupported()

@@ -6,6 +6,9 @@ import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.audioplayer.cast.RemotePlayer
 import ai.rever.goonj.audioplayer.local.LocalPlayer
 import ai.rever.goonj.audioplayer.models.Samples
+import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.MutableLiveData
 import java.lang.ref.WeakReference
 
 abstract class AudioPlayer {
@@ -21,8 +24,8 @@ abstract class AudioPlayer {
     // basic operations that are always supported
     abstract fun play(item: Samples.Sample)
 
-    abstract fun seek(item: Samples.Sample)
-    abstract fun getStatus(item: Samples.Sample, update: Boolean)
+    abstract fun seekTo(positionMs : Long)
+    open fun getStatus(item: Samples.Sample, seek: Boolean, positionMs: Long){}
     abstract fun pause()
     abstract fun resume()
     abstract fun stop()
@@ -40,15 +43,10 @@ abstract class AudioPlayer {
 
     abstract fun getTrackPosition() : Long?
 
-    abstract fun customiseNotification(useNavigationAction: Boolean,
+    open fun customiseNotification(useNavigationAction: Boolean,
                                    usePlayPauseAction: Boolean,
                                    fastForwardIncrementMs: Long,
-                                   rewindIncrementMs: Long)
-
-
-    open fun getStatistics(): String {
-        return ""
-    }
+                                   rewindIncrementMs: Long) {}
 
     fun setCallback(callback: Callback) {
         mCallback = callback

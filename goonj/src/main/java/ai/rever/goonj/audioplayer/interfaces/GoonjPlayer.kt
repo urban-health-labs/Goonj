@@ -28,6 +28,10 @@ interface GoonjPlayer {
         performPlayerAction(context, ACTION_NEXT)
     }
 
+    fun seek(context: Context, positionMs: Long?){
+        performPlayerAction(context, ACTION_SEEK_TO, positionMs)
+    }
+
     fun addAudioToPlaylist(context: Context, audioSample: Samples.Sample){
         val intent = Intent(context, AudioPlayerService::class.java)
         intent.action = ACTION_ADD_AUDIO_TO_PLAYLIST
@@ -35,13 +39,15 @@ interface GoonjPlayer {
         context.startService(intent)
     }
 
-    private fun performPlayerAction(context: Context, action: String){
+    private fun performPlayerAction(context: Context, action: String, positionMs: Long ?= 0){
         val intent = Intent(context, AudioPlayerService::class.java)
         intent.action = action
+        positionMs?.let { pos ->
+            intent.putExtra(SEEK_TO,pos)
+        }
         context.startService(intent)
     }
 
-    //@JvmOverloads
     fun customizeNotification(context: Context, useNavigationAction: Boolean = true,
                               usePlayPauseAction: Boolean = true,
                               fastForwardIncrementMs: Long = 0L,
