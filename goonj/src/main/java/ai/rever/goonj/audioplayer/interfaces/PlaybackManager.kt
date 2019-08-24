@@ -2,6 +2,7 @@ package ai.rever.goonj.audioplayer.interfaces
 
 import ai.rever.goonj.audioplayer.models.Samples
 import ai.rever.goonj.audioplayer.service.AudioPlayerService
+import ai.rever.goonj.audioplayer.util.SingletonHolder
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -11,7 +12,7 @@ import java.lang.Exception
 
 class PlaybackManager (private val mContext : Context){
 
-    private var playbackInterface : PlaybackInterface? = null
+    lateinit var playbackInterface : PlaybackInterface
     private var mServiceBound = false
     private var mServiceConnection: ServiceConnection? = null
 
@@ -19,7 +20,9 @@ class PlaybackManager (private val mContext : Context){
         if(mServiceConnection == null){
             mServiceConnection = object : ServiceConnection{
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                    playbackInterface = (service as AudioPlayerService.Binder).service
+                    (service as? AudioPlayerService.Binder)?.service?.let {
+                        playbackInterface = it
+                    }
                     mServiceBound = true
 
                 }
@@ -42,7 +45,9 @@ class PlaybackManager (private val mContext : Context){
     fun unregister(){
         try{
             if(this.mServiceBound) {
-                mContext.applicationContext.unbindService(this.mServiceConnection!!)
+                this.mServiceConnection?.let {
+                    mContext.applicationContext.unbindService(it)
+                }
             }
         }catch (e: Exception) {
             e.printStackTrace()
@@ -50,50 +55,37 @@ class PlaybackManager (private val mContext : Context){
     }
 
     fun play(){
-        if(playbackInterface!=null) {
-            playbackInterface?.play()
-        }
-
+        playbackInterface.play()
     }
 
     fun pause(){
-        playbackInterface?.pause()
+        playbackInterface.pause()
     }
 
     fun stop(){
-        playbackInterface?.stop()
+        playbackInterface.stop()
     }
 
     fun seekTo(position : Long){
-        playbackInterface?.seekTo(position)
+        playbackInterface.seekTo(position)
     }
 
     fun startNewSession(){
-        playbackInterface?.startNewSession()
+        playbackInterface.startNewSession()
     }
 
     fun addAudioToPlaylist(track : Samples.Track){
-        playbackInterface?.addToPlaylist(track)
+        playbackInterface.addToPlaylist(track)
     }
 
     fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long ,
                               rewindIncrementMs: Long){
-        playbackInterface?.customiseNotification(useNavigationAction,usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
+        playbackInterface.customiseNotification(useNavigationAction,usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
     }
 
-    companion object {
+    val isPlayingLiveData get() = playbackInterface.isPlayingLiveData
 
-        private var mInstance: PlaybackManager? = null
+    val currentPlayingTrack get() = playbackInterface.currentPlayingTrack
 
-        fun getInstance(context: Context): PlaybackManager {
-            if (mInstance == null) {
-                synchronized(PlaybackManager::class.java) {
-                    if (mInstance == null) {
-                        mInstance = PlaybackManager(context)
-                    }
-                }
-            }
-            return mInstance!!
-        }
-    }
+    companion object : SingletonHolder<PlaybackManager,Context>(::PlaybackManager)
 }

@@ -11,11 +11,11 @@ import androidx.mediarouter.media.MediaSessionStatus
 import androidx.mediarouter.media.RemotePlaybackClient
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.service.AudioPlayerService
 import ai.rever.goonj.audioplayer.util.SingletonHolder
-import ai.rever.goonj.audioplayer.util.mCURRENT_PLAYING_ITEM
-import ai.rever.goonj.audioplayer.util.mIsPlaying
 import android.net.Uri
 import androidx.core.net.toUri
+import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.cast.MediaMetadata
 import java.util.ArrayList
 import com.google.android.gms.common.images.WebImage
@@ -36,6 +36,8 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
 
     private var mClient: RemotePlaybackClient? = null
     private val mContext: Context? get() = contextWeakReference.get()
+    private val mIsPlaying: MutableLiveData<Boolean>? get() = (mContext as? AudioPlayerService)?.mIsPlaying
+    private val mCurrentPlayingTrack : MutableLiveData<Samples.Track>? get() = (mContext as? AudioPlayerService)?.mCurrentPlayingTrack
 
     override fun isRemotePlayback(): Boolean {
         return true
@@ -48,7 +50,6 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     override fun connect(route: MediaRouter.RouteInfo?) {
         mRoute = route
         mClient = RemotePlaybackClient(mContext, route)
-//        mClient?.setStatusCallback(mStatusCallback)
 
         if (DEBUG) {
             Log.d(
@@ -76,7 +77,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
             Log.d(TAG, "play: item=$item")
         }
 
-        mCURRENT_PLAYING_ITEM.value = item
+        mCurrentPlayingTrack?.value = item
         mClient?.setStatusCallback(mStatusCallback)
         mClient?.play(item.url.toUri(), "audio/mp3", null, 0, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
@@ -97,7 +98,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
 
                 setMediaMetadata(item)
                 mCallback.onPlaylistChanged()
-                mIsPlaying.value = true
+                mIsPlaying?.value = true
             }
 
             override fun onError(error: String?, code: Int, data: Bundle?) {
@@ -137,7 +138,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     override fun seekTo(positionMs: Long) {
-        mCURRENT_PLAYING_ITEM.value?.let {
+        mCurrentPlayingTrack?.value?.let {
             getStatus(it, true, positionMs)
         }
     }
@@ -210,7 +211,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
                 logStatus("pause: succeeded", sessionId, sessionStatus, null, null)
                 mCallback.onPlaylistChanged()
 
-                mIsPlaying.value = false
+                mIsPlaying?.value = false
 
             }
 
@@ -234,7 +235,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
                 logStatus("resume: succeeded", sessionId, sessionStatus, null, null)
                 mCallback.onPlaylistChanged()
 
-                mIsPlaying.value = true
+                mIsPlaying?.value = true
             }
 
             override fun onError(error: String?, code: Int, data: Bundle?) {
@@ -258,7 +259,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
                     endSession()
                 }
                 mCallback.onPlaylistChanged()
-                mIsPlaying.value = false
+                mIsPlaying?.value = false
             }
 
             override fun onError(error: String?, code: Int, data: Bundle?) {
@@ -485,7 +486,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     private fun setPlayerStateRemote(isRemotePlaying : Boolean){
         val map = mutableMapOf(IS_REMOTE_PLAYING to isRemotePlaying)
         logEventBehaviour(true, PlayerAnalyticsEnum.SET_PLAYER_STATE_REMOTE, map)
-        mIsPlaying.value = isRemotePlaying
+        mIsPlaying?.value = isRemotePlaying
     }
 
 }

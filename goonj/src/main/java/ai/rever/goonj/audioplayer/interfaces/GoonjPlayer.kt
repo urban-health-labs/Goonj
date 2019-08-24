@@ -1,14 +1,9 @@
 package ai.rever.goonj.audioplayer.interfaces
 
 import ai.rever.goonj.audioplayer.models.Samples
-import ai.rever.goonj.audioplayer.service.AudioPlayerService
-import ai.rever.goonj.audioplayer.util.*
 import android.content.Context
-import android.content.Intent
 
 interface GoonjPlayer {
-
-
     fun startNewSession(context: Context){
         PlaybackManager.getInstance(context).startNewSession()
     }
@@ -42,5 +37,9 @@ interface GoonjPlayer {
 
         PlaybackManager.getInstance(context).customiseNotification(useNavigationAction,usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
     }
+
+    fun isPlayingLiveData(context: Context) = PlaybackManager.getInstance(context).isPlayingLiveData
+
+    fun currentPlayingTrack(context: Context) = PlaybackManager.getInstance(context).currentPlayingTrack
 
 }

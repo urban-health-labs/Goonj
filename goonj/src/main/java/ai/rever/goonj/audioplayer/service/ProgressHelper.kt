@@ -1,7 +1,6 @@
 package ai.rever.goonj.audioplayer.service
 
 import android.util.Log
-import ai.rever.goonj.audioplayer.util.mIsPlaying
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable

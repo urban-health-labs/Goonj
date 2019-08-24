@@ -18,11 +18,13 @@ import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.audioplayer.download.DownloadUtil
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.service.AudioPlayerService
 import ai.rever.goonj.audioplayer.util.*
 import android.annotation.SuppressLint
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import androidx.lifecycle.MutableLiveData
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.analytics.AnalyticsListener
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
@@ -39,10 +41,11 @@ import java.lang.ref.WeakReference
 
 class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlayer(),  AudioManager.OnAudioFocusChangeListener {
 
-
     val TAG = "LOCAL_PLAYER"
     private val DEBUG = BuildConfig.DEBUG
-    val service: Service? get() = weakReferenceService.get()
+    private val service: Service? get() = weakReferenceService.get()
+    private val mIsPlaying: MutableLiveData<Boolean>? get() = (service as? AudioPlayerService)?.mIsPlaying
+    private val mCurrentPlayingTrack : MutableLiveData<Samples.Track>? get() = (service as? AudioPlayerService)?.mCurrentPlayingTrack
 
     private var exoPlayer : SimpleExoPlayer
     private lateinit var playerNotificationManager: PlayerNotificationManager
@@ -111,7 +114,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
     private val notificationAdapter = object : PlayerNotificationManager.MediaDescriptionAdapter {
         override fun getCurrentContentTitle(player: Player): String {
-            mCURRENT_PLAYING_ITEM.postValue(playList[player.currentWindowIndex])
+            mCurrentPlayingTrack?.postValue(playList[player.currentWindowIndex])
             return playList[player.currentWindowIndex].title
         }
 
@@ -237,12 +240,12 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
             if (playWhenReady && playbackState == Player.STATE_READY) {
                 requestAudioFocus()
-                mIsPlaying.postValue(true)
+                mIsPlaying?.postValue(true)
             } else if (playWhenReady) {
 
             } else {
                 removeAudioFocus()
-                mIsPlaying.postValue(false)
+                mIsPlaying?.postValue(false)
             }
         }
 
@@ -321,7 +324,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         mediaSession?.release()
         mediaSessionConnector?.setPlayer(null)
         exoPlayer.playWhenReady = false
-        mIsPlaying.postValue(false)
+        mIsPlaying?.postValue(false)
         removeListeners()
         exoPlayer.release()
         playerNotificationManager.setPlayer(null)

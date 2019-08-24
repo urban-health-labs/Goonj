@@ -10,6 +10,8 @@ import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.interfaces.PlaybackInterface
 import ai.rever.goonj.audioplayer.models.Samples
 import android.app.Service
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.Observable
 
 class AudioPlayerService : Service(), PlaybackInterface {
@@ -25,6 +27,9 @@ class AudioPlayerService : Service(), PlaybackInterface {
 
     val mSessionManager = SessionManager("app")
     private var mPlayer: AudioPlayer? = null
+
+    internal val mIsPlaying: MutableLiveData<Boolean> = MutableLiveData()
+    internal val mCurrentPlayingTrack : MutableLiveData<Samples.Track> = MutableLiveData()
 
     private val mediaRouterCallback = object : MediaRouter.Callback(){
         override fun onRouteSelected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
@@ -160,5 +165,8 @@ class AudioPlayerService : Service(), PlaybackInterface {
             usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
     }
 
+    override val isPlayingLiveData: LiveData<Boolean> get() = mIsPlaying
 
+    override val currentPlayingTrack: LiveData<Samples.Track>
+        get() = mCurrentPlayingTrack
 }
