@@ -42,7 +42,7 @@
             android:layout_marginLeft="64dp"
             android:layout_marginStart="64dp"
             android:scaleType="centerCrop"
-            tools:srcCompat="@tools:sample/backgrounds/scenic"
+            tools:srcCompat="@tools:track/backgrounds/scenic"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>

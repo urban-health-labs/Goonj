@@ -11,8 +11,8 @@ import androidx.mediarouter.media.MediaSessionStatus
 import androidx.mediarouter.media.RemotePlaybackClient
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
-import ai.rever.goonj.audioplayer.util.currentPlayingItem
-import ai.rever.goonj.audioplayer.util.isPlaying
+import ai.rever.goonj.audioplayer.util.mCURRENT_PLAYING_ITEM
+import ai.rever.goonj.audioplayer.util.mIsPlaying
 import android.net.Uri
 import androidx.core.net.toUri
 import com.google.android.gms.cast.MediaMetadata
@@ -55,7 +55,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     private var DEBUG = BuildConfig.DEBUG
     private var mRoute: MediaRouter.RouteInfo? = null
     private var mEnqueuePending: Boolean = false
-    private val mTempQueue = ArrayList<Samples.Sample>()
+    private val mTempQueue = ArrayList<Samples.Track>()
 
     private var mClient: RemotePlaybackClient? = null
     private val mContext: Context? get() = contextWeakReference.get()
@@ -94,12 +94,12 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         Log.d(TAG,"Start new session")
     }
 
-    override fun play(item: Samples.Sample) {
+    override fun play(item: Samples.Track) {
         if (DEBUG) {
             Log.d(TAG, "play: item=$item")
         }
 
-        currentPlayingItem.value = item
+        mCURRENT_PLAYING_ITEM.value = item
         mClient?.setStatusCallback(mStatusCallback)
         mClient?.play(item.url.toUri(), "audio/mp3", null, 0, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
@@ -120,7 +120,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
 
                 setMediaMetadata(item)
                 mCallback.onPlaylistChanged()
-                isPlaying.value = true
+                mIsPlaying.value = true
             }
 
             override fun onError(error: String?, code: Int, data: Bundle?) {
@@ -129,7 +129,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         })
     }
 
-    private fun setMediaMetadata(item: Samples.Sample){
+    private fun setMediaMetadata(item: Samples.Track){
         val musicMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
 
         musicMetadata.putString(MediaMetadata.KEY_TITLE, item.title)
@@ -160,12 +160,12 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     override fun seekTo(positionMs: Long) {
-        currentPlayingItem.value?.let {
+        mCURRENT_PLAYING_ITEM.value?.let {
             getStatus(it, true, positionMs)
         }
     }
 
-    override fun getStatus(item: Samples.Sample, seek: Boolean, positionMs: Long) {
+    override fun getStatus(item: Samples.Track, seek: Boolean, positionMs: Long) {
 
         if (mClient?.hasSession() != true || item.remoteItemId == null) {
             // if session is not valid or item id not assigend yet.
@@ -233,7 +233,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
                 logStatus("pause: succeeded", sessionId, sessionStatus, null, null)
                 mCallback.onPlaylistChanged()
 
-                isPlaying.value = false
+                mIsPlaying.value = false
 
             }
 
@@ -257,7 +257,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
                 logStatus("resume: succeeded", sessionId, sessionStatus, null, null)
                 mCallback.onPlaylistChanged()
 
-                isPlaying.value = true
+                mIsPlaying.value = true
             }
 
             override fun onError(error: String?, code: Int, data: Bundle?) {
@@ -281,7 +281,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
                     endSession()
                 }
                 mCallback.onPlaylistChanged()
-                isPlaying.value = false
+                mIsPlaying.value = false
             }
 
             override fun onError(error: String?, code: Int, data: Bundle?) {
@@ -290,7 +290,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         })
     }
 
-    override fun enqueue(item: Samples.Sample) {
+    override fun enqueue(item: Samples.Track) {
         throwIfQueuingUnsupported()
 
         if (mClient?.hasSession() != true && !mEnqueuePending) {
@@ -307,7 +307,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         }
     }
 
-    override fun remove(iid: String): Samples.Sample? {
+    override fun remove(iid: String): Samples.Track? {
         throwIfNoSession()
         throwIfQueuingUnsupported()
 
@@ -333,7 +333,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         return null
     }
 
-    override fun setPlaylist(playlist: List<Samples.Sample>) {
+    override fun setPlaylist(playlist: List<Samples.Track>) {
 
     }
 
@@ -345,7 +345,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         return null
     }
 
-    private fun enqueueInternal(item: Samples.Sample) {
+    private fun enqueueInternal(item: Samples.Track) {
         throwIfQueuingUnsupported()
 
         if (DEBUG) {
@@ -384,7 +384,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         })
     }
 
-    private fun seekInternal(item: Samples.Sample) {
+    private fun seekInternal(item: Samples.Track) {
         throwIfNoSession()
 
         if (DEBUG) {
@@ -408,7 +408,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         })
     }
 
-    private fun startSession(item: Samples.Sample) {
+    private fun startSession(item: Samples.Track) {
         mClient?.startSession(null, object : RemotePlaybackClient.SessionActionCallback() {
             override fun onResult(data: Bundle?, sessionId: String?, sessionStatus: MediaSessionStatus?) {
                 logStatus("startSession: succeeded", sessionId, sessionStatus, null, null)
@@ -508,7 +508,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     private fun setPlayerStateRemote(isRemotePlaying : Boolean){
         val map = mutableMapOf(IS_REMOTE_PLAYING to isRemotePlaying)
         logEventBehaviour(true, PlayerAnalyticsEnum.SET_PLAYER_STATE_REMOTE, map)
-        isPlaying.value = isRemotePlaying
+        mIsPlaying.value = isRemotePlaying
     }
 
 }

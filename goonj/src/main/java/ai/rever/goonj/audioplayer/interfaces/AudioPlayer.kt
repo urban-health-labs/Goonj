@@ -6,9 +6,6 @@ import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.audioplayer.cast.RemotePlayer
 import ai.rever.goonj.audioplayer.local.LocalPlayer
 import ai.rever.goonj.audioplayer.models.Samples
-import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.MutableLiveData
 import java.lang.ref.WeakReference
 
 abstract class AudioPlayer {
@@ -22,10 +19,10 @@ abstract class AudioPlayer {
     abstract fun release()
 
     // basic operations that are always supported
-    abstract fun play(item: Samples.Sample)
+    abstract fun play(item: Samples.Track)
 
     abstract fun seekTo(positionMs : Long)
-    open fun getStatus(item: Samples.Sample, seek: Boolean, positionMs: Long){}
+    open fun getStatus(item: Samples.Track, seek: Boolean, positionMs: Long){}
     abstract fun pause()
     abstract fun resume()
     abstract fun stop()
@@ -33,11 +30,11 @@ abstract class AudioPlayer {
 
     // advanced queuing (enqueue & remove) are only supported
     // if isQueuingSupported() returns true
-    abstract fun enqueue(item: Samples.Sample)
+    abstract fun enqueue(item: Samples.Track)
 
-    abstract fun remove(iid: String): Samples.Sample?
+    abstract fun remove(iid: String): Samples.Track?
 
-    abstract fun setPlaylist(playlist: List<Samples.Sample>)
+    abstract fun setPlaylist(playlist: List<Samples.Track>)
 
     abstract fun setVolume(volume: Float)
 

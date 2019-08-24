@@ -5,7 +5,7 @@ import ai.rever.goonj.audioplayer.analytics.analyticsObservable
 import ai.rever.goonj.audioplayer.analytics.analyticsObserver
 import ai.rever.goonj.audioplayer.analytics.isLoggable
 import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
-import ai.rever.goonj.audioplayer.util.currentPlayingItem
+import ai.rever.goonj.audioplayer.util.CURRENT_PLAYING_ITEM
 import ai.rever.goonj.audioplayer.util.isPlaying
 import android.os.Bundle
 import androidx.lifecycle.Observer
@@ -53,7 +53,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             }
         }
 
-        currentPlayingItem.observe(this, Observer { currentItem ->
+        CURRENT_PLAYING_ITEM.observe(this, Observer { currentItem ->
             Picasso.get().load(currentItem?.albumArtUrl).into(audioPlayerAlbumArtIV)
             audioPlayerAlbumTitleTv.text = currentItem?.title
             audioPlayerAlbumArtistTv.text = currentItem?.artist

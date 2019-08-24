@@ -3,7 +3,6 @@ package ai.rever.goonj.audioplayer
 import android.util.Log
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
-import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
 import androidx.mediarouter.media.MediaItemStatus
 import java.util.ArrayList
 
@@ -13,20 +12,20 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     private var mSessionValid: Boolean = false
     private var mPlayer: AudioPlayer? = null
     private var mCallback: Callback? = null
-    private var mPlaylist: MutableList<Samples.Sample> = ArrayList()
+    private var mPlaylist: MutableList<Samples.Track> = ArrayList()
     var isRemote: Boolean = false
 
     val sessionId: String?
         get() = if (mSessionValid) mSessionId.toString() else null
 
-    var currentItem: Samples.Sample? = if (mPlaylist.isEmpty()) null else mPlaylist[0]
+    var currentItem: Samples.Track? = if (mPlaylist.isEmpty()) null else mPlaylist[0]
 
-    val getSession : List<Samples.Sample>
+    val getSession : List<Samples.Track>
         get() = mPlaylist
 
 
     // Returns the cached playlist (note this is not responsible for updating it)
-    val playlist: List<Samples.Sample>
+    val playlist: List<Samples.Track>
         get() = mPlaylist
 
     fun setRemotePlayerSelected(isRemote: Boolean){
@@ -50,7 +49,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         return mSessionValid
     }
 
-    fun add(item: Samples.Sample) {
+    fun add(item: Samples.Track) {
         Log.d(TAG,item.toString())
 
         mPlaylist.add(item)
@@ -84,8 +83,8 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         mPlayer?.seekTo(positionMs)
     }
 
-    fun addItemToPlaylist(sample: Samples.Sample){
-        mPlaylist.add(sample)
+    fun addItemToPlaylist(track: Samples.Track){
+        mPlaylist.add(track)
     }
 
     fun setPlaylistToPlayer(){
@@ -183,7 +182,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
     interface Callback {
         fun onStatusChanged()
-        fun onItemChanged(item: Samples.Sample)
+        fun onItemChanged(item: Samples.Track)
     }
 
     companion object {

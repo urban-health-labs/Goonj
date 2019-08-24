@@ -1,6 +1,7 @@
 package ai.rever.goonj.audioplayer.util
 
 import ai.rever.goonj.audioplayer.models.Samples
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 // Audio LocalPlayer Helper
@@ -13,11 +14,14 @@ const val ACTION_ADD_PLAYLIST = "ly.blissful.bliss.action.ACTION_ADD_PLAYLIST"
 const val ACTION_START_NEW_SESSION = "ly.blissful.bliss.action.ACTION_START_NEW_SESSION"
 const val ACTION_CUSTOMIZE_NOTIFICATION = "ly.blissful.bliss.action.ACTION_CUSTOMIZE_NOTIFICATION"
 const val ACTION_SEEK_TO = "ly.blissful.bliss.action.ACTION_SEEK_TO"
+const val ACTION_SET_AUTOPLAY_CALLBACK = "ly.blissful.bliss.action.ACTION_SET_AUTOPLAY_CALLBACK"
 
 const val audioURLKey = "audio_url"
 
-val isPlaying : MutableLiveData<Boolean> = MutableLiveData()
-val currentPlayingItem : MutableLiveData<Samples.Sample?> = MutableLiveData()
+val mIsPlaying : MutableLiveData<Boolean> = MutableLiveData()
+val isPlaying: LiveData<Boolean> get() = mIsPlaying
+val mCURRENT_PLAYING_ITEM : MutableLiveData<Samples.Track?> = MutableLiveData()
+val CURRENT_PLAYING_ITEM : LiveData<Samples.Track?> get() = mCURRENT_PLAYING_ITEM
 
 //
 const val PLAYBACK_CHANNEL_ID = "playback_channel"

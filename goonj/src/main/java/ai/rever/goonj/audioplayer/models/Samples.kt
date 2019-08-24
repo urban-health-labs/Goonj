@@ -16,7 +16,7 @@ import java.io.Serializable
 object Samples {
 
     val SAMPLES = arrayOf(
-        Sample(
+        Track(
             "https://storage.googleapis.com/automotive-media/Talkies.mp3",
             //"https://raw.githubusercontent.com/rever-ai/SampleMusic/master/David_H_Porter_-_Mozarts_Rondo_No_3_in_A_Minor_K_511.mp3",
             "audio_1",
@@ -25,7 +25,7 @@ object Samples {
             "One",
             R.mipmap.ic_album_art,
             "https://img.discogs.com/Bss063QHQ7k0sRwejSQWTJ-iKGI=/fit-in/600x573/filters:strip_icc():format(jpeg):mode_rgb():quality(90)/discogs-images/R-900642-1182343816.jpeg.jpg"
-        ), Sample(
+        ), Track(
             "https://storage.googleapis.com/automotive-media/Jazz_In_Paris.mp3",
             //"https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Menstruation_Sisters_-_14_-_top_gun.mp3",
             "audio_2",
@@ -34,7 +34,7 @@ object Samples {
             "Two",
             R.mipmap.ic_album_art,
             "https://i.ebayimg.com/images/g/MMgAAOSwXi9b6BJ3/s-l640.jpg"
-        ), Sample(
+        ), Track(
             "https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
             //"https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Manueljgrotesque_-_24_-_grotesque25.mp3",
             "audio_3",
@@ -43,7 +43,7 @@ object Samples {
             "Three",
             R.mipmap.ic_album_art,
             "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
-//        ), Sample(
+//        ), Track(
 //            //"https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
 //            "https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Hard_TON_-_07_-_Choc-ice_Dance.mp3",
 //            "audio_4",
@@ -55,7 +55,7 @@ object Samples {
         )
     )
 
-    class Sample(
+    class Track(
         val url: String, val mediaId: String, val title: String, val artist: String, val bitmapResource: Int,
         val albumArtUrl : String? = ""
     ) : Serializable {
@@ -70,16 +70,16 @@ object Samples {
         }
     }
 
-    fun getMediaDescription(context: Context?, sample: Sample): MediaDescriptionCompat {
+    fun getMediaDescription(context: Context?, track: Track): MediaDescriptionCompat {
         val extras = Bundle()
         val mediaDescriptionBuilder =  MediaDescriptionCompat.Builder()
-            .setMediaId(sample.mediaId)
-            .setTitle(sample.title)
-            .setDescription(sample.artist)
+            .setMediaId(track.mediaId)
+            .setTitle(track.title)
+            .setDescription(track.artist)
             .setExtras(extras)
 
         context?.let {
-            val bitmap = getBitmap(context, sample.bitmapResource)
+            val bitmap = getBitmap(context, track.bitmapResource)
             extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
             extras.putParcelable(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, bitmap)
 

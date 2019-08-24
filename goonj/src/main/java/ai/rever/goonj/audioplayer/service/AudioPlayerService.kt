@@ -82,7 +82,7 @@ class AudioPlayerService : LifecycleService() {
                 Log.d(TAG,"SessionManager: onStatusChanged")
             }
 
-            override fun onItemChanged(item: Samples.Sample) {
+            override fun onItemChanged(item: Samples.Track) {
                 Log.d(TAG,"SessionManager: onItemChanged")
             }
         })
@@ -99,7 +99,12 @@ class AudioPlayerService : LifecycleService() {
         super.onBind(intent)
         return null
     }
-
+//
+//    override fun onTracksFetched(trackList: List<Samples.Track>) {
+//        for(track in trackList) {
+//            mSessionManager.add(track)
+//        }
+//    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         mSelector?.also { selector ->
@@ -126,7 +131,8 @@ class AudioPlayerService : LifecycleService() {
                     mSessionManager.seek(positionMs)
                 }
                 ACTION_ADD_AUDIO_TO_PLAYLIST -> {
-                    (intent.getSerializableExtra(audioURLKey) as? Samples.Sample)?.let {sample ->
+                    // Todo: to Parceble
+                    (intent.getSerializableExtra(audioURLKey) as? Samples.Track)?.let { sample ->
                         mSessionManager.add(sample)
                     }
                 }

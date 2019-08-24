@@ -1,7 +1,7 @@
 package ai.rever.goonj.audioplayer.service
 
 import android.util.Log
-import ai.rever.goonj.audioplayer.util.isPlaying
+import ai.rever.goonj.audioplayer.util.mIsPlaying
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 fun AudioPlayerService.setupProgressObserver() {
     playbackObservable = Observable.interval(500, TimeUnit.MILLISECONDS)
         .observeOn(AndroidSchedulers.mainThread())
-        .takeWhile { isPlaying.value?: false && mSessionManager.getTrackPosition()!= null }
+        .takeWhile { mIsPlaying.value?: false && mSessionManager.getTrackPosition()!= null }
         .map { mSessionManager.getTrackPosition() }
     addProgressObserver()
 }

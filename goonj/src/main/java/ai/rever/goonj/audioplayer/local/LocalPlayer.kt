@@ -54,7 +54,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     private var concatenatingMediaSource = ConcatenatingMediaSource()
     private lateinit var cacheDataSourceFactory : CacheDataSourceFactory
 
-    var playList : MutableList<Samples.Sample> = mutableListOf()
+    var playList : MutableList<Samples.Track> = mutableListOf()
 
     companion object{
         @SuppressLint("StaticFieldLeak")
@@ -111,7 +111,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
     private val notificationAdapter = object : PlayerNotificationManager.MediaDescriptionAdapter {
         override fun getCurrentContentTitle(player: Player): String {
-            currentPlayingItem.postValue(playList[player.currentWindowIndex])
+            mCURRENT_PLAYING_ITEM.postValue(playList[player.currentWindowIndex])
             return playList[player.currentWindowIndex].title
         }
 
@@ -175,7 +175,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         mediaSessionConnector?.setPlayer(exoPlayer)
     }
 
-    private fun addAudioPlaylist(vararg audioList: Samples.Sample) {
+    private fun addAudioPlaylist(vararg audioList: Samples.Track) {
         Log.d(TAG,"setupDataSource Local")
         for(audio in audioList){
             val mediaSource =  ProgressiveMediaSource.Factory(cacheDataSourceFactory)
@@ -185,6 +185,8 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         }
         exoPlayer.prepare(concatenatingMediaSource)
         exoPlayer.playWhenReady = true
+
+        exoPlayer.repeatMode
     }
 
     private val analyticsListener = object : AnalyticsListener {
@@ -235,12 +237,12 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
             if (playWhenReady && playbackState == Player.STATE_READY) {
                 requestAudioFocus()
-                isPlaying.postValue(true)
+                mIsPlaying.postValue(true)
             } else if (playWhenReady) {
 
             } else {
                 removeAudioFocus()
-                isPlaying.postValue(false)
+                mIsPlaying.postValue(false)
             }
         }
 
@@ -278,6 +280,9 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             val map = mutableMapOf(TIMELINE to timeline, MANIFEST to manifest, REASON to reason)
             logEventBehaviour(false, PlayerAnalyticsEnum.ON_TIMELINE_CHANGED, map)
         }
+
+
+
     }
 
     private fun addListeners(){
@@ -316,13 +321,13 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         mediaSession?.release()
         mediaSessionConnector?.setPlayer(null)
         exoPlayer.playWhenReady = false
-        isPlaying.postValue(false)
+        mIsPlaying.postValue(false)
         removeListeners()
         exoPlayer.release()
         playerNotificationManager.setPlayer(null)
     }
 
-    override fun play(item: Samples.Sample) {
+    override fun play(item: Samples.Track) {
         if (DEBUG) {
             Log.d(TAG, "play: item=$item")
         }
@@ -355,17 +360,17 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         exoPlayer.stop()
     }
 
-    override fun enqueue(item: Samples.Sample) {
+    override fun enqueue(item: Samples.Track) {
         if (DEBUG) {
             Log.d(TAG, "enqueue")
         }
         addAudioPlaylist(item)
     }
 
-    override fun remove(iid: String): Samples.Sample? {
+    override fun remove(iid: String): Samples.Track? {
         throw UnsupportedOperationException("LocalPlayer doesn't support remove!")    }
 
-    override fun setPlaylist(playlist: List<Samples.Sample>) {
+    override fun setPlaylist(playlist: List<Samples.Track>) {
         startNewSession()
         for(item in playlist){
             addAudioPlaylist(item)

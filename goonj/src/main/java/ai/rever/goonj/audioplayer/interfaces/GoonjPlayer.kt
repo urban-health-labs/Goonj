@@ -32,10 +32,10 @@ interface GoonjPlayer {
         performPlayerAction(context, ACTION_SEEK_TO, positionMs)
     }
 
-    fun addAudioToPlaylist(context: Context, audioSample: Samples.Sample){
+    fun addAudioToPlaylist(context: Context, audioTrack: Samples.Track){
         val intent = Intent(context, AudioPlayerService::class.java)
         intent.action = ACTION_ADD_AUDIO_TO_PLAYLIST
-        intent.putExtra(audioURLKey,audioSample)
+        intent.putExtra(audioURLKey,audioTrack)
         context.startService(intent)
     }
 
