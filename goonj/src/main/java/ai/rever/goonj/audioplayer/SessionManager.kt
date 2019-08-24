@@ -72,7 +72,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     fun resume() {
         Log.d(TAG,"resume")
         mPaused = false
-        mPlayer?.resume()
+            mPlayer?.resume()
 
     }
 

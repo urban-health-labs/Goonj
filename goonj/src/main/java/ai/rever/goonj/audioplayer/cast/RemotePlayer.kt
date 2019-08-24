@@ -11,6 +11,7 @@ import androidx.mediarouter.media.MediaSessionStatus
 import androidx.mediarouter.media.RemotePlaybackClient
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.util.SingletonHolder
 import ai.rever.goonj.audioplayer.util.mCURRENT_PLAYING_ITEM
 import ai.rever.goonj.audioplayer.util.mIsPlaying
 import android.net.Uri
@@ -22,30 +23,6 @@ import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadRequestData
 import com.google.android.gms.cast.framework.CastContext
 import java.lang.ref.WeakReference
-
-open class SingletonHolder<out T: Any, in A>(creator: (A) -> T) {
-    private var creator: ((A) -> T)? = creator
-    @Volatile private var instance: T? = null
-
-    fun getInstance(arg: A): T {
-        val i = instance
-        if (i != null) {
-            return i
-        }
-
-        return synchronized(this) {
-            val i2 = instance
-            if (i2 != null) {
-                i2
-            } else {
-                val created = creator!!(arg)
-                instance = created
-                creator = null
-                created
-            }
-        }
-    }
-}
 
 class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>) : AudioPlayer() {
 
