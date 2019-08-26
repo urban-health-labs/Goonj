@@ -4,6 +4,8 @@ import ai.rever.goonj.audioplayer.interfaces.GoonjPlayer
 import ai.rever.goonj.audioplayer.analytics.analyticsObservable
 import ai.rever.goonj.audioplayer.analytics.analyticsObserver
 import ai.rever.goonj.audioplayer.analytics.isLoggable
+import ai.rever.goonj.audioplayer.interfaces.AutoLoadListener
+import ai.rever.goonj.audioplayer.models.Samples
 import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
 import android.os.Bundle
 import androidx.lifecycle.Observer
@@ -22,15 +24,17 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     val TAG = "AUDIO_PLAYER_ACTIVITY"
     val SECOND_LAST = 2
+    var load = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_audio_player)
 
+        setupUI()
         customizeNotification()
         setupPlayer()
-        setupUI()
+
 
         setCastButton()
 
@@ -59,13 +63,6 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             audioPlayerAlbumArtistTv.text = currentItem?.artist
             Log.d(TAG,"TRACK: $currentItem")
 
-            /** This lines loads new items when the current item is the second last item**/
-            if(currentItem.index == session(this).size - SECOND_LAST){
-                /**
-                 * Load your new items here and add to the playlist
-                 */
-                Log.d(TAG,"========= LOAD NEW ITEMS")
-            }
         })
 
         audioPlayerForward10s.setOnClickListener {
@@ -77,7 +74,17 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         }
 
         audioPlayerAutoplaySwitch.setOnCheckedChangeListener { _, autoplay ->
-            setAutoplay(this,autoplay)
+            val autoLoad = object : AutoLoadListener{
+                override fun onLoadTracks() {
+                    Log.d(TAG,"============= LOAD NEW TRACKS")
+                    if(load) {
+                        addAudioToPlaylist(applicationContext, SAMPLES[4])
+                        addAudioToPlaylist(applicationContext, SAMPLES[5])
+                        load = false
+                    }
+                }
+            }
+            setAutoplay(this,autoplay,1,autoLoad)
         }
     }
 
@@ -90,8 +97,8 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         addAudioToPlaylist(this, SAMPLES[1])
         addAudioToPlaylist(this, SAMPLES[2])
         addAudioToPlaylist(this, SAMPLES[3])
-        addAudioToPlaylist(this, SAMPLES[4])
-        addAudioToPlaylist(this, SAMPLES[5])
+//        addAudioToPlaylist(this, SAMPLES[4])
+//        addAudioToPlaylist(this, SAMPLES[5])
     }
 
     override fun onBackPressed() {
