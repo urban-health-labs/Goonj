@@ -326,7 +326,9 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     override fun setAutoplay(autoplay: Boolean) {
+        mAutoplay = autoplay
 
+        // TODO : Re-create RemotePlayer with playlist support
     }
 
     private fun enqueueInternal(item: Samples.Track) {
