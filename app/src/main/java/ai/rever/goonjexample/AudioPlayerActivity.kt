@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.activity_audio_player.*
 import android.media.AudioManager
 import android.view.KeyEvent
 import android.content.Context
+import android.util.Log
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.cast.framework.CastButtonFactory
@@ -20,6 +21,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     val TAG = "AUDIO_PLAYER_ACTIVITY"
+    val SECOND_LAST = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +57,15 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             Picasso.get().load(currentItem?.albumArtUrl).into(audioPlayerAlbumArtIV)
             audioPlayerAlbumTitleTv.text = currentItem?.title
             audioPlayerAlbumArtistTv.text = currentItem?.artist
+            Log.d(TAG,"TRACK: $currentItem")
+
+            /** This lines loads new items when the current item is the second last item**/
+            if(currentItem.index == session(this).size - SECOND_LAST){
+                /**
+                 * Load your new items here and add to the playlist
+                 */
+                Log.d(TAG,"========= LOAD NEW ITEMS")
+            }
         })
 
         audioPlayerForward10s.setOnClickListener {
@@ -78,12 +89,13 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         addAudioToPlaylist(this, SAMPLES[0])
         addAudioToPlaylist(this, SAMPLES[1])
         addAudioToPlaylist(this, SAMPLES[2])
-        //addAudioToPlaylist(this, SAMPLES[3])
+        addAudioToPlaylist(this, SAMPLES[3])
+        addAudioToPlaylist(this, SAMPLES[4])
+        addAudioToPlaylist(this, SAMPLES[5])
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
-        // TODO ask for confirmation
         stop(this)
     }
 

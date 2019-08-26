@@ -45,6 +45,10 @@ interface GoonjPlayer {
         PlaybackManager.getInstance(context).customiseNotification(useNavigationAction,usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
     }
 
+    fun session(context: Context) : List<Samples.Track>{
+        return PlaybackManager.getInstance(context).currentSession
+    }
+
     fun isPlayingLiveData(context: Context) = PlaybackManager.getInstance(context).isPlayingLiveData
 
     fun currentPlayingTrack(context: Context) = PlaybackManager.getInstance(context).currentPlayingTrack

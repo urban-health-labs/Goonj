@@ -71,7 +71,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     override fun startNewSession() {
-        Log.d(TAG,"Start new session")
+        Log.d(TAG,"Start new getSession")
     }
 
     override fun play(item: Samples.Track) {
@@ -148,7 +148,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     override fun getStatus(item: Samples.Track, seek: Boolean, positionMs: Long) {
 
         if (mClient?.hasSession() != true || item.remoteItemId == null) {
-            // if session is not valid or item id not assigend yet.
+            // if getSession is not valid or item id not assigend yet.
             // just return, it's not fatal
             return
         }
@@ -199,7 +199,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
 
     override fun pause() {
         if (mClient?.hasSession() != true) {
-            // ignore if no session
+            // ignore if no getSession
             return
         }
         if (DEBUG) {
@@ -226,7 +226,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     override fun resume() {
         // Todo: find following code meaning
         if (mClient?.hasSession() != true) {
-            // ignore if no session
+            // ignore if no getSession
             return
         }
         if (DEBUG) {
@@ -248,7 +248,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
 
     override fun stop() {
         if (mClient?.hasSession() != true) {
-            // ignore if no session
+            // ignore if no getSession
             return
         }
         if (DEBUG) {

@@ -91,5 +91,7 @@ class PlaybackManager (private val mContext : Context){
 
     val currentPlayingTrack get() = playbackInterface.currentPlayingTrack
 
+    val currentSession get() = playbackInterface.getSession
+
     companion object : SingletonHolder<PlaybackManager,Context>(::PlaybackManager)
 }

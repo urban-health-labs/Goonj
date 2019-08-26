@@ -173,4 +173,6 @@ class AudioPlayerService : Service(), PlaybackInterface {
 
     override val currentPlayingTrack: LiveData<Samples.Track>
         get() = mCurrentPlayingTrack
+
+    override val getSession: List<Samples.Track> get() = mSessionManager.getSession
 }

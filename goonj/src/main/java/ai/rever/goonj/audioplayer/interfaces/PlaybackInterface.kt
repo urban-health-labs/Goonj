@@ -16,4 +16,5 @@ interface PlaybackInterface {
     fun setAutoplay(autoplay : Boolean)
     val isPlayingLiveData: LiveData<Boolean>
     val currentPlayingTrack : LiveData<Samples.Track>
+    val getSession : List<Samples.Track>
 }
