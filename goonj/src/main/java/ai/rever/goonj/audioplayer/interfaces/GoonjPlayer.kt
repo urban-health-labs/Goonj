@@ -3,6 +3,9 @@ package ai.rever.goonj.audioplayer.interfaces
 import ai.rever.goonj.audioplayer.models.Samples
 import android.content.Context
 
+/**
+ * This interface will be visible to User
+ */
 interface GoonjPlayer {
     fun startNewSession(context: Context){
         PlaybackManager.getInstance(context).startNewSession()
@@ -24,6 +27,10 @@ interface GoonjPlayer {
 
     fun seek(context: Context, positionMs: Long?){
         PlaybackManager.getInstance(context).seekTo(positionMs!!)
+    }
+
+    fun setAutoplay(context: Context, autoplay : Boolean) {
+        PlaybackManager.getInstance(context).setAutoplay(autoplay)
     }
 
     fun addAudioToPlaylist(context: Context, audioTrack: Samples.Track){

@@ -46,7 +46,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     private val service: Service? get() = weakReferenceService.get()
     private val mIsPlaying: MutableLiveData<Boolean>? get() = (service as? AudioPlayerService)?.mIsPlaying
     private val mCurrentPlayingTrack : MutableLiveData<Samples.Track>? get() = (service as? AudioPlayerService)?.mCurrentPlayingTrack
-
+    private var mAutoplay : Boolean = true
     private var exoPlayer : SimpleExoPlayer
     private lateinit var playerNotificationManager: PlayerNotificationManager
 
@@ -257,6 +257,10 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         override fun onTracksChanged(trackGroups: TrackGroupArray?, trackSelections: TrackSelectionArray?) {
             val map = mutableMapOf(TRACK_GROUPS to trackGroups, TRACK_SELECTIONS to trackSelections)
             logEventBehaviour(false, PlayerAnalyticsEnum.ON_TRACKS_CHANGED, map)
+
+            if(!mAutoplay) {
+                pause()
+            }
         }
 
         override fun onLoadingChanged(isLoading: Boolean) {
@@ -386,6 +390,10 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
     override fun getTrackPosition(): Long? {
         return exoPlayer.currentPosition
+    }
+
+    override fun setAutoplay(autoplay: Boolean) {
+        this.mAutoplay = autoplay
     }
 
     lateinit var audioManager : AudioManager

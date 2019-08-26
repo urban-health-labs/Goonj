@@ -129,6 +129,10 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
             fastForwardIncrementMs, rewindIncrementMs)
     }
 
+    fun setAutoplay(autoplay : Boolean){
+        mPlayer?.setAutoplay(autoplay)
+    }
+
     private fun playItemOnRemotePlayer(){
         currentItem = playlist.first {
             Log.d(TAG,"STATUS: ${it.state}")

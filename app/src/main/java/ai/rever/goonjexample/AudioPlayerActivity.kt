@@ -51,7 +51,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             }
         }
 
-        currentPlayingTrack(this)?.observe(this, Observer { currentItem ->
+        currentPlayingTrack(this).observe(this, Observer { currentItem ->
             Picasso.get().load(currentItem?.albumArtUrl).into(audioPlayerAlbumArtIV)
             audioPlayerAlbumTitleTv.text = currentItem?.title
             audioPlayerAlbumArtistTv.text = currentItem?.artist
@@ -63,6 +63,10 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
         audioPlayerRewind10s.setOnClickListener {
             seek(this, -3000)
+        }
+
+        audioPlayerAutoplaySwitch.setOnCheckedChangeListener { _, autoplay ->
+            setAutoplay(this,autoplay)
         }
     }
 

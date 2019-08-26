@@ -165,6 +165,10 @@ class AudioPlayerService : Service(), PlaybackInterface {
             usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
     }
 
+    override fun setAutoplay(autoplay: Boolean) {
+        mSessionManager.setAutoplay(autoplay)
+    }
+
     override val isPlayingLiveData: LiveData<Boolean> get() = mIsPlaying
 
     override val currentPlayingTrack: LiveData<Samples.Track>

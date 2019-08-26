@@ -39,6 +39,8 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     private val mIsPlaying: MutableLiveData<Boolean>? get() = (mContext as? AudioPlayerService)?.mIsPlaying
     private val mCurrentPlayingTrack : MutableLiveData<Samples.Track>? get() = (mContext as? AudioPlayerService)?.mCurrentPlayingTrack
 
+    private var mAutoplay : Boolean = true
+
     override fun isRemotePlayback(): Boolean {
         return true
     }
@@ -321,6 +323,10 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
 
     override fun getTrackPosition(): Long? {
         return null
+    }
+
+    override fun setAutoplay(autoplay: Boolean) {
+
     }
 
     private fun enqueueInternal(item: Samples.Track) {

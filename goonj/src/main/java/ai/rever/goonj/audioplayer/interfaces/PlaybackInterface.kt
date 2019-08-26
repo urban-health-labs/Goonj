@@ -13,6 +13,7 @@ interface PlaybackInterface {
     fun startNewSession()
     fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long ,
                               rewindIncrementMs: Long )
+    fun setAutoplay(autoplay : Boolean)
     val isPlayingLiveData: LiveData<Boolean>
     val currentPlayingTrack : LiveData<Samples.Track>
 }

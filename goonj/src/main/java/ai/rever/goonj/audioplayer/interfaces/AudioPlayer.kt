@@ -45,6 +45,8 @@ abstract class AudioPlayer {
                                    fastForwardIncrementMs: Long,
                                    rewindIncrementMs: Long) {}
 
+    abstract fun setAutoplay(autoplay: Boolean)
+
     fun setCallback(callback: Callback) {
         mCallback = callback
     }

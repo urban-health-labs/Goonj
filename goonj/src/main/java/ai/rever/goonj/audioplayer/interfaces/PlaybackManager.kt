@@ -78,6 +78,10 @@ class PlaybackManager (private val mContext : Context){
         playbackInterface.addToPlaylist(track)
     }
 
+    fun setAutoplay(autoplay : Boolean){
+        playbackInterface.setAutoplay(autoplay)
+    }
+
     fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long ,
                               rewindIncrementMs: Long){
         playbackInterface.customiseNotification(useNavigationAction,usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
