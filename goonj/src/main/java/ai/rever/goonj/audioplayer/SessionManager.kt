@@ -72,7 +72,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     fun resume() {
         Log.d(TAG,"resume")
         mPaused = false
-        mPlayer?.resume()
+            mPlayer?.resume()
 
     }
 
@@ -127,6 +127,10 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
         mPlayer?.customiseNotification(useNavigationAction,usePlayPauseAction,
             fastForwardIncrementMs, rewindIncrementMs)
+    }
+
+    fun setAutoplay(autoplay : Boolean){
+        mPlayer?.setAutoplay(autoplay)
     }
 
     private fun playItemOnRemotePlayer(){

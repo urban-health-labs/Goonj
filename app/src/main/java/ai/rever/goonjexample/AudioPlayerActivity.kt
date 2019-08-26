@@ -5,8 +5,6 @@ import ai.rever.goonj.audioplayer.analytics.analyticsObservable
 import ai.rever.goonj.audioplayer.analytics.analyticsObserver
 import ai.rever.goonj.audioplayer.analytics.isLoggable
 import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
-import ai.rever.goonj.audioplayer.util.CURRENT_PLAYING_ITEM
-import ai.rever.goonj.audioplayer.util.isPlaying
 import android.os.Bundle
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_audio_player.*
@@ -41,7 +39,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     private fun setupUI() {
 
-        isPlaying.observe(this, Observer { isAudioPlaying ->
+        isPlayingLiveData(this).observe(this, Observer { isAudioPlaying ->
             audioPlayerPlayPauseToggleBtn.isChecked = !isAudioPlaying
         })
 
@@ -53,7 +51,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             }
         }
 
-        CURRENT_PLAYING_ITEM.observe(this, Observer { currentItem ->
+        currentPlayingTrack(this).observe(this, Observer { currentItem ->
             Picasso.get().load(currentItem?.albumArtUrl).into(audioPlayerAlbumArtIV)
             audioPlayerAlbumTitleTv.text = currentItem?.title
             audioPlayerAlbumArtistTv.text = currentItem?.artist
@@ -65,6 +63,10 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
         audioPlayerRewind10s.setOnClickListener {
             seek(this, -3000)
+        }
+
+        audioPlayerAutoplaySwitch.setOnCheckedChangeListener { _, autoplay ->
+            setAutoplay(this,autoplay)
         }
     }
 
