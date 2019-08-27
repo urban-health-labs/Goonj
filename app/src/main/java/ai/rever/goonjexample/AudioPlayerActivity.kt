@@ -97,8 +97,6 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         addAudioToPlaylist(this, SAMPLES[1])
         addAudioToPlaylist(this, SAMPLES[2])
         addAudioToPlaylist(this, SAMPLES[3])
-//        addAudioToPlaylist(this, SAMPLES[4])
-//        addAudioToPlaylist(this, SAMPLES[5])
     }
 
     override fun onBackPressed() {
