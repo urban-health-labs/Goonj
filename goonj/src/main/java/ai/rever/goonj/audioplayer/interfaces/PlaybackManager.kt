@@ -78,8 +78,8 @@ class PlaybackManager (private val mContext : Context){
         playbackInterface.addToPlaylist(track)
     }
 
-    fun setAutoplay(autoplay : Boolean){
-        playbackInterface.setAutoplay(autoplay)
+    fun setAutoplay(autoplay : Boolean, indexFromLast: Int, autoLoadListener: AutoLoadListener){
+        playbackInterface.setAutoplay(autoplay,indexFromLast,autoLoadListener)
     }
 
     fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long ,
@@ -90,6 +90,8 @@ class PlaybackManager (private val mContext : Context){
     val isPlayingLiveData get() = playbackInterface.isPlayingLiveData
 
     val currentPlayingTrack get() = playbackInterface.currentPlayingTrack
+
+    val currentSession get() = playbackInterface.getSession
 
     companion object : SingletonHolder<PlaybackManager,Context>(::PlaybackManager)
 }

@@ -43,15 +43,30 @@ object Samples {
             "Three",
             R.mipmap.ic_album_art,
             "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
-//        ), Track(
-//            //"https://storage.googleapis.com/automotive-media/The_Messenger.mp3",
-//            "https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Hard_TON_-_07_-_Choc-ice_Dance.mp3",
-//            "audio_4",
-//            "The messenger",
-//            //"Hipster guide to London",
-//            "Four",
-//            R.mipmap.ic_album_art,
-//            "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
+        ), Track(
+            "https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Hard_TON_-_07_-_Choc-ice_Dance.mp3",
+            "audio_4",
+            "Audio 4",
+            //"Hipster guide to London",
+            "Four",
+            R.mipmap.ic_album_art,
+            "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
+        ), Track(
+            "https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Big_Blood_-_01_-_Bah-num.mp3",
+            "audio_5",
+            "Audio 5",
+            //"Hipster guide to London",
+            "Five",
+            R.mipmap.ic_album_art,
+            "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
+        ),  Track(
+            "https://raw.githubusercontent.com/rever-ai/SampleMusic/master/Black_Ant_-_08_-_realest_year_9.mp3",
+            "audio_6",
+            "Audio 6",
+            //"Hipster guide to London",
+            "Six",
+            R.mipmap.ic_album_art,
+            "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
         )
     )
 
@@ -60,13 +75,14 @@ object Samples {
         val albumArtUrl : String? = ""
     ) : Serializable {
         var state = MediaItemStatus.PLAYBACK_STATE_PENDING
+        var index : Int = 0
         var position: Long = 0
         var duration: Long = 0
         var timestamp: Long = 0
         var remoteItemId: String? = null
 
         override fun toString(): String {
-            return "$title Description: $artist URL: $url"
+            return "$title Description: $artist URL: $url INDEX: $index"
         }
     }
 

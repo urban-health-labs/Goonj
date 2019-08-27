@@ -58,6 +58,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     private lateinit var cacheDataSourceFactory : CacheDataSourceFactory
 
     var playList : MutableList<Samples.Track> = mutableListOf()
+    var isPlayerPrepared : Boolean = false
 
     companion object{
         @SuppressLint("StaticFieldLeak")
@@ -186,10 +187,10 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             concatenatingMediaSource.addMediaSource(mediaSource)
             playList.add(audio)
         }
-        exoPlayer.prepare(concatenatingMediaSource)
-        exoPlayer.playWhenReady = true
-
-        exoPlayer.repeatMode
+        if(!isPlayerPrepared) {
+            exoPlayer.prepare(concatenatingMediaSource)
+            isPlayerPrepared = true
+        }
     }
 
     private val analyticsListener = object : AnalyticsListener {
@@ -287,9 +288,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             val map = mutableMapOf(TIMELINE to timeline, MANIFEST to manifest, REASON to reason)
             logEventBehaviour(false, PlayerAnalyticsEnum.ON_TIMELINE_CHANGED, map)
         }
-
-
-
     }
 
     private fun addListeners(){
@@ -305,6 +303,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     override fun startNewSession(){
         playList.clear()
         concatenatingMediaSource.clear()
+        isPlayerPrepared = false
     }
 
     override fun isRemotePlayback(): Boolean {
@@ -332,6 +331,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         removeListeners()
         exoPlayer.release()
         playerNotificationManager.setPlayer(null)
+        isPlayerPrepared = false
     }
 
     override fun play(item: Samples.Track) {
@@ -438,7 +438,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     init {
         exoPlayer = ExoPlayerFactory.newSimpleInstance(context)
         exoPlayer.playWhenReady = true
-
         onSetup()
     }
 

@@ -7,14 +7,16 @@ import android.util.Log
 import androidx.mediarouter.media.*
 import ai.rever.goonj.audioplayer.SessionManager
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
+import ai.rever.goonj.audioplayer.interfaces.AutoLoadListener
 import ai.rever.goonj.audioplayer.interfaces.PlaybackInterface
 import ai.rever.goonj.audioplayer.models.Samples
-import android.app.Service
+import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import io.reactivex.Observable
 
-class AudioPlayerService : Service(), PlaybackInterface {
+class AudioPlayerService : LifecycleService(), PlaybackInterface{
 
     val TAG = "AUDIO_PLAYER_SERVICE"
     lateinit var context: Context
@@ -63,6 +65,8 @@ class AudioPlayerService : Service(), PlaybackInterface {
             mSessionManager.suspend()
         }
     }
+
+    lateinit var mAutoLoadListener: AutoLoadListener
 
 
     inner class Binder : android.os.Binder() {
@@ -113,7 +117,9 @@ class AudioPlayerService : Service(), PlaybackInterface {
     }
 
     override fun onBind(intent: Intent?): IBinder? {
+        super.onBind(intent)
         return Binder()
+
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -165,12 +171,23 @@ class AudioPlayerService : Service(), PlaybackInterface {
             usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
     }
 
-    override fun setAutoplay(autoplay: Boolean) {
+    override fun setAutoplay(autoplay: Boolean, indexFromLast: Int, autoLoadListener: AutoLoadListener) {
+
+        mAutoLoadListener = autoLoadListener
         mSessionManager.setAutoplay(autoplay)
+
+        mCurrentPlayingTrack.observe(this, Observer { currentTrack ->
+            if(getSession.size - indexFromLast == currentTrack.index){
+                mAutoLoadListener.onLoadTracks()
+            }
+        })
+
     }
 
     override val isPlayingLiveData: LiveData<Boolean> get() = mIsPlaying
 
     override val currentPlayingTrack: LiveData<Samples.Track>
         get() = mCurrentPlayingTrack
+
+    override val getSession: List<Samples.Track> get() = mSessionManager.getSession
 }

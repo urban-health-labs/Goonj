@@ -4,6 +4,8 @@ import ai.rever.goonj.audioplayer.interfaces.GoonjPlayer
 import ai.rever.goonj.audioplayer.analytics.analyticsObservable
 import ai.rever.goonj.audioplayer.analytics.analyticsObserver
 import ai.rever.goonj.audioplayer.analytics.isLoggable
+import ai.rever.goonj.audioplayer.interfaces.AutoLoadListener
+import ai.rever.goonj.audioplayer.models.Samples
 import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
 import android.os.Bundle
 import androidx.lifecycle.Observer
@@ -11,6 +13,7 @@ import kotlinx.android.synthetic.main.activity_audio_player.*
 import android.media.AudioManager
 import android.view.KeyEvent
 import android.content.Context
+import android.util.Log
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.cast.framework.CastButtonFactory
@@ -20,15 +23,18 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     val TAG = "AUDIO_PLAYER_ACTIVITY"
+    val SECOND_LAST = 2
+    var load = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_audio_player)
 
+        setupUI()
         customizeNotification()
         setupPlayer()
-        setupUI()
+
 
         setCastButton()
 
@@ -55,6 +61,8 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             Picasso.get().load(currentItem?.albumArtUrl).into(audioPlayerAlbumArtIV)
             audioPlayerAlbumTitleTv.text = currentItem?.title
             audioPlayerAlbumArtistTv.text = currentItem?.artist
+            Log.d(TAG,"TRACK: $currentItem")
+
         })
 
         audioPlayerForward10s.setOnClickListener {
@@ -66,7 +74,17 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         }
 
         audioPlayerAutoplaySwitch.setOnCheckedChangeListener { _, autoplay ->
-            setAutoplay(this,autoplay)
+            val autoLoad = object : AutoLoadListener{
+                override fun onLoadTracks() {
+                    Log.d(TAG,"============= LOAD NEW TRACKS")
+                    if(load) {
+                        addAudioToPlaylist(applicationContext, SAMPLES[4])
+                        addAudioToPlaylist(applicationContext, SAMPLES[5])
+                        load = false
+                    }
+                }
+            }
+            setAutoplay(this,autoplay,1,autoLoad)
         }
     }
 
@@ -78,12 +96,11 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         addAudioToPlaylist(this, SAMPLES[0])
         addAudioToPlaylist(this, SAMPLES[1])
         addAudioToPlaylist(this, SAMPLES[2])
-        //addAudioToPlaylist(this, SAMPLES[3])
+        addAudioToPlaylist(this, SAMPLES[3])
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
-        // TODO ask for confirmation
         stop(this)
     }
 

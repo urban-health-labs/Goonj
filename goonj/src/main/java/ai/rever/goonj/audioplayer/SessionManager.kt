@@ -50,8 +50,8 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     }
 
     fun add(item: Samples.Track) {
-        Log.d(TAG,item.toString())
 
+        item.index = mPlaylist.size
         mPlaylist.add(item)
 
         // if player supports queuing, enqueue the item now

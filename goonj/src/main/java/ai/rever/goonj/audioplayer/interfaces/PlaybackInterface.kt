@@ -9,11 +9,12 @@ interface PlaybackInterface {
     fun resume()
     fun stop()
     fun seekTo(position: Long)
-    fun addToPlaylist(track : Samples.Track)
+    fun addToPlaylist(track : Samples.Track){}
     fun startNewSession()
     fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long ,
                               rewindIncrementMs: Long )
-    fun setAutoplay(autoplay : Boolean)
+    fun setAutoplay(autoplay : Boolean, indexFromLast: Int, autoLoadListener: AutoLoadListener)
     val isPlayingLiveData: LiveData<Boolean>
     val currentPlayingTrack : LiveData<Samples.Track>
+    val getSession : List<Samples.Track>
 }
