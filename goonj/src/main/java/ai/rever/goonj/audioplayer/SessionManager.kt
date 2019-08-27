@@ -3,6 +3,7 @@ package ai.rever.goonj.audioplayer
 import android.util.Log
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
+import android.content.Intent
 import androidx.mediarouter.media.MediaItemStatus
 import java.util.ArrayList
 
@@ -131,6 +132,10 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
     fun setAutoplay(autoplay : Boolean){
         mPlayer?.setAutoplay(autoplay)
+    }
+
+    fun setPendingActivityForNotification(intent : Intent){
+        mPlayer?.setPendingActivityForNotification(intent)
     }
 
     private fun playItemOnRemotePlayer(){

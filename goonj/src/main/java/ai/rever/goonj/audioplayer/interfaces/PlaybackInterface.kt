@@ -1,6 +1,7 @@
 package ai.rever.goonj.audioplayer.interfaces
 
 import ai.rever.goonj.audioplayer.models.Samples
+import android.content.Intent
 import androidx.lifecycle.LiveData
 
 interface PlaybackInterface {
@@ -14,6 +15,7 @@ interface PlaybackInterface {
     fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long ,
                               rewindIncrementMs: Long )
     fun setAutoplay(autoplay : Boolean, indexFromLast: Int, autoLoadListener: AutoLoadListener)
+    fun setPendingActivityForNotification(intent: Intent)
     val isPlayingLiveData: LiveData<Boolean>
     val currentPlayingTrack : LiveData<Samples.Track>
     val getSession : List<Samples.Track>

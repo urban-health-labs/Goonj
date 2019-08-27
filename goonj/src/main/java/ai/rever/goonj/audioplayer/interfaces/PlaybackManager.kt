@@ -16,12 +16,13 @@ class PlaybackManager (private val mContext : Context){
     private var mServiceBound = false
     private var mServiceConnection: ServiceConnection? = null
 
-    fun register() {
+    fun register(intent: Intent) {
         if(mServiceConnection == null){
             mServiceConnection = object : ServiceConnection{
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                     (service as? AudioPlayerService.Binder)?.service?.let {
                         playbackInterface = it
+                        setPendingActivityForNotification(intent)
                     }
                     mServiceBound = true
 
@@ -85,6 +86,10 @@ class PlaybackManager (private val mContext : Context){
     fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long ,
                               rewindIncrementMs: Long){
         playbackInterface.customiseNotification(useNavigationAction,usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
+    }
+
+    fun setPendingActivityForNotification(intent: Intent){
+        playbackInterface.setPendingActivityForNotification(intent)
     }
 
     val isPlayingLiveData get() = playbackInterface.isPlayingLiveData

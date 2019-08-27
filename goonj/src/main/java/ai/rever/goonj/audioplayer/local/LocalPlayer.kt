@@ -60,6 +60,8 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     var playList : MutableList<Samples.Track> = mutableListOf()
     var isPlayerPrepared : Boolean = false
 
+    var pendingIntent = Intent()
+
     companion object{
         @SuppressLint("StaticFieldLeak")
         var INSTANCE : LocalPlayer? = null
@@ -81,6 +83,10 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         addListeners()
     }
 
+    override fun setPendingActivityForNotification(intent: Intent) {
+        pendingIntent = intent
+    }
+
     private fun setupDataSource(){
         Log.d(TAG,"setupDataSource Local")
         context?.let {context ->
@@ -88,7 +94,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
                 context,
                 Util.getUserAgent(context, context.getString(R.string.app_name))
             )
-
             cacheDataSourceFactory = CacheDataSourceFactory(
                 DownloadUtil.getCache(context), dataSourceFactory, CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR
             )
@@ -100,8 +105,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         override fun onNotificationStarted(notificationId: Int, notification: Notification) {
             notification.contentIntent = PendingIntent.getActivity(
                 service?.baseContext, PLAYBACK_NOTIFICATION_ID,
-                Intent(),
-
+                pendingIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT
             )
             service?.startForeground(notificationId, notification)

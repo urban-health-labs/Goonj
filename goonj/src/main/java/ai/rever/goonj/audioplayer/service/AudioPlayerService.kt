@@ -181,9 +181,11 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
                 mAutoLoadListener.onLoadTracks()
             }
         })
-
     }
 
+    override fun setPendingActivityForNotification(intent: Intent) {
+        mSessionManager?.setPendingActivityForNotification(intent)
+    }
     override val isPlayingLiveData: LiveData<Boolean> get() = mIsPlaying
 
     override val currentPlayingTrack: LiveData<Samples.Track>

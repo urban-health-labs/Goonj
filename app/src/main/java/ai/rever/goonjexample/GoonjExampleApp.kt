@@ -8,10 +8,9 @@ import android.content.Intent
 class GoonjExampleApp: Application() {
     override fun onCreate() {
         super.onCreate()
-//        val serviceIntent = Intent(this, AudioPlayerService::class.java)
-//        startService(serviceIntent)
-
-        PlaybackManager.getInstance(this).register()
+        val pendingIntent = Intent(applicationContext,AudioPlayerActivity::class.java)
+        PlaybackManager.getInstance(this).register(pendingIntent)
+        PlaybackManager.getInstance(this)
     }
 
     override fun onTerminate() {

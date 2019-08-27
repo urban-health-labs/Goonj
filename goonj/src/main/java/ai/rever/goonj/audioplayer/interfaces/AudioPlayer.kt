@@ -6,6 +6,7 @@ import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.audioplayer.cast.RemotePlayer
 import ai.rever.goonj.audioplayer.local.LocalPlayer
 import ai.rever.goonj.audioplayer.models.Samples
+import android.content.Intent
 import java.lang.ref.WeakReference
 
 abstract class AudioPlayer {
@@ -46,6 +47,8 @@ abstract class AudioPlayer {
                                    rewindIncrementMs: Long) {}
 
     abstract fun setAutoplay(autoplay: Boolean)
+
+    open fun setPendingActivityForNotification(intent: Intent){}
 
     fun setCallback(callback: Callback) {
         mCallback = callback
