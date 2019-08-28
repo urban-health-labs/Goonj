@@ -153,8 +153,8 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
         mSessionManager.seek(position)
     }
 
-    override fun addToPlaylist(track: Samples.Track) {
-        mSessionManager.add(track)
+    override fun addToPlaylist(track: Samples.Track, index: Int?) {
+        mSessionManager.add(track,index)
     }
 
     override fun startNewSession() {
@@ -184,7 +184,15 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
     }
 
     override fun setPendingActivityForNotification(intent: Intent) {
-        mSessionManager?.setPendingActivityForNotification(intent)
+        mSessionManager.setPendingActivityForNotification(intent)
+    }
+
+    override fun removeTrack(index: Int) {
+        mSessionManager.removeTrack(index)
+    }
+
+    override fun moveTrack(currentIndex: Int, finalIndex: Int) {
+        mSessionManager.moveTrack(currentIndex, finalIndex)
     }
     override val isPlayingLiveData: LiveData<Boolean> get() = mIsPlaying
 

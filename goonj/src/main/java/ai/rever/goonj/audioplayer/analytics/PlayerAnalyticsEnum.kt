@@ -1,23 +1,9 @@
 package ai.rever.goonj.audioplayer.analytics
 
-import android.util.Log
 import io.reactivex.Observable
-import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
 
 var isLoggable = false
-
-private fun logAnalyticsEvent(message : String?, error : Boolean ?= false){
-    val TAG = "ANALYTICS"
-    if(error == true){
-        Log.e(TAG,"=======error: $message")
-    } else if(isLoggable){
-        message?.let {
-            Log.d(TAG,message)
-        }
-    }
-}
 
 enum class PlayerAnalyticsEnum{
     ON_PLAYER_STATE_CHANGED,
@@ -88,24 +74,6 @@ private val analyticsSubjectBehaviour : BehaviorSubject<AnalyticsModel> = Behavi
  * analyticsObservable doesn't allows pushing values
  */
 val analyticsObservable get() = analyticsSubjectBehaviour as Observable<AnalyticsModel>
-
-val analyticsObserver = object : Observer<AnalyticsModel> {
-    override fun onComplete() {
-        logAnalyticsEvent("onComplete")
-    }
-
-    override fun onSubscribe(d: Disposable) {
-        logAnalyticsEvent("onSubscribe")
-    }
-
-    override fun onNext(t: AnalyticsModel) {
-        logAnalyticsEvent(t.toString())
-    }
-
-    override fun onError(e: Throwable) {
-        logAnalyticsEvent(e.message, true)
-    }
-}
 
 fun logEventBehaviour(isRemote: Boolean, behaviour: PlayerAnalyticsEnum, data: Map<String,Any?>){
     analyticsSubjectBehaviour.onNext(AnalyticsModel(isRemote,behaviour, data))

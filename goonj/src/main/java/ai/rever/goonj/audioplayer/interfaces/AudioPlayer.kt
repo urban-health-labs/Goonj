@@ -31,9 +31,9 @@ abstract class AudioPlayer {
 
     // advanced queuing (enqueue & remove) are only supported
     // if isQueuingSupported() returns true
-    abstract fun enqueue(item: Samples.Track)
+    abstract fun enqueue(item: Samples.Track, index: Int = -1)
 
-    abstract fun remove(iid: String): Samples.Track?
+    abstract fun remove(index : Int)
 
     abstract fun setPlaylist(playlist: List<Samples.Track>)
 
@@ -49,6 +49,8 @@ abstract class AudioPlayer {
     abstract fun setAutoplay(autoplay: Boolean)
 
     open fun setPendingActivityForNotification(intent: Intent){}
+
+    open fun moveTrack(currentIndex: Int, finalIndex: Int){}
 
     fun setCallback(callback: Callback) {
         mCallback = callback

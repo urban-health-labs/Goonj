@@ -224,7 +224,6 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     override fun resume() {
-        // Todo: find following code meaning
         if (mClient?.hasSession() != true) {
             // ignore if no getSession
             return
@@ -270,7 +269,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         })
     }
 
-    override fun enqueue(item: Samples.Track) {
+    override fun enqueue(item: Samples.Track, index : Int) {
         throwIfQueuingUnsupported()
 
         if (mClient?.hasSession() != true && !mEnqueuePending) {
@@ -287,30 +286,9 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         }
     }
 
-    override fun remove(iid: String): Samples.Track? {
+    override fun remove(index: Int){
         throwIfNoSession()
         throwIfQueuingUnsupported()
-
-        if (DEBUG) {
-            Log.d(TAG, "remove: itemId=$iid")
-        }
-        mClient?.remove(iid, null, object : RemotePlaybackClient.ItemActionCallback() {
-            override fun onResult(
-                data: Bundle?,
-                sessionId: String?,
-                sessionStatus: MediaSessionStatus?,
-                itemId: String?,
-                itemStatus: MediaItemStatus?
-            ) {
-                logStatus("remove: succeeded", sessionId, sessionStatus, itemId, itemStatus)
-            }
-
-            override fun onError(error: String?, code: Int, data: Bundle?) {
-                logError("remove: failed", error, code)
-            }
-        })
-
-        return null
     }
 
     override fun setPlaylist(playlist: List<Samples.Track>) {

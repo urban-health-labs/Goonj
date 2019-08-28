@@ -33,8 +33,8 @@ interface GoonjPlayer {
         PlaybackManager.getInstance(context).setAutoplay(autoplay, indexFromLast, autoLoadListener)
     }
 
-    fun addAudioToPlaylist(context: Context, audioTrack: Samples.Track){
-        PlaybackManager.getInstance(context).addAudioToPlaylist(audioTrack)
+    fun addAudioToPlaylist(context: Context, audioTrack: Samples.Track, index: Int ?= -1){
+        PlaybackManager.getInstance(context).addAudioToPlaylist(audioTrack,index)
     }
 
     fun customizeNotification(context: Context, useNavigationAction: Boolean = true,
@@ -47,6 +47,14 @@ interface GoonjPlayer {
 
     fun session(context: Context) : List<Samples.Track>{
         return PlaybackManager.getInstance(context).currentSession
+    }
+
+    fun removeTrack(context: Context,index : Int){
+        PlaybackManager.getInstance(context).removeTrack(index)
+    }
+
+    fun moveTrack(context: Context, currentIndex : Int, finalIndex : Int){
+        PlaybackManager.getInstance(context).moveTrack(currentIndex, finalIndex)
     }
 
     fun isPlayingLiveData(context: Context) = PlaybackManager.getInstance(context).isPlayingLiveData

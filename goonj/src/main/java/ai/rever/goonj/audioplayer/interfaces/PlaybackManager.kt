@@ -75,8 +75,8 @@ class PlaybackManager (private val mContext : Context){
         playbackInterface.startNewSession()
     }
 
-    fun addAudioToPlaylist(track : Samples.Track){
-        playbackInterface.addToPlaylist(track)
+    fun addAudioToPlaylist(track : Samples.Track, index : Int ?= -1){
+        playbackInterface.addToPlaylist(track,index)
     }
 
     fun setAutoplay(autoplay : Boolean, indexFromLast: Int, autoLoadListener: AutoLoadListener){
@@ -90,6 +90,14 @@ class PlaybackManager (private val mContext : Context){
 
     fun setPendingActivityForNotification(intent: Intent){
         playbackInterface.setPendingActivityForNotification(intent)
+    }
+
+    fun removeTrack(index : Int){
+        playbackInterface.removeTrack(index)
+    }
+
+    fun moveTrack(currentIndex : Int, finalIndex : Int){
+        playbackInterface.moveTrack(currentIndex, finalIndex)
     }
 
     val isPlayingLiveData get() = playbackInterface.isPlayingLiveData

@@ -1,9 +1,7 @@
 package ai.rever.goonjexample
 
+import ai.rever.goonj.audioplayer.analytics.*
 import ai.rever.goonj.audioplayer.interfaces.GoonjPlayer
-import ai.rever.goonj.audioplayer.analytics.analyticsObservable
-import ai.rever.goonj.audioplayer.analytics.analyticsObserver
-import ai.rever.goonj.audioplayer.analytics.isLoggable
 import ai.rever.goonj.audioplayer.interfaces.AutoLoadListener
 import ai.rever.goonj.audioplayer.models.Samples
 import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
@@ -19,12 +17,31 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     val TAG = "AUDIO_PLAYER_ACTIVITY"
     val SECOND_LAST = 2
     var load = true
+
+    val analyticsObserver = object : io.reactivex.Observer<AnalyticsModel> {
+        override fun onComplete() {
+            logAnalyticsEvent("onComplete")
+        }
+
+        override fun onSubscribe(d: Disposable) {
+            logAnalyticsEvent("onSubscribe")
+        }
+
+        override fun onNext(t: AnalyticsModel) {
+            logAnalyticsEvent(t.toString())
+        }
+
+        override fun onError(e: Throwable) {
+            logAnalyticsEvent(e.message, true)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +96,10 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
                     Log.d(TAG,"============= LOAD NEW TRACKS")
                     if(load) {
                         addAudioToPlaylist(applicationContext, SAMPLES[4])
-                        addAudioToPlaylist(applicationContext, SAMPLES[5])
+                        // add at particular index
+                        addAudioToPlaylist(applicationContext, SAMPLES[5], 2)
+                        removeTrack(applicationContext,0)
+                        moveTrack(applicationContext,3,4)
                         load = false
                     }
                 }
@@ -140,5 +160,16 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         super.onDestroy()
     }
 
+
+    private fun logAnalyticsEvent(message : String?, error : Boolean ?= false){
+        val TAG = "ANALYTICS"
+        if(error == true){
+            Log.e(TAG,"=======error: $message")
+        } else if(isLoggable){
+            message?.let {
+                Log.d(TAG,message)
+            }
+        }
+    }
 }
 

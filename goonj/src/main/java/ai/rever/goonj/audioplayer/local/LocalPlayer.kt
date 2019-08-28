@@ -113,7 +113,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
         override fun onNotificationCancelled(notificationId: Int) {
             pause()
-            //service.stopSelf()
         }
     }
 
@@ -183,18 +182,25 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         mediaSessionConnector?.setPlayer(exoPlayer)
     }
 
-    private fun addAudioPlaylist(vararg audioList: Samples.Track) {
+    private fun addAudioPlaylist(audio: Samples.Track, index: Int) {
         Log.d(TAG,"setupDataSource Local")
-        for(audio in audioList){
-            val mediaSource =  ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-                .createMediaSource(audio.url.toUri())
+
+        val mediaSource =  ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+            .createMediaSource(audio.url.toUri())
+
+        if(index != -1){
+            concatenatingMediaSource.addMediaSource(index, mediaSource)
+            playList.add(index, audio)
+        } else {
             concatenatingMediaSource.addMediaSource(mediaSource)
             playList.add(audio)
         }
+
         if(!isPlayerPrepared) {
             exoPlayer.prepare(concatenatingMediaSource)
             isPlayerPrepared = true
         }
+
     }
 
     private val analyticsListener = object : AnalyticsListener {
@@ -371,20 +377,30 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         exoPlayer.stop()
     }
 
-    override fun enqueue(item: Samples.Track) {
+    override fun enqueue(item: Samples.Track, index : Int) {
         if (DEBUG) {
             Log.d(TAG, "enqueue")
         }
-        addAudioPlaylist(item)
+        addAudioPlaylist(item, index)
     }
 
-    override fun remove(iid: String): Samples.Track? {
-        throw UnsupportedOperationException("LocalPlayer doesn't support remove!")    }
+    override fun remove(index: Int){
+        concatenatingMediaSource.removeMediaSource(index)
+        playList.removeAt(index)
+    }
+
+    override fun moveTrack(currentIndex: Int, finalIndex: Int) {
+        val currentTrack = playList[currentIndex]
+        playList.removeAt(currentIndex)
+        playList.add(finalIndex-1,currentTrack)
+
+        concatenatingMediaSource.moveMediaSource(currentIndex,finalIndex)
+    }
 
     override fun setPlaylist(playlist: List<Samples.Track>) {
         startNewSession()
         for(item in playlist){
-            addAudioPlaylist(item)
+            addAudioPlaylist(item, -1)
         }
     }
 

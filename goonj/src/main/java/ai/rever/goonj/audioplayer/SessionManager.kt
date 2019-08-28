@@ -50,17 +50,30 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         return mSessionValid
     }
 
-    fun add(item: Samples.Track) {
+    fun add(item: Samples.Track, index: Int ?= -1) {
 
-        item.index = mPlaylist.size
-        mPlaylist.add(item)
+        index?.let {
+            if(it >= 0 && it < mPlaylist.size){
+                item.index = index
+                mPlaylist.add(it, item)
 
-        // if player supports queuing, enqueue the item now
-        if (mPlayer?.isQueuingSupported() == true) {
-            mPlayer?.enqueue(item)
-        } else {
-            playItemOnRemotePlayer()
-            mPaused = false
+                if (mPlayer?.isQueuingSupported() == true) {
+                    mPlayer?.enqueue(item, it)
+                } else {
+                    playItemOnRemotePlayer()
+                    mPaused = false
+                }
+            } else {
+                item.index = mPlaylist.size
+                mPlaylist.add(item)
+
+                if (mPlayer?.isQueuingSupported() == true) {
+                    mPlayer?.enqueue(item)
+                } else {
+                    playItemOnRemotePlayer()
+                    mPaused = false
+                }
+            }
         }
     }
 
@@ -136,6 +149,19 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
     fun setPendingActivityForNotification(intent : Intent){
         mPlayer?.setPendingActivityForNotification(intent)
+    }
+
+    fun removeTrack(index : Int){
+        mPlaylist.removeAt(index)
+        mPlayer?.remove(index)
+    }
+
+    fun moveTrack(currentIndex: Int, finalIndex: Int){
+        val currentTrack = mPlaylist[currentIndex]
+        mPlaylist.removeAt(currentIndex)
+        mPlaylist.add(finalIndex-1,currentTrack)
+
+        mPlayer?.moveTrack(currentIndex, finalIndex)
     }
 
     private fun playItemOnRemotePlayer(){
