@@ -164,6 +164,14 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         mPlayer?.moveTrack(currentIndex, finalIndex)
     }
 
+    fun skipToNext(){
+        mPlayer?.skipToNext()
+    }
+
+    fun skipToPrevious(){
+        mPlayer?.skipToPrevious()
+    }
+
     private fun playItemOnRemotePlayer(){
         currentItem = playlist.first {
             Log.d(TAG,"STATUS: ${it.state}")

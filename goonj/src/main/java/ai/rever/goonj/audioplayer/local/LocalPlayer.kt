@@ -397,6 +397,14 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         concatenatingMediaSource.moveMediaSource(currentIndex,finalIndex)
     }
 
+    override fun skipToNext() {
+        exoPlayer.next()
+    }
+
+    override fun skipToPrevious() {
+        exoPlayer.previous()
+    }
+
     override fun setPlaylist(playlist: List<Samples.Track>) {
         startNewSession()
         for(item in playlist){

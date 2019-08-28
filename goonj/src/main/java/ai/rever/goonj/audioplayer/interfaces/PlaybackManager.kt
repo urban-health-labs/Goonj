@@ -100,6 +100,14 @@ class PlaybackManager (private val mContext : Context){
         playbackInterface.moveTrack(currentIndex, finalIndex)
     }
 
+    fun skipToNext(){
+        playbackInterface.skipToNext()
+    }
+
+    fun skipToPrevious(){
+        playbackInterface.skipToPrevious()
+    }
+
     val isPlayingLiveData get() = playbackInterface.isPlayingLiveData
 
     val currentPlayingTrack get() = playbackInterface.currentPlayingTrack

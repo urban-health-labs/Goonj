@@ -52,6 +52,10 @@ abstract class AudioPlayer {
 
     open fun moveTrack(currentIndex: Int, finalIndex: Int){}
 
+    open fun skipToNext(){}
+
+    open fun skipToPrevious(){}
+
     fun setCallback(callback: Callback) {
         mCallback = callback
     }

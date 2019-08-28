@@ -194,6 +194,15 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
     override fun moveTrack(currentIndex: Int, finalIndex: Int) {
         mSessionManager.moveTrack(currentIndex, finalIndex)
     }
+
+    override fun skipToNext() {
+        mSessionManager.skipToNext()
+    }
+
+    override fun skipToPrevious() {
+        mSessionManager.skipToPrevious()
+    }
+
     override val isPlayingLiveData: LiveData<Boolean> get() = mIsPlaying
 
     override val currentPlayingTrack: LiveData<Samples.Track>

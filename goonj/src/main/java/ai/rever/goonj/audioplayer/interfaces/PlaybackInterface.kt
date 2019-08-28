@@ -18,6 +18,8 @@ interface PlaybackInterface {
     fun setPendingActivityForNotification(intent: Intent)
     fun removeTrack(index : Int)
     fun moveTrack(currentIndex: Int, finalIndex: Int)
+    fun skipToNext()
+    fun skipToPrevious()
     val isPlayingLiveData: LiveData<Boolean>
     val currentPlayingTrack : LiveData<Samples.Track>
     val getSession : List<Samples.Track>

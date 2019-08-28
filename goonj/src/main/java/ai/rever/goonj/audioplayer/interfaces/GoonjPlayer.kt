@@ -23,8 +23,6 @@ interface GoonjPlayer {
         PlaybackManager.getInstance(context).stop()
     }
 
-    fun next(context: Context){}
-
     fun seek(context: Context, positionMs: Long?){
         PlaybackManager.getInstance(context).seekTo(positionMs!!)
     }
@@ -55,6 +53,14 @@ interface GoonjPlayer {
 
     fun moveTrack(context: Context, currentIndex : Int, finalIndex : Int){
         PlaybackManager.getInstance(context).moveTrack(currentIndex, finalIndex)
+    }
+
+    fun skipToNext(context: Context){
+        PlaybackManager.getInstance(context).skipToNext()
+    }
+
+    fun skipToPrevious(context: Context){
+        PlaybackManager.getInstance(context).skipToPrevious()
     }
 
     fun isPlayingLiveData(context: Context) = PlaybackManager.getInstance(context).isPlayingLiveData

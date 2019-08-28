@@ -106,6 +106,16 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             }
             setAutoplay(this,autoplay,1,autoLoad)
         }
+
+        audioPlayerSkipNext.setOnClickListener {
+            skipToNext(this)
+        }
+
+        audioPlayerSkipPrev.setOnClickListener {
+            skipToPrevious(this)
+        }
+
+
     }
 
     private fun customizeNotification(){
