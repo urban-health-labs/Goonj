@@ -79,6 +79,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             audioPlayerAlbumTitleTv.text = currentItem?.title
             audioPlayerAlbumArtistTv.text = currentItem?.artist
             Log.d(TAG,"TRACK: $currentItem")
+            Log.d(TAG,"Position: ${currentItem.position}")
 
         })
 

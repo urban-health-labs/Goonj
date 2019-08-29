@@ -96,22 +96,18 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
                 MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
         }
 
-        //                TODO: cHECK REQUIREMENT
-        mSessionManager.setCallback(object : SessionManager.Callback {
-            override fun onStatusChanged() {
-                //updateUi()
-                Log.d(TAG,"SessionManager: onStatusChanged")
-            }
-
-            override fun onItemChanged(item: Samples.Track) {
-                Log.d(TAG,"SessionManager: onItemChanged")
+        isPlayingLiveData.observe(this, Observer {
+            if(it){
+                addProgressObserver()
+            } else {
+                removeProgressObserver()
             }
         })
 
     }
 
     override fun onDestroy() {
-        removeObserver()
+        removeProgressObserver()
         mediaRouter?.removeCallback(mediaRouterCallback)
         super.onDestroy()
     }

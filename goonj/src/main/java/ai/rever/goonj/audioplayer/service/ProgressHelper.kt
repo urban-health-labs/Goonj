@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 
 fun AudioPlayerService.setupProgressObserver() {
     playbackObservable = Observable.interval(500, TimeUnit.MILLISECONDS)
-        .observeOn(AndroidSchedulers.mainThread())
+    .observeOn(AndroidSchedulers.mainThread())
         .takeWhile { mIsPlaying.value?: false && mSessionManager.getTrackPosition()!= null }
         .map { mSessionManager.getTrackPosition() }
     addProgressObserver()
@@ -19,8 +19,11 @@ fun AudioPlayerService.addProgressObserver() {
 
     playbackObserver = object : io.reactivex.Observer<Long> {
         override fun onNext(position: Long) {
-            // TODO use the position for analytics
-            Log.d(TAG, "Position: $position")
+            val currentPlayingTrack = currentPlayingTrack.value
+            currentPlayingTrack?.let {
+                it.position = position
+                mCurrentPlayingTrack.value = it
+            }
         }
 
         override fun onSubscribe(d: Disposable) {
@@ -40,6 +43,6 @@ fun AudioPlayerService.addProgressObserver() {
         .subscribe(playbackObserver)
 }
 
-fun AudioPlayerService.removeObserver() {
+fun AudioPlayerService.removeProgressObserver() {
     playbackObservable.unsubscribeOn(AndroidSchedulers.mainThread())
 }
