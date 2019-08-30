@@ -82,7 +82,7 @@ object Samples {
         var remoteItemId: String? = null
 
         override fun toString(): String {
-            return "$title Description: $artist URL: $url INDEX: $index"
+            return "$title Description: $artist DURATION: $duration INDEX: $index"
         }
     }
 

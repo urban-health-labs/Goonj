@@ -1,6 +1,5 @@
 package ai.rever.goonj.audioplayer.service
 
-import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -15,7 +14,6 @@ fun AudioPlayerService.setupProgressObserver() {
 }
 
 fun AudioPlayerService.addProgressObserver() {
-    val TAG = "PROGRESS"
 
     playbackObserver = object : io.reactivex.Observer<Long> {
         override fun onNext(position: Long) {
@@ -26,17 +24,11 @@ fun AudioPlayerService.addProgressObserver() {
             }
         }
 
-        override fun onSubscribe(d: Disposable) {
-            Log.e(TAG, "onSubscribe: ")
-        }
+        override fun onSubscribe(d: Disposable) {}
 
-        override fun onError(e: Throwable) {
-            Log.e(TAG, "onError: ")
-        }
+        override fun onError(e: Throwable) {}
 
-        override fun onComplete() {
-            Log.e(TAG, "onComplete: All Done!")
-        }
+        override fun onComplete() {}
     }
 
     playbackObservable.subscribeOn(AndroidSchedulers.mainThread())

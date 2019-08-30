@@ -1,6 +1,5 @@
 package ai.rever.goonj.audioplayer.local
 
-import ai.rever.goonj.BuildConfig
 import ai.rever.goonj.R
 import ai.rever.goonj.audioplayer.analytics.*
 import android.app.Notification
@@ -11,7 +10,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
-import android.util.Log
 import androidx.annotation.Nullable
 import androidx.core.net.toUri
 import androidx.mediarouter.media.MediaRouter
@@ -41,13 +39,11 @@ import java.lang.ref.WeakReference
 
 class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlayer(),  AudioManager.OnAudioFocusChangeListener {
 
-    val TAG = "LOCAL_PLAYER"
-    private val DEBUG = BuildConfig.DEBUG
     private val service: Service? get() = weakReferenceService.get()
     private val mIsPlaying: MutableLiveData<Boolean>? get() = (service as? AudioPlayerService)?.mIsPlaying
     private val mCurrentPlayingTrack : MutableLiveData<Samples.Track>? get() = (service as? AudioPlayerService)?.mCurrentPlayingTrack
     private var mAutoplay : Boolean = true
-    private var exoPlayer : SimpleExoPlayer
+    private var exoPlayer : SimpleExoPlayer? = null
     private lateinit var playerNotificationManager: PlayerNotificationManager
 
     var mediaSession: MediaSessionCompat? = null
@@ -76,7 +72,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
 
     private fun onSetup(){
-        Log.d(TAG,"onSetup Local")
         setupDataSource()
         initNotification()
         setupMediaSession()
@@ -88,7 +83,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
 
     private fun setupDataSource(){
-        Log.d(TAG,"setupDataSource Local")
         context?.let {context ->
             val dataSourceFactory = DefaultDataSourceFactory(
                 context,
@@ -102,17 +96,17 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
 
     private val notificationListener = object : PlayerNotificationManager.NotificationListener {
-        override fun onNotificationStarted(notificationId: Int, notification: Notification) {
-            notification.contentIntent = PendingIntent.getActivity(
+
+        override fun onNotificationPosted(
+            notificationId: Int,
+            notification: Notification?,
+            ongoing: Boolean
+        ) {
+            notification?.contentIntent = PendingIntent.getActivity(
                 service?.baseContext, PLAYBACK_NOTIFICATION_ID,
                 pendingIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT
             )
-            service?.startForeground(notificationId, notification)
-        }
-
-        override fun onNotificationCancelled(notificationId: Int) {
-            pause()
         }
     }
 
@@ -124,7 +118,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
         @Nullable
         override fun createCurrentContentIntent(player: Player): PendingIntent? {
-            return PendingIntent.getActivity(service,0, Intent(), PendingIntent.FLAG_UPDATE_CURRENT)
+            return PendingIntent.getActivity(service,0, pendingIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
         @Nullable
@@ -139,14 +133,11 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
 
     private fun initNotification(){
-        Log.d(TAG,"setupDataSource Local")
-
         playerNotificationManager = PlayerNotificationManager.createWithNotificationChannel(
             context, PLAYBACK_CHANNEL_ID,R.string.channel_name, PLAYBACK_NOTIFICATION_ID,
             notificationAdapter, notificationListener)
 
         playerNotificationManager.setPlayer(exoPlayer)
-
     }
 
     /**
@@ -166,7 +157,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
 
     private fun setupMediaSession(){
-        Log.d(TAG,"setupDataSource Local")
         mediaSession = MediaSessionCompat(context, MEDIA_SESSION_TAG)
         mediaSession?.isActive = true
 
@@ -175,7 +165,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         mediaSessionConnector = MediaSessionConnector(mediaSession)
         mediaSessionConnector?.setQueueNavigator(object : TimelineQueueNavigator(mediaSession) {
             override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
-                Log.d(TAG,"Window Index: $windowIndex")
                 return Samples.getMediaDescription(context, playList[windowIndex])
             }
         })
@@ -183,8 +172,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
 
     private fun addAudioPlaylist(audio: Samples.Track, index: Int) {
-        Log.d(TAG,"setupDataSource Local")
-
         val mediaSource =  ProgressiveMediaSource.Factory(cacheDataSourceFactory)
             .createMediaSource(audio.url.toUri())
 
@@ -197,7 +184,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         }
 
         if(!isPlayerPrepared) {
-            exoPlayer.prepare(concatenatingMediaSource)
+            exoPlayer?.prepare(concatenatingMediaSource)
             isPlayerPrepared = true
         }
 
@@ -249,6 +236,9 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             val map = mutableMapOf(PLAY_WHEN_READY to playWhenReady, PLAYBACK_STATE to playbackState)
             logEventBehaviour(false, PlayerAnalyticsEnum.ON_PLAYER_STATE_CHANGED, map)
 
+            exoPlayer?.let {
+                mCurrentPlayingTrack?.value?.duration = it.contentDuration
+            }
             if (playWhenReady && playbackState == Player.STATE_READY) {
                 requestAudioFocus()
                 mIsPlaying?.postValue(true)
@@ -257,6 +247,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             } else {
                 removeAudioFocus()
                 mIsPlaying?.postValue(false)
+                service?.stopForeground(false)
             }
         }
 
@@ -301,13 +292,13 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
 
     private fun addListeners(){
-        exoPlayer.addAnalyticsListener(analyticsListener)
-        exoPlayer.addListener(eventListener)
+        exoPlayer?.addAnalyticsListener(analyticsListener)
+        exoPlayer?.addListener(eventListener)
     }
 
     private fun removeListeners(){
-        exoPlayer.removeAnalyticsListener(analyticsListener)
-        exoPlayer.removeListener(eventListener)
+        exoPlayer?.removeAnalyticsListener(analyticsListener)
+        exoPlayer?.removeListener(eventListener)
     }
 
     override fun startNewSession(){
@@ -324,63 +315,43 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         return true
     }
 
-    override fun connect(route: MediaRouter.RouteInfo?) {
-        if (DEBUG) {
-            Log.d(TAG, "connecting to: $route")
-        }
-    }
+    override fun connect(route: MediaRouter.RouteInfo?) {}
 
     override fun release() {
-        if (DEBUG) {
-            Log.d(TAG, "releasing")
-        }
         mediaSession?.release()
         mediaSessionConnector?.setPlayer(null)
-        exoPlayer.playWhenReady = false
+        exoPlayer?.playWhenReady = false
         mIsPlaying?.postValue(false)
         removeListeners()
-        exoPlayer.release()
         playerNotificationManager.setPlayer(null)
+        exoPlayer?.release()
         isPlayerPrepared = false
     }
 
     override fun play(item: Samples.Track) {
-        if (DEBUG) {
-            Log.d(TAG, "play: item=$item")
-        }
-        exoPlayer.playWhenReady = true
+        exoPlayer?.playWhenReady = true
     }
 
     override fun seekTo(positionMs: Long) {
-        exoPlayer.seekTo(exoPlayer.currentPosition + positionMs)
+        exoPlayer?.let {
+            it.seekTo(it.currentPosition + positionMs)
+        }
     }
 
     override fun pause() {
-        if (DEBUG) {
-            Log.d(TAG, "pause")
-        }
-        exoPlayer.playWhenReady = false
+        exoPlayer?.playWhenReady = false
     }
 
     override fun resume() {
-        if (DEBUG) {
-            Log.d(TAG, "resume")
-            Log.d(TAG,"Playlist Size: ${playList.size}")
-        }
-        exoPlayer.playWhenReady = true
+        exoPlayer?.playWhenReady = true
     }
 
     override fun stop() {
-        if (DEBUG) {
-            Log.d(TAG, "stop")
-        }
-        exoPlayer.stop()
+        exoPlayer?.stop()
+        release()
     }
 
     override fun enqueue(item: Samples.Track, index : Int) {
-        if (DEBUG) {
-            Log.d(TAG, "enqueue")
-        }
         addAudioPlaylist(item, index)
     }
 
@@ -398,11 +369,11 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
 
     override fun skipToNext() {
-        exoPlayer.next()
+        exoPlayer?.next()
     }
 
     override fun skipToPrevious() {
-        exoPlayer.previous()
+        exoPlayer?.previous()
     }
 
     override fun setPlaylist(playlist: List<Samples.Track>) {
@@ -413,11 +384,11 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
 
     override fun setVolume(volume: Float) {
-        exoPlayer.volume = volume
+        exoPlayer?.volume = volume
     }
 
     override fun getTrackPosition(): Long? {
-        return exoPlayer.currentPosition
+        return exoPlayer?.currentPosition
     }
 
     override fun setAutoplay(autoplay: Boolean) {
@@ -439,7 +410,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
                         mPlaybackDelayed = false
                         mResumeOnFocusGain = false
                     }
-                    exoPlayer.volume = 1f
+                    exoPlayer?.volume = 1f
                 }
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
@@ -451,21 +422,24 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
                 removeAudioFocus()
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-                exoPlayer.volume = 0.1f
+                exoPlayer?.volume = 0.1f
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
                 synchronized(mFocusLock){
-                    mResumeOnFocusGain = exoPlayer.playWhenReady
+                    exoPlayer?.let {
+                        mResumeOnFocusGain = it.playWhenReady
+                    }
+
                     mPlaybackDelayed = false
                 }
-                exoPlayer.volume = 0.1f
+                exoPlayer?.volume = 0.1f
             }
         }
     }
 
     init {
         exoPlayer = ExoPlayerFactory.newSimpleInstance(context)
-        exoPlayer.playWhenReady = true
+        exoPlayer?.playWhenReady = true
         onSetup()
     }
 

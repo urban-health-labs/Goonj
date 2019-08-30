@@ -3,7 +3,6 @@ package ai.rever.goonj.audioplayer.service
 import android.content.Intent
 import android.os.IBinder
 import android.content.Context
-import android.util.Log
 import androidx.mediarouter.media.*
 import ai.rever.goonj.audioplayer.SessionManager
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
@@ -18,7 +17,6 @@ import io.reactivex.Observable
 
 class AudioPlayerService : LifecycleService(), PlaybackInterface{
 
-    val TAG = "AUDIO_PLAYER_SERVICE"
     lateinit var context: Context
 
     lateinit var playbackObservable: Observable<Long>
@@ -35,8 +33,6 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
 
     private val mediaRouterCallback = object : MediaRouter.Callback(){
         override fun onRouteSelected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
-            Log.d(TAG, "onRouteSelected: route=$route")
-            Log.d(TAG,"Playlist Size: ${mSessionManager.playlist.size}")
 
             mPlayer = AudioPlayer.create(this@AudioPlayerService, route)
             mPlayer?.let {
@@ -44,19 +40,15 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
             }
             mSessionManager.unsuspend()
 
-            Log.d(TAG,mPlayer.toString())
             if(route?.isDefault == true || route?.isDefault == true) {
                 mSessionManager.setRemotePlayerSelected(false)
                 mSessionManager.resume()
             } else {
-                Log.d(TAG,"Playlist Size: ${mSessionManager.playlist.size}")
                 mSessionManager.setRemotePlayerSelected(true)
             }
         }
 
         override fun onRouteUnselected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
-            Log.d(TAG, "onRouteUnselected: route=$route")
-
             if(route?.isDefault == true || route?.isBluetooth == true ) {
                 mSessionManager.setRemotePlayerSelected(true)
             } else {
@@ -76,7 +68,6 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG,"oncreated")
         context = this
 
         setupProgressObserver()
@@ -109,6 +100,7 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
     override fun onDestroy() {
         removeProgressObserver()
         mediaRouter?.removeCallback(mediaRouterCallback)
+        mSessionManager.release()
         super.onDestroy()
     }
 
@@ -141,7 +133,7 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
     }
 
     override fun stop() {
-        mSessionManager.pause()
+        mSessionManager.stop()
         stopForeground(true)
     }
 

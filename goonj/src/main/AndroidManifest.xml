@@ -4,7 +4,10 @@
 
 
     <application>
-        <service android:name=".audioplayer.service.AudioPlayerService"/>
+        <service android:name=".audioplayer.service.AudioPlayerService"
+                android:stopWithTask="true">
+
+        </service>
         <service android:name=".audioplayer.download.AudioDownloadService"/>
         <meta-data
                 android:name=
