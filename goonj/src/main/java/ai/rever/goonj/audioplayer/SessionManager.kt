@@ -97,17 +97,6 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         mPlayer?.seekTo(positionMs)
     }
 
-    fun addItemToPlaylist(track: Samples.Track){
-        mPlaylist.add(track)
-    }
-
-    fun setPlaylistToPlayer(){
-        mPlayer?.setPlaylist(playlist)
-    }
-
-    fun setVolume(volume : Float){
-        mPlayer?.setVolume(volume)
-    }
     fun startNewSession(){
         mPlaylist.clear()
         mPlayer?.startNewSession()
@@ -194,8 +183,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
     override fun onCompletion() {
         currentItem?.state = MediaItemStatus.PLAYBACK_STATE_FINISHED
-        playItemOnRemotePlayer ()
-        //mPlayer?.play(SAMPLES[3])
+        playItemOnRemotePlayer()
     }
 
     override fun onPlaylistChanged() {

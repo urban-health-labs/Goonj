@@ -9,6 +9,7 @@ import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.interfaces.AutoLoadListener
 import ai.rever.goonj.audioplayer.interfaces.PlaybackInterface
 import ai.rever.goonj.audioplayer.models.Samples
+import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -101,13 +102,13 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
         removeProgressObserver()
         mediaRouter?.removeCallback(mediaRouterCallback)
         mSessionManager.release()
+        Log.e("=======>", "service on destroy")
         super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         super.onBind(intent)
         return Binder()
-
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

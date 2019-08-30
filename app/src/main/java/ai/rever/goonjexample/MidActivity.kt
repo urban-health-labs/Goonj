@@ -14,7 +14,6 @@ class MidActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mid)
 
-
         button2.setOnClickListener {
             startActivity(Intent(this,AudioPlayerActivity::class.java))
         }
@@ -24,10 +23,5 @@ class MidActivity : AppCompatActivity() {
             addDownload(this,"1",SAMPLES[1].url)
             addDownload(this,"2",SAMPLES[2].url)
         }
-    }
-
-    override fun onDestroy() {
-        PlaybackManager.getInstance(this).unregister()
-        super.onDestroy()
     }
 }

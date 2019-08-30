@@ -35,6 +35,15 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     private val mTempQueue = ArrayList<Samples.Track>()
 
     private var mClient: RemotePlaybackClient? = null
+    private var client: RemotePlaybackClient?
+        get() {
+            return mClient
+        }
+        set(value) {
+            Log.e(TAG, "========> mClient get")
+            value?.setStatusCallback(mStatusCallback)
+            mClient = value
+        }
     private val mContext: Context? get() = contextWeakReference.get()
     private val mIsPlaying: MutableLiveData<Boolean>? get() = (mContext as? AudioPlayerService)?.mIsPlaying
     private val mCurrentPlayingTrack : MutableLiveData<Samples.Track>? get() = (mContext as? AudioPlayerService)?.mCurrentPlayingTrack
@@ -46,24 +55,28 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     override fun isQueuingSupported(): Boolean {
-        return mClient?.isQueuingSupported ?: false
+        return client?.isQueuingSupported ?: false
     }
 
     override fun connect(route: MediaRouter.RouteInfo?) {
         mRoute = route
-        mClient = RemotePlaybackClient(mContext, route)
+        client = RemotePlaybackClient(mContext, route)
+
+        client?.setOnMessageReceivedListener { sessionId, message ->
+            Log.e(TAG, "======> SessionId: $sessionId, message: $message")
+        }
 
         if (DEBUG) {
             Log.d(
                 TAG, "connected to: " + route
-                        + ", isRemotePlaybackSupported: " + mClient?.isRemotePlaybackSupported
-                        + ", isQueuingSupported: " + mClient?.isQueuingSupported
+                        + ", isRemotePlaybackSupported: " + client?.isRemotePlaybackSupported
+                        + ", isQueuingSupported: " + client?.isQueuingSupported
             )
         }
     }
 
     override fun release() {
-        mClient?.release()
+        client?.release()
 
         if (DEBUG) {
             Log.d(TAG, "released.")
@@ -80,8 +93,10 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         }
 
         mCurrentPlayingTrack?.value = item
-        mClient?.setStatusCallback(mStatusCallback)
-        mClient?.play(item.url.toUri(), "audio/mp3", null, 0, null, object : RemotePlaybackClient.ItemActionCallback() {
+
+//        client?.setStatusCallback(mStatusCallback)
+
+        client?.play(item.url.toUri(), "audio/mp3", null, 0, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
                 data: Bundle?,
                 sessionId: String?,
@@ -147,7 +162,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
 
     override fun getStatus(item: Samples.Track, seek: Boolean, positionMs: Long) {
 
-        if (mClient?.hasSession() != true || item.remoteItemId == null) {
+        if (client?.hasSession() != true || item.remoteItemId == null) {
             // if getSession is not valid or item id not assigend yet.
             // just return, it's not fatal
             return
@@ -156,7 +171,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         if (DEBUG) {
             Log.d(TAG, "getStatus: item=$item, seek=$seek")
         }
-        mClient?.getStatus(item.remoteItemId, null, object : RemotePlaybackClient.ItemActionCallback() {
+        client?.getStatus(item.remoteItemId, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
                 data: Bundle?,
                 sessionId: String?,
@@ -198,7 +213,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     override fun pause() {
-        if (mClient?.hasSession() != true) {
+        if (client?.hasSession() != true) {
             // ignore if no getSession
             return
         }
@@ -207,7 +222,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         }
 
 
-        mClient?.pause(null, object : RemotePlaybackClient.SessionActionCallback() {
+        client?.pause(null, object : RemotePlaybackClient.SessionActionCallback() {
             override fun onResult(data: Bundle?, sessionId: String?, sessionStatus: MediaSessionStatus?) {
 
                 logStatus("pause: succeeded", sessionId, sessionStatus, null, null)
@@ -224,14 +239,14 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     override fun resume() {
-        if (mClient?.hasSession() != true) {
+        if (client?.hasSession() != true) {
             // ignore if no getSession
             return
         }
         if (DEBUG) {
             Log.d(TAG, "resume")
         }
-        mClient?.resume(null, object : RemotePlaybackClient.SessionActionCallback() {
+        client?.resume(null, object : RemotePlaybackClient.SessionActionCallback() {
             override fun onResult(data: Bundle?, sessionId: String?, sessionStatus: MediaSessionStatus?) {
                 logStatus("resume: succeeded", sessionId, sessionStatus, null, null)
                 mCallback.onPlaylistChanged()
@@ -246,17 +261,17 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     override fun stop() {
-        if (mClient?.hasSession() != true) {
+        if (client?.hasSession() != true) {
             // ignore if no getSession
             return
         }
         if (DEBUG) {
             Log.d(TAG, "stop")
         }
-        mClient?.stop(null, object : RemotePlaybackClient.SessionActionCallback() {
+        client?.stop(null, object : RemotePlaybackClient.SessionActionCallback() {
             override fun onResult(data: Bundle?, sessionId: String?, sessionStatus: MediaSessionStatus?) {
                 logStatus("stop: succeeded", sessionId, sessionStatus, null, null)
-                if (mClient?.isSessionManagementSupported == true) {
+                if (client?.isSessionManagementSupported == true) {
                     endSession()
                 }
                 mCallback.onPlaylistChanged()
@@ -272,9 +287,9 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     override fun enqueue(item: Samples.Track, index : Int) {
         throwIfQueuingUnsupported()
 
-        if (mClient?.hasSession() != true && !mEnqueuePending) {
+        if (client?.hasSession() != true && !mEnqueuePending) {
             mEnqueuePending = true
-            if (mClient?.isSessionManagementSupported == true) {
+            if (client?.isSessionManagementSupported == true) {
                 startSession(item)
             } else {
                 enqueueInternal(item)
@@ -315,7 +330,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         if (DEBUG) {
             Log.d(TAG, "enqueue: item=$item")
         }
-        mClient?.enqueue(item.url.toUri(), "audio/*", null, 0, null, object : RemotePlaybackClient.ItemActionCallback() {
+        client?.enqueue(item.url.toUri(), "audio/*", null, 0, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
                 data: Bundle?,
                 sessionId: String?,
@@ -354,7 +369,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         if (DEBUG) {
             Log.d(TAG, "seek: item=$item")
         }
-        mClient?.seek(item.remoteItemId, item.position, null, object : RemotePlaybackClient.ItemActionCallback() {
+        client?.seek(item.remoteItemId, item.position, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
                 data: Bundle?,
                 sessionId: String?,
@@ -373,7 +388,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     private fun startSession(item: Samples.Track) {
-        mClient?.startSession(null, object : RemotePlaybackClient.SessionActionCallback() {
+        client?.startSession(null, object : RemotePlaybackClient.SessionActionCallback() {
             override fun onResult(data: Bundle?, sessionId: String?, sessionStatus: MediaSessionStatus?) {
                 logStatus("startSession: succeeded", sessionId, sessionStatus, null, null)
                 enqueueInternal(item)
@@ -386,7 +401,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     private fun endSession() {
-        mClient?.endSession(null, object : RemotePlaybackClient.SessionActionCallback() {
+        client?.endSession(null, object : RemotePlaybackClient.SessionActionCallback() {
             override fun onResult(data: Bundle?, sessionId: String?, sessionStatus: MediaSessionStatus?) {
                 logStatus("endSession: succeeded", sessionId, sessionStatus, null, null)
             }
@@ -425,7 +440,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     private fun throwIfNoSession() {
-        if (mClient?.hasSession() != true) {
+        if (client?.hasSession() != true) {
             throw IllegalStateException("Session is invalid")
         }
     }
@@ -436,7 +451,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         }
     }
 
-    private val mStatusCallback get() = object : RemotePlaybackClient.StatusCallback() {
+    private val mStatusCallback = object : RemotePlaybackClient.StatusCallback() {
         override fun onItemStatusChanged(
             data: Bundle?,
             sessionId: String?,
@@ -444,6 +459,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
             itemId: String?,
             itemStatus: MediaItemStatus?
         ) {
+            Log.d("===============>","Position: ${itemStatus?.contentPosition} Duration: ${itemStatus?.contentDuration}")
             if (itemStatus?.playbackState == MediaItemStatus.PLAYBACK_STATE_FINISHED) {
                 mCallback.onCompletion()
             } else if (itemStatus?.playbackState == MediaItemStatus.PLAYBACK_STATE_ERROR) {
