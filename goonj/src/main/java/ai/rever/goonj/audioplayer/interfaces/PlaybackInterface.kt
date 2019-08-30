@@ -12,8 +12,8 @@ interface PlaybackInterface {
     fun seekTo(position: Long)
     fun addToPlaylist(track : Samples.Track, index: Int?= -1){}
     fun startNewSession()
-    fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long ,
-                              rewindIncrementMs: Long )
+    fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean,
+                              fastForwardIncrementMs: Long , rewindIncrementMs: Long )
     fun setAutoplay(autoplay : Boolean, indexFromLast: Int, autoLoadListener: AutoLoadListener)
     fun setPendingActivityForNotification(intent: Intent)
     fun removeTrack(index : Int)

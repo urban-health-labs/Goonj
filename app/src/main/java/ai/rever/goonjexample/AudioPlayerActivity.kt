@@ -3,7 +3,6 @@ package ai.rever.goonjexample
 import ai.rever.goonj.audioplayer.analytics.*
 import ai.rever.goonj.audioplayer.interfaces.GoonjPlayer
 import ai.rever.goonj.audioplayer.interfaces.AutoLoadListener
-import ai.rever.goonj.audioplayer.models.Samples
 import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
 import android.os.Bundle
 import androidx.lifecycle.Observer
@@ -22,7 +21,6 @@ import io.reactivex.disposables.Disposable
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     val TAG = "AUDIO_PLAYER_ACTIVITY"
-    val SECOND_LAST = 2
     var load = true
 
     val analyticsObserver = object : io.reactivex.Observer<AnalyticsModel> {
@@ -132,7 +130,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        stop(this)
+        pause(this)
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -167,6 +165,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     }
 
     override fun onDestroy() {
+        Log.d(TAG,"=========> apa destroy")
         analyticsObservable.unsubscribeOn(AndroidSchedulers.mainThread())
         super.onDestroy()
     }
@@ -182,5 +181,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             }
         }
     }
+
+
 }
 

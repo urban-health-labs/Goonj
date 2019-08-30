@@ -1,6 +1,5 @@
 package ai.rever.goonj.audioplayer
 
-import android.util.Log
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
 import android.content.Intent
@@ -30,7 +29,6 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         get() = mPlaylist
 
     fun setRemotePlayerSelected(isRemote: Boolean){
-        Log.d(TAG,"isRemote: $isRemote")
         this.isRemote = isRemote
     }
 
@@ -78,16 +76,18 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     }
 
     fun pause() {
-        Log.d(TAG,"pause")
         mPaused = true
         mPlayer?.pause()
     }
 
     fun resume() {
-        Log.d(TAG,"resume")
         mPaused = false
-            mPlayer?.resume()
+        mPlayer?.resume()
 
+    }
+
+    fun stop(){
+        mPlayer?.stop()
     }
 
     fun seek(positionMs : Long){
@@ -174,7 +174,6 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
     private fun playItemOnRemotePlayer(){
         currentItem = playlist.first {
-            Log.d(TAG,"STATUS: ${it.state}")
             it.state != MediaItemStatus.PLAYBACK_STATE_FINISHED
         }
         currentItem?.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
@@ -184,14 +183,16 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         }
     }
 
+    fun release(){
+        mPlayer?.release()
+    }
+
     // Player.Callback
     override fun onError() {
-        Log.e(TAG,"===============> Error")
     }
 
 
     override fun onCompletion() {
-        Log.e(TAG,"==============> Finished: ${currentItem?.title}")
         currentItem?.state = MediaItemStatus.PLAYBACK_STATE_FINISHED
         playItemOnRemotePlayer ()
         //mPlayer?.play(SAMPLES[3])
@@ -226,10 +227,5 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     interface Callback {
         fun onStatusChanged()
         fun onItemChanged(item: Samples.Track)
-    }
-
-    companion object {
-        private val TAG = "SessionManager"
-        private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
     }
 }
