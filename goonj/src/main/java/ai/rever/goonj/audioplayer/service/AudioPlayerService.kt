@@ -107,8 +107,10 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
     }
 
     override fun onDestroy() {
+        Log.d(TAG,"=========> Destroy")
         removeProgressObserver()
         mediaRouter?.removeCallback(mediaRouterCallback)
+        mSessionManager.release()
         super.onDestroy()
     }
 
@@ -141,7 +143,7 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
     }
 
     override fun stop() {
-        mSessionManager.pause()
+        mSessionManager.stop()
         stopForeground(true)
     }
 
@@ -197,6 +199,18 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
 
     override fun skipToPrevious() {
         mSessionManager.skipToPrevious()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        onDestroy()
+        super.onTaskRemoved(rootIntent)
+        Log.d(TAG,"===========> task removed")
+
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        Log.d(TAG,"========> Trim memory")
     }
 
     override val isPlayingLiveData: LiveData<Boolean> get() = mIsPlaying

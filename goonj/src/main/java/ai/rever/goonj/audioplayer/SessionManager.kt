@@ -86,8 +86,12 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     fun resume() {
         Log.d(TAG,"resume")
         mPaused = false
-            mPlayer?.resume()
+        mPlayer?.resume()
 
+    }
+
+    fun stop(){
+        mPlayer?.stop()
     }
 
     fun seek(positionMs : Long){
@@ -182,6 +186,10 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
             mPlayer?.play(it)
             //mPlayer?.enqueue(it)
         }
+    }
+
+    fun release(){
+        mPlayer?.release()
     }
 
     // Player.Callback

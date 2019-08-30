@@ -102,17 +102,17 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
 
     private val notificationListener = object : PlayerNotificationManager.NotificationListener {
-        override fun onNotificationStarted(notificationId: Int, notification: Notification) {
-            notification.contentIntent = PendingIntent.getActivity(
+
+        override fun onNotificationPosted(
+            notificationId: Int,
+            notification: Notification?,
+            ongoing: Boolean
+        ) {
+            notification?.contentIntent = PendingIntent.getActivity(
                 service?.baseContext, PLAYBACK_NOTIFICATION_ID,
                 pendingIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT
             )
-            service?.startForeground(notificationId, notification)
-        }
-
-        override fun onNotificationCancelled(notificationId: Int) {
-            pause()
         }
     }
 
@@ -124,7 +124,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
         @Nullable
         override fun createCurrentContentIntent(player: Player): PendingIntent? {
-            return PendingIntent.getActivity(service,0, Intent(), PendingIntent.FLAG_UPDATE_CURRENT)
+            return PendingIntent.getActivity(service,0, pendingIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
         @Nullable
@@ -146,7 +146,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             notificationAdapter, notificationListener)
 
         playerNotificationManager.setPlayer(exoPlayer)
-
     }
 
     /**
@@ -257,6 +256,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             } else {
                 removeAudioFocus()
                 mIsPlaying?.postValue(false)
+                service?.stopForeground(false)
             }
         }
 
@@ -339,8 +339,8 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         exoPlayer.playWhenReady = false
         mIsPlaying?.postValue(false)
         removeListeners()
-        exoPlayer.release()
         playerNotificationManager.setPlayer(null)
+        exoPlayer.release()
         isPlayerPrepared = false
     }
 
@@ -375,6 +375,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             Log.d(TAG, "stop")
         }
         exoPlayer.stop()
+        release()
     }
 
     override fun enqueue(item: Samples.Track, index : Int) {

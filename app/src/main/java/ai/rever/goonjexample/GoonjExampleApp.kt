@@ -10,11 +10,11 @@ class GoonjExampleApp: Application() {
         super.onCreate()
         val pendingIntent = Intent(applicationContext,AudioPlayerActivity::class.java)
         PlaybackManager.getInstance(this).register(pendingIntent)
-        PlaybackManager.getInstance(this)
     }
 
     override fun onTerminate() {
         PlaybackManager.getInstance(this).unregister()
         super.onTerminate()
     }
+
 }

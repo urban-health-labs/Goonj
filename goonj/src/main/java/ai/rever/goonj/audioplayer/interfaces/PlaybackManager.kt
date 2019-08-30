@@ -83,8 +83,8 @@ class PlaybackManager (private val mContext : Context){
         playbackInterface.setAutoplay(autoplay,indexFromLast,autoLoadListener)
     }
 
-    fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long ,
-                              rewindIncrementMs: Long){
+    fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean,
+                              fastForwardIncrementMs: Long , rewindIncrementMs: Long){
         playbackInterface.customiseNotification(useNavigationAction,usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
     }
 

@@ -22,7 +22,6 @@ import io.reactivex.disposables.Disposable
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     val TAG = "AUDIO_PLAYER_ACTIVITY"
-    val SECOND_LAST = 2
     var load = true
 
     val analyticsObserver = object : io.reactivex.Observer<AnalyticsModel> {
@@ -120,7 +119,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     }
 
     private fun customizeNotification(){
-        customizeNotification(this,true,true,10000,5000)
+        customizeNotification(this,true,true, 10000,5000)
     }
     private fun setupPlayer() {
         startNewSession(this)
@@ -132,7 +131,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        stop(this)
+        pause(this)
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -167,6 +166,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     }
 
     override fun onDestroy() {
+        Log.d(TAG,"=========> apa destroy")
         analyticsObservable.unsubscribeOn(AndroidSchedulers.mainThread())
         super.onDestroy()
     }
@@ -182,5 +182,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             }
         }
     }
+
+
 }
 
