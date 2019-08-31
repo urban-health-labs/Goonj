@@ -102,13 +102,11 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     }
 
     fun unsuspend(){
-        if(!isRemote) {
-            for (item in mPlaylist) {
-                mPlayer?.enqueue(item)
-            }
-        } else {
+        if(isRemote){
             // play an item from playlist that isn't played
             playItemOnRemotePlayer()
+        } else {
+            mPlayer?.resume()
         }
     }
 

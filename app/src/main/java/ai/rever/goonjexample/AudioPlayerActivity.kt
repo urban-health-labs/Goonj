@@ -10,6 +10,7 @@ import kotlinx.android.synthetic.main.activity_audio_player.*
 import android.media.AudioManager
 import android.view.KeyEvent
 import android.content.Context
+import android.os.Handler
 import android.util.Log
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
@@ -97,12 +98,18 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
                 override fun onLoadTracks() {
                     Log.d(TAG,"============= LOAD NEW TRACKS")
                     if(load) {
-                        addAudioToPlaylist(applicationContext, SAMPLES[4])
-                        // add at particular index
-                        addAudioToPlaylist(applicationContext, SAMPLES[5], 2)
-                        removeTrack(applicationContext,0)
-                        moveTrack(applicationContext,3,4)
-                        load = false
+                        val handler = Handler()
+                        handler.postDelayed({
+                            if(load) {
+                                addAudioToPlaylist(applicationContext, SAMPLES[4])
+                                // add at particular index
+//                                addAudioToPlaylist(applicationContext, SAMPLES[5], 2)
+//                                removeTrack(applicationContext,0)
+//                                moveTrack(applicationContext,0,2)
+                                load = false
+                            }
+                        },4000)
+
                     }
                 }
             }
