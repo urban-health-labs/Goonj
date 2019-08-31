@@ -187,7 +187,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             exoPlayer?.prepare(concatenatingMediaSource)
             isPlayerPrepared = true
         }
-
     }
 
     private val analyticsListener = object : AnalyticsListener {
@@ -311,10 +310,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         return false
     }
 
-    override fun isQueuingSupported(): Boolean {
-        return true
-    }
-
     override fun connect(route: MediaRouter.RouteInfo?) {}
 
     override fun release() {
@@ -395,7 +390,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         this.mAutoplay = autoplay
     }
 
-    lateinit var audioManager : AudioManager
+    var audioManager : AudioManager? = null
     lateinit var playbackAttributes: AudioAttributes
     lateinit var focusRequest: AudioFocusRequest
     var mPlaybackDelayed = false

@@ -3,26 +3,21 @@ package ai.rever.goonj.audioplayer
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.models.Samples
 import android.content.Intent
+import android.util.Log
 import androidx.mediarouter.media.MediaItemStatus
 import java.util.ArrayList
 
 class SessionManager(private val mName: String) : AudioPlayer.Callback {
-    private var mSessionId: Int = 0
     var mPaused: Boolean = false
-    private var mSessionValid: Boolean = false
     private var mPlayer: AudioPlayer? = null
     private var mCallback: Callback? = null
     private var mPlaylist: MutableList<Samples.Track> = ArrayList()
     var isRemote: Boolean = false
 
-    val sessionId: String?
-        get() = if (mSessionValid) mSessionId.toString() else null
-
     var currentItem: Samples.Track? = if (mPlaylist.isEmpty()) null else mPlaylist[0]
 
     val getSession : List<Samples.Track>
         get() = mPlaylist
-
 
     // Returns the cached playlist (note this is not responsible for updating it)
     val playlist: List<Samples.Track>
@@ -44,10 +39,6 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         }
     }
 
-    fun hasSession(): Boolean {
-        return mSessionValid
-    }
-
     fun add(item: Samples.Track, index: Int ?= -1) {
 
         index?.let {
@@ -55,7 +46,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
                 item.index = index
                 mPlaylist.add(it, item)
 
-                if (mPlayer?.isQueuingSupported() == true) {
+                if (!isRemote) {
                     mPlayer?.enqueue(item, it)
                 } else {
                     playItemOnRemotePlayer()
@@ -65,7 +56,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
                 item.index = mPlaylist.size
                 mPlaylist.add(item)
 
-                if (mPlayer?.isQueuingSupported() == true) {
+                if (!isRemote) {
                     mPlayer?.enqueue(item)
                 } else {
                     playItemOnRemotePlayer()
@@ -98,7 +89,9 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     }
 
     fun startNewSession(){
+        Log.e("SESSIONMANAGER","=============> new session")
         mPlaylist.clear()
+        Log.e("SESSIONMANAGER","=============> SIZE: ${mPlaylist.size}")
         mPlayer?.startNewSession()
     }
 
@@ -111,15 +104,13 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     }
 
     fun unsuspend(){
-        if(mPlayer?.isQueuingSupported() == true) {
+        if(!isRemote) {
             for (item in mPlaylist) {
                 mPlayer?.enqueue(item)
             }
         } else {
-            if(isRemote) {
-                // play an item from playlist that isn't played
-                playItemOnRemotePlayer()
-            }
+            // play an item from playlist that isn't played
+            playItemOnRemotePlayer()
         }
     }
 
@@ -162,14 +153,23 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     }
 
     private fun playItemOnRemotePlayer(){
-        currentItem = playlist.first {
-            it.state != MediaItemStatus.PLAYBACK_STATE_FINISHED
+//        currentItem = playlist.first {
+//            it.state != MediaItemStatus.PLAYBACK_STATE_FINISHED
+//        }
+        for(item in playlist){
+            if(item.state != MediaItemStatus.PLAYBACK_STATE_FINISHED){
+                item.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
+//                currentItem?.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
+                currentItem = item
+                mPlayer?.play(item)
+                return
+            }
         }
-        currentItem?.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
-        currentItem?.let {
-            mPlayer?.play(it)
-            //mPlayer?.enqueue(it)
-        }
+//        currentItem?.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
+//        currentItem?.let {
+//            mPlayer?.play(it)
+//            //mPlayer?.enqueue(it)
+//        }
     }
 
     fun release(){

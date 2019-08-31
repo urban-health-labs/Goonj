@@ -23,7 +23,7 @@ fun LocalPlayer.requestAudioFocus() {
                 .setOnAudioFocusChangeListener(this)
                 .build()
 
-            val res = audioManager.requestAudioFocus(focusRequest)
+            val res = audioManager?.requestAudioFocus(focusRequest)
 
             synchronized(mFocusLock){
                 if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED){
@@ -41,7 +41,7 @@ fun LocalPlayer.requestAudioFocus() {
     }
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-        val result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
+        val result = audioManager?.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
 
         if(result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED){
             pause()
@@ -51,8 +51,8 @@ fun LocalPlayer.requestAudioFocus() {
 
 fun LocalPlayer.removeAudioFocus() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-        audioManager.abandonAudioFocus(this)
+        audioManager?.abandonAudioFocus(this)
     } else {
-        audioManager.abandonAudioFocusRequest(focusRequest)
+        audioManager?.abandonAudioFocusRequest(focusRequest)
     }
 }

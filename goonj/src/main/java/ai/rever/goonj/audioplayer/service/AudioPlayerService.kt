@@ -61,7 +61,6 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
 
     lateinit var mAutoLoadListener: AutoLoadListener
 
-
     inner class Binder : android.os.Binder() {
         val service: PlaybackInterface
             get() = this@AudioPlayerService
@@ -102,7 +101,6 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
         removeProgressObserver()
         mediaRouter?.removeCallback(mediaRouterCallback)
         mSessionManager.release()
-        Log.e("=======>", "service on destroy")
         super.onDestroy()
     }
 

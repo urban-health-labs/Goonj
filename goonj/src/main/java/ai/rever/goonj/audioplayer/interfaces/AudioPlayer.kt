@@ -14,46 +14,31 @@ abstract class AudioPlayer {
     protected lateinit var mCallback: Callback
 
     abstract fun isRemotePlayback(): Boolean
-    abstract fun isQueuingSupported(): Boolean
-
     abstract fun connect(route: MediaRouter.RouteInfo?)
     abstract fun release()
 
-    // basic operations that are always supported
     abstract fun play(item: Samples.Track)
-
     abstract fun seekTo(positionMs : Long)
     open fun getStatus(item: Samples.Track, seek: Boolean, positionMs: Long){}
     abstract fun pause()
     abstract fun resume()
     abstract fun stop()
     abstract fun startNewSession()
+    open fun enqueue(item: Samples.Track, index: Int = -1){}
 
-    // advanced queuing (enqueue & remove) are only supported
-    // if isQueuingSupported() returns true
-    abstract fun enqueue(item: Samples.Track, index: Int = -1)
-
-    abstract fun remove(index : Int)
-
+    open fun remove(index : Int){}
     abstract fun setPlaylist(playlist: List<Samples.Track>)
-
     abstract fun setVolume(volume: Float)
-
     abstract fun getTrackPosition() : Long?
-
     open fun customiseNotification(useNavigationAction: Boolean,
                                    usePlayPauseAction: Boolean,
                                    fastForwardIncrementMs: Long,
                                    rewindIncrementMs: Long) {}
 
     abstract fun setAutoplay(autoplay: Boolean)
-
     open fun setPendingActivityForNotification(intent: Intent){}
-
     open fun moveTrack(currentIndex: Int, finalIndex: Int){}
-
     open fun skipToNext(){}
-
     open fun skipToPrevious(){}
 
     fun setCallback(callback: Callback) {
@@ -82,5 +67,4 @@ abstract class AudioPlayer {
         fun onPlaylistChanged()
         fun onPlaylistReady()
     }
-
 }
