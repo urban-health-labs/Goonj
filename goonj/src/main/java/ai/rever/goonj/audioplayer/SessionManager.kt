@@ -183,7 +183,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
     override fun onCompletion() {
         currentItem?.state = MediaItemStatus.PLAYBACK_STATE_FINISHED
-        playItemOnRemotePlayer()
+//        playItemOnRemotePlayer()
     }
 
     override fun onPlaylistChanged() {
