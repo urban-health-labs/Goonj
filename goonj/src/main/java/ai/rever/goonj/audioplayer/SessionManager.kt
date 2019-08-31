@@ -89,9 +89,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     }
 
     fun startNewSession(){
-        Log.e("SESSIONMANAGER","=============> new session")
         mPlaylist.clear()
-        Log.e("SESSIONMANAGER","=============> SIZE: ${mPlaylist.size}")
         mPlayer?.startNewSession()
     }
 
@@ -153,23 +151,15 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     }
 
     private fun playItemOnRemotePlayer(){
-//        currentItem = playlist.first {
-//            it.state != MediaItemStatus.PLAYBACK_STATE_FINISHED
-//        }
         for(item in playlist){
+            Log.e("SESSIONMANAGER","ITEM: ${item}")
             if(item.state != MediaItemStatus.PLAYBACK_STATE_FINISHED){
                 item.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
-//                currentItem?.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
                 currentItem = item
                 mPlayer?.play(item)
                 return
             }
         }
-//        currentItem?.state = MediaItemStatus.PLAYBACK_STATE_PLAYING
-//        currentItem?.let {
-//            mPlayer?.play(it)
-//            //mPlayer?.enqueue(it)
-//        }
     }
 
     fun release(){
@@ -177,18 +167,14 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     }
 
     // Player.Callback
-    override fun onError() {
-    }
+    override fun onError() {}
 
 
     override fun onCompletion() {
         currentItem?.state = MediaItemStatus.PLAYBACK_STATE_FINISHED
-//        playItemOnRemotePlayer()
     }
 
-    override fun onPlaylistChanged() {
-        // Playlist has changed, update the cached playlist
-    }
+    override fun onPlaylistChanged() {}
 
     override fun onPlaylistReady() {
         // Notify activity to update Ui
