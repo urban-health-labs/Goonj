@@ -38,9 +38,11 @@ interface GoonjPlayer {
     fun customizeNotification(context: Context, useNavigationAction: Boolean = true,
                               usePlayPauseAction: Boolean = true,
                               fastForwardIncrementMs: Long = 0L,
-                              rewindIncrementMs: Long = 0L){
+                              rewindIncrementMs: Long = 0L,
+                              smallIcon : Int){
 
-        PlaybackManager.getInstance(context).customiseNotification(useNavigationAction,usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
+        PlaybackManager.getInstance(context).customiseNotification(useNavigationAction,usePlayPauseAction
+            ,fastForwardIncrementMs,rewindIncrementMs,smallIcon)
     }
 
     fun session(context: Context) : List<Samples.Track>{
@@ -61,6 +63,10 @@ interface GoonjPlayer {
 
     fun skipToPrevious(context: Context){
         PlaybackManager.getInstance(context).skipToPrevious()
+    }
+
+    fun removeNotification(context: Context){
+        PlaybackManager.getInstance(context).removeNotification()
     }
 
     fun isPlayingLiveData(context: Context) = PlaybackManager.getInstance(context).isPlayingLiveData

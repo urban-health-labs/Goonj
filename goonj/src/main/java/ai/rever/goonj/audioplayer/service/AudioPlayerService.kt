@@ -152,10 +152,11 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
         useNavigationAction: Boolean,
         usePlayPauseAction: Boolean,
         fastForwardIncrementMs: Long,
-        rewindIncrementMs: Long
+        rewindIncrementMs: Long,
+        smallIcon: Int
     ) {
         mSessionManager.customiseNotification(useNavigationAction,
-            usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
+            usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs, smallIcon)
     }
 
     override fun setAutoplay(autoplay: Boolean, indexFromLast: Int, autoLoadListener: AutoLoadListener) {
@@ -188,6 +189,10 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
 
     override fun skipToPrevious() {
         mSessionManager.skipToPrevious()
+    }
+
+    override fun removeNotification() {
+        mSessionManager.removeNotification()
     }
 
     override val isPlayingLiveData: LiveData<Boolean> get() = mIsPlaying

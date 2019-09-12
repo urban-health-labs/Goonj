@@ -3,6 +3,7 @@ package ai.rever.goonjexample
 import ai.rever.goonj.audioplayer.analytics.*
 import ai.rever.goonj.audioplayer.interfaces.GoonjPlayer
 import ai.rever.goonj.audioplayer.interfaces.AutoLoadListener
+import ai.rever.goonj.audioplayer.models.Samples
 import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
 import android.os.Bundle
 import androidx.lifecycle.Observer
@@ -10,10 +11,15 @@ import kotlinx.android.synthetic.main.activity_audio_player.*
 import android.media.AudioManager
 import android.view.KeyEvent
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.util.Log
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -128,7 +134,8 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     }
 
     private fun customizeNotification(){
-        customizeNotification(this,true,true,10000,5000)
+        customizeNotification(this,true,true,
+            10000,5000,R.mipmap.ic_launcher)
     }
     private fun setupPlayer() {
         startNewSession(this)
@@ -139,8 +146,10 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     }
 
     override fun onBackPressed() {
+        removeNotification(this)
         super.onBackPressed()
         pause(this)
+
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {

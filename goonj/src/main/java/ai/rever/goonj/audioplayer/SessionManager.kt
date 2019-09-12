@@ -113,10 +113,10 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     fun customiseNotification(useNavigationAction: Boolean ,
                               usePlayPauseAction: Boolean ,
                               fastForwardIncrementMs: Long ,
-                              rewindIncrementMs: Long ){
+                              rewindIncrementMs: Long,smallIcon: Int ){
 
         mPlayer?.customiseNotification(useNavigationAction,usePlayPauseAction,
-            fastForwardIncrementMs, rewindIncrementMs)
+            fastForwardIncrementMs, rewindIncrementMs, smallIcon)
     }
 
     fun setAutoplay(autoplay : Boolean){
@@ -162,6 +162,10 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
     fun release(){
         mPlayer?.release()
+    }
+
+    fun removeNotification(){
+        mPlayer?.removeNotification()
     }
 
     // Player.Callback

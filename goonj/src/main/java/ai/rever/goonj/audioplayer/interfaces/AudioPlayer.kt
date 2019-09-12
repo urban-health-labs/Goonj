@@ -33,13 +33,15 @@ abstract class AudioPlayer {
     open fun customiseNotification(useNavigationAction: Boolean,
                                    usePlayPauseAction: Boolean,
                                    fastForwardIncrementMs: Long,
-                                   rewindIncrementMs: Long) {}
+                                   rewindIncrementMs: Long,
+                                   smallIcon: Int?) {}
 
     abstract fun setAutoplay(autoplay: Boolean)
     open fun setPendingActivityForNotification(intent: Intent){}
     open fun moveTrack(currentIndex: Int, finalIndex: Int){}
     open fun skipToNext(){}
     open fun skipToPrevious(){}
+    open fun removeNotification(){}
 
     fun setCallback(callback: Callback) {
         mCallback = callback

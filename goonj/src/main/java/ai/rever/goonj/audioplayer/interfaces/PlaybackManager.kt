@@ -84,8 +84,8 @@ class PlaybackManager (private val mContext : Context){
     }
 
     fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean,
-                              fastForwardIncrementMs: Long , rewindIncrementMs: Long){
-        playbackInterface.customiseNotification(useNavigationAction,usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs)
+                              fastForwardIncrementMs: Long , rewindIncrementMs: Long,smallIcon: Int){
+        playbackInterface.customiseNotification(useNavigationAction,usePlayPauseAction,fastForwardIncrementMs,rewindIncrementMs,smallIcon)
     }
 
     fun setPendingActivityForNotification(intent: Intent){
@@ -106,6 +106,10 @@ class PlaybackManager (private val mContext : Context){
 
     fun skipToPrevious(){
         playbackInterface.skipToPrevious()
+    }
+
+    fun removeNotification(){
+        playbackInterface.removeNotification()
     }
 
     val isPlayingLiveData get() = playbackInterface.isPlayingLiveData

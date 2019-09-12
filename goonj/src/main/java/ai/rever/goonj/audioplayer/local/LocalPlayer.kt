@@ -105,7 +105,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             notification?.contentIntent = PendingIntent.getActivity(
                 service?.baseContext, PLAYBACK_NOTIFICATION_ID,
                 pendingIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_CANCEL_CURRENT
             )
         }
     }
@@ -148,12 +148,16 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
      * @param rewindIncrementMs Set rewind increment in milliseconds. 0 ms will hide it
      */
     override fun customiseNotification(useNavigationAction: Boolean , usePlayPauseAction: Boolean,
-                                  fastForwardIncrementMs: Long, rewindIncrementMs: Long){
+                                  fastForwardIncrementMs: Long, rewindIncrementMs: Long,smallIcon: Int?){
 
         playerNotificationManager.setUseNavigationActions(useNavigationAction)
         playerNotificationManager.setUsePlayPauseActions(usePlayPauseAction)
         playerNotificationManager.setFastForwardIncrementMs(fastForwardIncrementMs)
         playerNotificationManager.setRewindIncrementMs(rewindIncrementMs)
+        smallIcon?.let {
+            playerNotificationManager.setSmallIcon(it)
+        }
+
     }
 
     private fun setupMediaSession(){
@@ -246,7 +250,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             } else {
                 removeAudioFocus()
                 mIsPlaying?.postValue(false)
-                service?.stopForeground(false)
+                service?.stopForeground(true)
             }
         }
 
@@ -348,6 +352,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
     override fun enqueue(item: Samples.Track, index : Int) {
         addAudioPlaylist(item, index)
+        playerNotificationManager.setPlayer(exoPlayer)
     }
 
     override fun remove(index: Int){
@@ -388,6 +393,11 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
     override fun setAutoplay(autoplay: Boolean) {
         this.mAutoplay = autoplay
+    }
+
+    override fun removeNotification() {
+        playerNotificationManager.setPlayer(null)
+        service?.stopForeground(true)
     }
 
     var audioManager : AudioManager? = null
