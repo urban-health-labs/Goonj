@@ -128,7 +128,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
         @Nullable
         override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback): Bitmap {
-            return Samples.getBitmap(context, playList[player.currentWindowIndex].bitmapResource)!!
+            return playList[player.currentWindowIndex].bitmap?: Samples.getBitmap(context, playList[player.currentWindowIndex].bitmapResource)!!
         }
     }
 
@@ -157,7 +157,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         smallIcon?.let {
             playerNotificationManager.setSmallIcon(it)
         }
-
     }
 
     private fun setupMediaSession(){

@@ -4,6 +4,7 @@ import ai.rever.goonj.R
 import android.content.Context
 import androidx.annotation.DrawableRes
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.os.Bundle
@@ -75,7 +76,7 @@ object Samples {
         var timestamp: Long = 0
         var remoteItemId: String? = null
         var bitmapResource: Int = R.mipmap.ic_album_art
-        var bitmap: Bitmap? =null
+        var bitmap: Bitmap? = null
 
         override fun toString(): String {
             return "$title Description: $artist DURATION: $duration INDEX: $index state: $state"
