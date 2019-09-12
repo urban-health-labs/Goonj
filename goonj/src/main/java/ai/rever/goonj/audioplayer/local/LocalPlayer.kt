@@ -187,6 +187,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         }
 
         if(!isPlayerPrepared) {
+            exoPlayer?.playWhenReady = true
             exoPlayer?.prepare(concatenatingMediaSource)
             isPlayerPrepared = true
         }
@@ -233,6 +234,9 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         }
     }
 
+    private var isPlayingFirstTimeAfterCreation = true
+    private var isPlayingFirstTimeAfterNewSession = true
+
     private val eventListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             val map = mutableMapOf(PLAY_WHEN_READY to playWhenReady, PLAYBACK_STATE to playbackState)
@@ -241,14 +245,24 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
             exoPlayer?.let {
                 mCurrentPlayingTrack?.value?.duration = it.contentDuration
             }
+            /** if player is ready to play and is commanded to play **/
             if (playWhenReady && playbackState == Player.STATE_READY) {
                 requestAudioFocus()
                 mIsPlaying?.postValue(true)
-            } else if (playWhenReady) {
 
-            } else {
+            } else if (!playWhenReady) {
                 removeAudioFocus()
-                mIsPlaying?.postValue(false)
+                /** attach listener if player is playing for the first time or
+                 * if its playing after a new session is played atleast once**/
+                if (isPlayingFirstTimeAfterCreation || !isPlayingFirstTimeAfterNewSession) {
+                    /** set false as the player is created**/
+                    isPlayingFirstTimeAfterCreation = false
+                    mIsPlaying?.postValue(false)
+                } else {
+                    /** if the player is playing first time after a new session
+                     * do not attach the listener **/
+                    isPlayingFirstTimeAfterNewSession = false
+                }
                 service?.stopForeground(true)
             }
         }
@@ -304,6 +318,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     }
 
     override fun startNewSession(){
+        isPlayingFirstTimeAfterNewSession = true
         playList.clear()
         concatenatingMediaSource.clear()
         isPlayerPrepared = false
@@ -443,7 +458,6 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
     init {
         exoPlayer = ExoPlayerFactory.newSimpleInstance(context)
-        exoPlayer?.playWhenReady = true
         onSetup()
     }
 
