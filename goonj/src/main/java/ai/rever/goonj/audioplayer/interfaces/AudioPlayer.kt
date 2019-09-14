@@ -5,7 +5,7 @@ import androidx.mediarouter.media.MediaControlIntent
 import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.audioplayer.cast.RemotePlayer
 import ai.rever.goonj.audioplayer.local.LocalPlayer
-import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.models.Track
 import android.content.Intent
 import java.lang.ref.WeakReference
 
@@ -16,18 +16,17 @@ abstract class AudioPlayer {
     abstract fun isRemotePlayback(): Boolean
     abstract fun connect(route: MediaRouter.RouteInfo?)
     abstract fun release()
-
-    abstract fun play(item: Samples.Track)
+    abstract fun play(item: Track)
     abstract fun seekTo(positionMs : Long)
-    open fun getStatus(item: Samples.Track, seek: Boolean, positionMs: Long){}
+    open fun getStatus(item: Track, seek: Boolean, positionMs: Long){}
     abstract fun pause()
     abstract fun resume()
     abstract fun stop()
     abstract fun startNewSession()
-    open fun enqueue(item: Samples.Track, index: Int = -1){}
+    open fun enqueue(item: Track, index: Int = -1){}
 
     open fun remove(index : Int){}
-    abstract fun setPlaylist(playlist: List<Samples.Track>)
+    abstract fun setPlaylist(playlist: List<Track>)
     abstract fun setVolume(volume: Float)
     abstract fun getTrackPosition() : Long?
     open fun customiseNotification(useNavigationAction: Boolean,

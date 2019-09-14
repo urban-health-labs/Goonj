@@ -1,6 +1,6 @@
 package ai.rever.goonj.audioplayer.interfaces
 
-import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.models.Track
 import android.content.Context
 
 /**
@@ -31,7 +31,7 @@ interface GoonjPlayer {
         PlaybackManager.getInstance(context).setAutoplay(autoplay, indexFromLast, autoLoadListener)
     }
 
-    fun addAudioToPlaylist(context: Context, audioTrack: Samples.Track, index: Int ?= -1){
+    fun addAudioToPlaylist(context: Context, audioTrack: Track, index: Int ?= -1){
         PlaybackManager.getInstance(context).addAudioToPlaylist(audioTrack,index)
     }
 
@@ -45,7 +45,7 @@ interface GoonjPlayer {
             ,fastForwardIncrementMs,rewindIncrementMs,smallIcon)
     }
 
-    fun session(context: Context) : List<Samples.Track>{
+    fun session(context: Context) : List<Track>{
         return PlaybackManager.getInstance(context).currentSession
     }
 

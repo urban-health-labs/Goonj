@@ -15,7 +15,9 @@ import androidx.core.net.toUri
 import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.audioplayer.download.DownloadUtil
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
-import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.models.Track
+import ai.rever.goonj.audioplayer.models.getBitmap
+import ai.rever.goonj.audioplayer.models.getMediaDescription
 import ai.rever.goonj.audioplayer.service.AudioPlayerService
 import ai.rever.goonj.audioplayer.util.*
 import android.annotation.SuppressLint
@@ -41,7 +43,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
     private val service: Service? get() = weakReferenceService.get()
     private val mIsPlaying: MutableLiveData<Boolean>? get() = (service as? AudioPlayerService)?.mIsPlaying
-    private val mCurrentPlayingTrack : MutableLiveData<Samples.Track>? get() = (service as? AudioPlayerService)?.mCurrentPlayingTrack
+    private val mCurrentPlayingTrack : MutableLiveData<Track>? get() = (service as? AudioPlayerService)?.mCurrentPlayingTrack
     private var mAutoplay : Boolean = true
     private var exoPlayer : SimpleExoPlayer? = null
     private lateinit var playerNotificationManager: PlayerNotificationManager
@@ -53,7 +55,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
     private var concatenatingMediaSource = ConcatenatingMediaSource()
     private lateinit var cacheDataSourceFactory : CacheDataSourceFactory
 
-    var playList : MutableList<Samples.Track> = mutableListOf()
+    var playList : MutableList<Track> = mutableListOf()
     var isPlayerPrepared : Boolean = false
 
     var pendingIntent = Intent()
@@ -128,7 +130,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
 
         @Nullable
         override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback): Bitmap {
-            return playList[player.currentWindowIndex].bitmap?: Samples.getBitmap(context, playList[player.currentWindowIndex].bitmapResource)!!
+            return playList[player.currentWindowIndex].bitmap?: getBitmap(context, playList[player.currentWindowIndex].bitmapResource)!!
         }
     }
 
@@ -168,13 +170,13 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         mediaSessionConnector = MediaSessionConnector(mediaSession)
         mediaSessionConnector?.setQueueNavigator(object : TimelineQueueNavigator(mediaSession) {
             override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
-                return Samples.getMediaDescription(context, playList[windowIndex])
+                return getMediaDescription(context, playList[windowIndex])
             }
         })
         mediaSessionConnector?.setPlayer(exoPlayer)
     }
 
-    private fun addAudioPlaylist(audio: Samples.Track, index: Int) {
+    private fun addAudioPlaylist(audio: Track, index: Int) {
         val mediaSource =  ProgressiveMediaSource.Factory(cacheDataSourceFactory)
             .createMediaSource(audio.url.toUri())
 
@@ -341,7 +343,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         isPlayerPrepared = false
     }
 
-    override fun play(item: Samples.Track) {
+    override fun play(item: Track) {
         exoPlayer?.playWhenReady = true
     }
 
@@ -364,7 +366,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         release()
     }
 
-    override fun enqueue(item: Samples.Track, index : Int) {
+    override fun enqueue(item: Track, index : Int) {
         addAudioPlaylist(item, index)
         playerNotificationManager.setPlayer(exoPlayer)
     }
@@ -390,7 +392,7 @@ class LocalPlayer (var weakReferenceService: WeakReference<Service>) : AudioPlay
         exoPlayer?.previous()
     }
 
-    override fun setPlaylist(playlist: List<Samples.Track>) {
+    override fun setPlaylist(playlist: List<Track>) {
         startNewSession()
         for(item in playlist){
             addAudioPlaylist(item, -1)

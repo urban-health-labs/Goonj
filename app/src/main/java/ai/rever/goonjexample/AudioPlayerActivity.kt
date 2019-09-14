@@ -3,8 +3,7 @@ package ai.rever.goonjexample
 import ai.rever.goonj.audioplayer.analytics.*
 import ai.rever.goonj.audioplayer.interfaces.GoonjPlayer
 import ai.rever.goonj.audioplayer.interfaces.AutoLoadListener
-import ai.rever.goonj.audioplayer.models.Samples
-import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
+import ai.rever.goonj.audioplayer.models.SAMPLES
 import android.os.Bundle
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_audio_player.*

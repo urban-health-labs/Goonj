@@ -2,11 +2,11 @@ package ai.rever.goonj.audioplayer.download
 
 import ai.rever.goonj.R
 import android.content.Context
+import android.util.Log
 import androidx.core.net.toUri
 import com.google.android.exoplayer2.database.ExoDatabaseProvider
-import com.google.android.exoplayer2.offline.DownloadManager
-import com.google.android.exoplayer2.offline.DownloadRequest
-import com.google.android.exoplayer2.offline.DownloadService
+import com.google.android.exoplayer2.offline.*
+import com.google.android.exoplayer2.scheduler.Requirements
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.Cache
 import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor
@@ -35,8 +35,7 @@ object DownloadUtil {
             downloadManager = DownloadManager(context,
                 ExoDatabaseProvider(context),
                 getCache(context),
-                DefaultDataSourceFactory(context,
-                    Util.getUserAgent(context, context.getString(R.string.app_name))))
+                DefaultDataSourceFactory(context, Util.getUserAgent(context, context.getString(R.string.app_name))))
         }
         return downloadManager as DownloadManager
     }
@@ -47,6 +46,44 @@ object DownloadUtil {
                 url.toUri(), Collections.emptyList(),null,null),
             false
         )
+    }
+    val TAG = "DOWNLOAD UTIL"
+    fun getAllDownloads(context: Context) {
+
+
+        var downloadCursor = getDownloadManager(context).downloadIndex.getDownloads()
+        Log.d(TAG,"Count: ${downloadCursor?.count} ")
+
+        if(downloadCursor.count == 0){
+            return
+        }
+
+        try {
+
+            downloadCursor.moveToFirst()
+            var download = downloadCursor?.download
+            Log.d(TAG,"Percent: ${download?.percentDownloaded} State: ${download?.state} Length:${download?.contentLength}")
+
+            while (downloadCursor.moveToNext()){
+                var download = downloadCursor?.download
+                Log.d(TAG,"Percent: ${download?.percentDownloaded} State: ${download?.state} Length:${download?.contentLength}")
+            }
+
+        } finally {
+            downloadCursor.close()
+        }
+    }
+
+    fun isMediaDownloaded(context: Context, mediaId: String): Boolean {
+        var download = getDownloadManager(context).downloadIndex.getDownload(mediaId)
+        Log.d(TAG,"zD: ${download?.percentDownloaded}")
+
+        return download?.state == Download.STATE_COMPLETED
+    }
+
+    fun getMediaDownloadPercentage(context: Context, mediaId: String) : Float? {
+        var download = getDownloadManager(context).downloadIndex.getDownload(mediaId)
+        return download?.percentDownloaded
     }
 
 }

@@ -1,6 +1,6 @@
 package ai.rever.goonj.audioplayer.interfaces
 
-import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.models.Track
 import ai.rever.goonj.audioplayer.service.AudioPlayerService
 import ai.rever.goonj.audioplayer.util.SingletonHolder
 import android.content.ComponentName
@@ -75,7 +75,7 @@ class PlaybackManager (private val mContext : Context){
         playbackInterface.startNewSession()
     }
 
-    fun addAudioToPlaylist(track : Samples.Track, index : Int ?= -1){
+    fun addAudioToPlaylist(track : Track, index : Int ?= -1){
         playbackInterface.addToPlaylist(track,index)
     }
 

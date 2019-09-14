@@ -8,7 +8,7 @@ import ai.rever.goonj.audioplayer.SessionManager
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
 import ai.rever.goonj.audioplayer.interfaces.AutoLoadListener
 import ai.rever.goonj.audioplayer.interfaces.PlaybackInterface
-import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.models.Track
 import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.LiveData
@@ -30,7 +30,7 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
     private var mPlayer: AudioPlayer? = null
 
     internal val mIsPlaying: MutableLiveData<Boolean> = MutableLiveData()
-    internal val mCurrentPlayingTrack : MutableLiveData<Samples.Track> = MutableLiveData()
+    internal val mCurrentPlayingTrack : MutableLiveData<Track> = MutableLiveData()
 
     private val mediaRouterCallback = object : MediaRouter.Callback(){
         override fun onRouteSelected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
@@ -140,7 +140,7 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
         mSessionManager.seek(position)
     }
 
-    override fun addToPlaylist(track: Samples.Track, index: Int?) {
+    override fun addToPlaylist(track: Track, index: Int?) {
         mSessionManager.add(track,index)
     }
 
@@ -197,8 +197,8 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
 
     override val isPlayingLiveData: LiveData<Boolean> get() = mIsPlaying
 
-    override val currentPlayingTrack: LiveData<Samples.Track>
+    override val currentPlayingTrack: LiveData<Track>
         get() = mCurrentPlayingTrack
 
-    override val getSession: List<Samples.Track> get() = mSessionManager.getSession
+    override val getSession: List<Track> get() = mSessionManager.getSession
 }

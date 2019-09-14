@@ -10,8 +10,7 @@ import androidx.mediarouter.media.MediaRouter
 import androidx.mediarouter.media.MediaSessionStatus
 import androidx.mediarouter.media.RemotePlaybackClient
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
-import ai.rever.goonj.audioplayer.models.Samples
-import ai.rever.goonj.audioplayer.models.Samples.SAMPLES
+import ai.rever.goonj.audioplayer.models.Track
 import ai.rever.goonj.audioplayer.service.AudioPlayerService
 import ai.rever.goonj.audioplayer.util.SingletonHolder
 import android.net.Uri
@@ -45,7 +44,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         }
     private val mContext: Context? get() = contextWeakReference.get()
     private val mIsPlaying: MutableLiveData<Boolean>? get() = (mContext as? AudioPlayerService)?.mIsPlaying
-    private val mCurrentPlayingTrack : MutableLiveData<Samples.Track>? get() = (mContext as? AudioPlayerService)?.mCurrentPlayingTrack
+    private val mCurrentPlayingTrack : MutableLiveData<Track>? get() = (mContext as? AudioPlayerService)?.mCurrentPlayingTrack
 
     private var mAutoplay : Boolean = true
     private var mIsHandlerRunning = false
@@ -75,7 +74,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         Log.d(TAG,"Start new getSession")
     }
 
-    override fun play(item: Samples.Track) {
+    override fun play(item: Track) {
         client?.play(item.url.toUri(), "audio/*", null, 0, null, object : RemotePlaybackClient.ItemActionCallback() {
             override fun onResult(
                 data: Bundle?,
@@ -110,7 +109,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         })
     }
 
-    private fun setMediaMetadata(item: Samples.Track){
+    private fun setMediaMetadata(item: Track){
         val musicMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
 
         musicMetadata.putString(MediaMetadata.KEY_TITLE, item.title)
@@ -146,7 +145,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         }
     }
 
-    override fun getStatus(item: Samples.Track, seek: Boolean, positionMs: Long) {
+    override fun getStatus(item: Track, seek: Boolean, positionMs: Long) {
         if (client?.hasSession() != true || item.remoteItemId == null) {
             // if getSession is not valid or item id not assigend yet.
             // just return, it's not fatal
@@ -289,7 +288,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
 
-    override fun setPlaylist(playlist: List<Samples.Track>) {}
+    override fun setPlaylist(playlist: List<Track>) {}
 
     override fun setVolume(volume: Float) {}
 
@@ -303,7 +302,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
         // TODO : Re-create RemotePlayer with playlist support
     }
 
-    private fun seekInternal(item: Samples.Track) {
+    private fun seekInternal(item: Track) {
         if (client?.hasSession() != true) {
             // ignore if no getSession
             return

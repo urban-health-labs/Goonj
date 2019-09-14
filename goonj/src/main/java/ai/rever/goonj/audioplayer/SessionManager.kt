@@ -1,7 +1,7 @@
 package ai.rever.goonj.audioplayer
 
 import ai.rever.goonj.audioplayer.interfaces.AudioPlayer
-import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.models.Track
 import android.content.Intent
 import android.util.Log
 import androidx.mediarouter.media.MediaItemStatus
@@ -11,16 +11,16 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
     var mPaused: Boolean = false
     private var mPlayer: AudioPlayer? = null
     private var mCallback: Callback? = null
-    private var mPlaylist: MutableList<Samples.Track> = ArrayList()
+    private var mPlaylist: MutableList<Track> = ArrayList()
     var isRemote: Boolean = false
 
-    var currentItem: Samples.Track? = if (mPlaylist.isEmpty()) null else mPlaylist[0]
+    var currentItem: Track? = if (mPlaylist.isEmpty()) null else mPlaylist[0]
 
-    val getSession : List<Samples.Track>
+    val getSession : List<Track>
         get() = mPlaylist
 
     // Returns the cached playlist (note this is not responsible for updating it)
-    val playlist: List<Samples.Track>
+    val playlist: List<Track>
         get() = mPlaylist
 
     fun setRemotePlayerSelected(isRemote: Boolean){
@@ -39,7 +39,7 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
         }
     }
 
-    fun add(item: Samples.Track, index: Int ?= -1) {
+    fun add(item: Track, index: Int ?= -1) {
 
         index?.let {
             if(it >= 0 && it < mPlaylist.size){
@@ -202,6 +202,6 @@ class SessionManager(private val mName: String) : AudioPlayer.Callback {
 
     interface Callback {
         fun onStatusChanged()
-        fun onItemChanged(item: Samples.Track)
+        fun onItemChanged(item: Track)
     }
 }

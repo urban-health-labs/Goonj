@@ -14,7 +14,6 @@ import androidx.mediarouter.media.MediaItemStatus
 import java.io.Serializable
 
 
-object Samples {
 
     val SAMPLES = arrayOf(
         Track(
@@ -109,4 +108,3 @@ object Samples {
         return context?.let { ContextCompat.getDrawable(it, bitmapResource)?.toBitmap() }
     }
 
-}

@@ -7,24 +7,115 @@
         android:layout_height="match_parent"
         tools:context=".MidActivity">
 
-    <Button
-            android:text="Start Music"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/button2"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="161dp"
-            app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="341dp"
-            android:layout_marginLeft="161dp"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
 
-    <Button
-            android:text="Download"
-            android:layout_width="150dp"
-            android:layout_height="43dp"
-            android:id="@+id/buttonDownload"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toTopOf="@+id/button2" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="160dp"
-            android:layout_marginLeft="160dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Talkies"/>
+        <ImageButton
+                android:id="@+id/activity_mid_download1_btn"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:src="@mipmap/ic_download_arrow"
+                android:layout_alignParentRight="true" />
+        <ImageView
+                android:id="@+id/activity_mid_done1_btn"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:src="@mipmap/ic_done"
+                android:layout_alignParentRight="true"
+                android:visibility="gone"/>
+
+    </RelativeLayout>
+
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Jazz in Paris"/>
+            <ImageButton
+                    android:id="@+id/activity_mid_download2_btn"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:src="@mipmap/ic_download_arrow"
+                    android:layout_alignParentRight="true" />
+            <ImageView
+                    android:id="@+id/activity_mid_done2_btn"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:src="@mipmap/ic_done"
+                    android:layout_alignParentRight="true"
+                    android:visibility="gone"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="The messenger"/>
+            <ImageButton
+                    android:id="@+id/activity_mid_download3_btn"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:src="@mipmap/ic_download_arrow"
+                    android:layout_alignParentRight="true" />
+            <ImageView
+                    android:id="@+id/activity_mid_done3_btn"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:src="@mipmap/ic_done"
+                    android:layout_alignParentRight="true"
+                    android:visibility="gone"/>
+
+        </RelativeLayout>
+
+
+
+        <Button
+                android:text="Start Music"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:id="@+id/button2"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+        <Button
+                android:text="Download"
+                android:layout_width="150dp"
+                android:layout_height="43dp"
+                android:id="@+id/buttonDownload"
+                android:layout_marginBottom="16dp"/>
+    </LinearLayout>
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

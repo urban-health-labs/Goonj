@@ -1,6 +1,6 @@
 package ai.rever.goonj.audioplayer.interfaces
 
-import ai.rever.goonj.audioplayer.models.Samples
+import ai.rever.goonj.audioplayer.models.Track
 import android.content.Intent
 import androidx.lifecycle.LiveData
 
@@ -10,7 +10,7 @@ interface PlaybackInterface {
     fun resume()
     fun stop()
     fun seekTo(position: Long)
-    fun addToPlaylist(track : Samples.Track, index: Int?= -1){}
+    fun addToPlaylist(track : Track, index: Int?= -1){}
     fun startNewSession()
     fun customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean,
                               fastForwardIncrementMs: Long , rewindIncrementMs: Long,
@@ -23,6 +23,6 @@ interface PlaybackInterface {
     fun skipToPrevious()
     fun removeNotification()
     val isPlayingLiveData: LiveData<Boolean>
-    val currentPlayingTrack : LiveData<Samples.Track>
-    val getSession : List<Samples.Track>
+    val currentPlayingTrack : LiveData<Track>
+    val getSession : List<Track>
 }
