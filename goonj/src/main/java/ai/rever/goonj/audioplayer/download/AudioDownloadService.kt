@@ -2,10 +2,12 @@ package ai.rever.goonj.audioplayer.download
 
 import ai.rever.goonj.R
 import ai.rever.goonj.audioplayer.download.DownloadUtil
+import ai.rever.goonj.audioplayer.download.database.DownloadRepository
 import android.app.Notification
 import androidx.annotation.Nullable
 import ai.rever.goonj.audioplayer.util.DOWNLOAD_CHANNEL_ID
 import ai.rever.goonj.audioplayer.util.DOWNLOAD_NOTIFICATION_ID
+import android.util.Log.e
 import com.google.android.exoplayer2.offline.Download
 import com.google.android.exoplayer2.offline.DownloadManager
 import com.google.android.exoplayer2.offline.DownloadService
@@ -33,6 +35,16 @@ class AudioDownloadService : DownloadService(
         return null
     }
 
+    override fun onDownloadChanged(download: Download?) {
+        val mediaId = download?.request?.id
+        e("============>","DownloadID: $mediaId")
 
+        if(download?.state == Download.STATE_COMPLETED){
 
+            mediaId?.let {
+                DownloadRepository(application).updateDownload(mediaId,download.state)
+            }
+
+        }
+    }
 }

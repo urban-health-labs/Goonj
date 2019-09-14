@@ -4,16 +4,19 @@ import ai.rever.goonj.R
 import android.content.Context
 import androidx.annotation.DrawableRes
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.os.Bundle
+import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.mediarouter.media.MediaItemStatus
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
+import com.google.android.exoplayer2.offline.Download
+import com.google.android.exoplayer2.offline.DownloadManager
 import java.io.Serializable
-
-
 
     val SAMPLES = arrayOf(
         Track(
@@ -63,11 +66,15 @@ import java.io.Serializable
             "https://www.mobygames.com/images/covers/l/507031-the-messenger-nintendo-switch-front-cover.jpg"
         )
     )
-
+    @Entity(tableName = "download_table")
     class Track(
-        val url: String, val mediaId: String, val title: String, val artist: String,
+        val url: String,
+        @PrimaryKey
+        val mediaId: String,
+        val title: String, val artist: String,
         val albumArtUrl : String? = ""
     ) : Serializable {
+        var downloadedState = Download.STATE_QUEUED
         var state = MediaItemStatus.PLAYBACK_STATE_PENDING
         var index : Int = 0
         var position: Long = 0
@@ -75,6 +82,8 @@ import java.io.Serializable
         var timestamp: Long = 0
         var remoteItemId: String? = null
         var bitmapResource: Int = R.mipmap.ic_album_art
+
+        @Ignore
         var bitmap: Bitmap? = null
 
         override fun toString(): String {
