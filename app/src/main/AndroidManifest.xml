@@ -25,6 +25,8 @@
                 android:name=".AudioPlayerActivity"
                 android:launchMode="singleInstance">
         </activity>
-
+        <service android:name=".AudioService"
+                android:stopWithTask="true">
+        </service>
     </application>
 </manifest>

@@ -16,7 +16,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import io.reactivex.Observable
 
-class AudioPlayerService : LifecycleService(), PlaybackInterface{
+open class AudioPlayerService : LifecycleService(), PlaybackInterface{
 
     lateinit var context: Context
 
@@ -193,6 +193,10 @@ class AudioPlayerService : LifecycleService(), PlaybackInterface{
 
     override fun removeNotification() {
         mSessionManager.removeNotification()
+    }
+
+    open fun onComplete(){
+
     }
 
     override val isPlayingLiveData: LiveData<Boolean> get() = mIsPlaying

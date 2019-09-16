@@ -54,6 +54,7 @@ class RemotePlayer constructor (var contextWeakReference: WeakReference<Context>
     }
 
     override fun connect(route: MediaRouter.RouteInfo?) {
+        // TODO check for play services
         mRoute = route
         client = RemotePlaybackClient(mContext, route)
 

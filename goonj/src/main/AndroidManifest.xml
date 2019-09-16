@@ -1,13 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="ai.rever.goonj">
-
-
-
     <application>
         <service android:name=".audioplayer.service.AudioPlayerService"
-                android:stopWithTask="true">
-
-        </service>
+                android:stopWithTask="true"/>
         <service android:name=".audioplayer.download.AudioDownloadService"/>
         <meta-data
                 android:name=

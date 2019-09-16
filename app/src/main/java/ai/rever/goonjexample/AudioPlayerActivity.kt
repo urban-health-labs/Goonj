@@ -20,6 +20,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.google.android.gms.cast.framework.CastButtonFactory
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -139,9 +141,9 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     private fun setupPlayer() {
         startNewSession(this)
         addAudioToPlaylist(this, SAMPLES[0])
-//        addAudioToPlaylist(this, SAMPLES[1])
-//        addAudioToPlaylist(this, SAMPLES[2])
-//        addAudioToPlaylist(this, SAMPLES[3])
+        addAudioToPlaylist(this, SAMPLES[1])
+        addAudioToPlaylist(this, SAMPLES[2])
+        addAudioToPlaylist(this, SAMPLES[3])
     }
 
     override fun onBackPressed() {
@@ -179,7 +181,20 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     }
 
     private fun setCastButton() {
-        CastButtonFactory.setUpMediaRouteButton(this, audioPlayerMRB)
+        if (isGooglePlayServicesAvailable())
+            CastButtonFactory.setUpMediaRouteButton(this, audioPlayerMRB)
+    }
+
+    private fun isGooglePlayServicesAvailable() : Boolean{
+        val apiAvailability = GoogleApiAvailability.getInstance()
+        val status = apiAvailability.isGooglePlayServicesAvailable(this)
+        if(status != ConnectionResult.SUCCESS){
+            if(apiAvailability.isUserResolvableError(status)){
+                apiAvailability.getErrorDialog(this,status,2404).show()
+            }
+            return false
+        }
+        return true
     }
 
     override fun onDestroy() {

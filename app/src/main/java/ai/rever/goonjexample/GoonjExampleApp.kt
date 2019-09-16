@@ -20,8 +20,9 @@ class GoonjExampleApp: Application(), LifecycleObserver {
     fun onAppCreate() {
         Log.e("=============>", "create")
 
-        val pendingIntent = Intent(applicationContext,AudioPlayerActivity::class.java)
-        PlaybackManager.getInstance(this).register(pendingIntent)
+        val pendingIntent = Intent(applicationContext, AudioPlayerActivity::class.java)
+
+        PlaybackManager.getInstance(this).register(pendingIntent, AudioService::class.java)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)

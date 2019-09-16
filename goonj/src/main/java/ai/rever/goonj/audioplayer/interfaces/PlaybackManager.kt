@@ -8,15 +8,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import android.util.Log.e
 import java.lang.Exception
 
-class PlaybackManager (private val mContext : Context){
+class PlaybackManager(private val mContext : Context){
+
+    companion object : SingletonHolder<PlaybackManager, Context>(::PlaybackManager)
 
     lateinit var playbackInterface : PlaybackInterface
     private var mServiceBound = false
     private var mServiceConnection: ServiceConnection? = null
 
-    fun register(intent: Intent) {
+    fun <T: AudioPlayerService>register(intent: Intent, audioServiceClass: Class<T>) {
         if(mServiceConnection == null){
             mServiceConnection = object : ServiceConnection{
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -34,12 +37,13 @@ class PlaybackManager (private val mContext : Context){
             }
         }
 
-        try{
-            mContext.applicationContext.bindService(Intent(
-                mContext.applicationContext, AudioPlayerService::class.java),
-                mServiceConnection!!, Context.BIND_AUTO_CREATE)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        mServiceConnection?.let {
+            mContext.applicationContext.bindService(
+                Intent(
+                    mContext.applicationContext, audioServiceClass
+                ),
+                mServiceConnection!!, Context.BIND_AUTO_CREATE
+            )
         }
     }
 
@@ -118,5 +122,4 @@ class PlaybackManager (private val mContext : Context){
 
     val currentSession get() = playbackInterface.getSession
 
-    companion object : SingletonHolder<PlaybackManager,Context>(::PlaybackManager)
 }
