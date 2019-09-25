@@ -1,8 +1,11 @@
 package ai.rever.goonjexample
 
-import ai.rever.goonj.audioplayer.interfaces.PlaybackManager
+import ai.rever.goonj.GoonjPlayer
+import ai.rever.goonj.models.Track
 import android.app.Application
+import android.app.Service
 import android.content.Intent
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -18,17 +21,18 @@ class GoonjExampleApp: Application(), LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onAppCreate() {
-        Log.e("=============>", "create")
-
         val pendingIntent = Intent(applicationContext, AudioPlayerActivity::class.java)
 
-        PlaybackManager.getInstance(this).register(pendingIntent, AudioService::class.java)
+        GoonjPlayer.initialize(this)
+            .setPendingIntentForNotification(pendingIntent)
+            .setTrackComplete {  }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onAppDestroy() {
         Log.e("=============>", "destroy")
 
-        PlaybackManager.getInstance(this).unregister()
+        GoonjPlayer.unregister()
     }
 }
+

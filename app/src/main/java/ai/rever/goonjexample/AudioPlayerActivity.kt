@@ -1,29 +1,24 @@
 package ai.rever.goonjexample
 
-import ai.rever.goonj.audioplayer.analytics.*
-import ai.rever.goonj.audioplayer.interfaces.GoonjPlayer
-import ai.rever.goonj.audioplayer.interfaces.AutoLoadListener
-import ai.rever.goonj.audioplayer.models.SAMPLES
+import ai.rever.goonj.analytics.analyticsObservable
+import ai.rever.goonj.analytics.isLoggable
+import ai.rever.goonj.interfaces.GoonjPlayer
+import ai.rever.goonj.interfaces.AutoLoadListener
+import ai.rever.goonj.models.SAMPLES
 import android.os.Bundle
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_audio_player.*
 import android.media.AudioManager
 import android.view.KeyEvent
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.util.Log
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.squareup.picasso.Picasso
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
@@ -31,23 +26,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     val TAG = "AUDIO_PLAYER_ACTIVITY"
     var load = true
 
-    val analyticsObserver = object : io.reactivex.Observer<AnalyticsModel> {
-        override fun onComplete() {
-            logAnalyticsEvent("onComplete")
-        }
-
-        override fun onSubscribe(d: Disposable) {
-            logAnalyticsEvent("onSubscribe")
-        }
-
-        override fun onNext(t: AnalyticsModel) {
-            logAnalyticsEvent(t.toString())
-        }
-
-        override fun onError(e: Throwable) {
-            logAnalyticsEvent(e.message, true)
-        }
-    }
+    private lateinit var disposable: Disposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,59 +37,60 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         customizeNotification()
         setupPlayer()
 
-
         setCastButton()
 
         isLoggable = true
-        analyticsObservable.subscribe(analyticsObserver)
+        disposable = analyticsObservable.subscribe {
+            logAnalyticsEvent(it.toString())
+        }
 
     }
 
     private fun setupUI() {
 
-        isPlayingLiveData(this).observe(this, Observer { isAudioPlaying ->
+        isPlayingLiveData?.observe(this, Observer { isAudioPlaying ->
             audioPlayerPlayPauseToggleBtn.isChecked = !isAudioPlaying
         })
 
         audioPlayerPlayPauseToggleBtn.setOnCheckedChangeListener { _, paused ->
             if (paused) {
-                pause(this)
+                pause()
             } else {
-                play(this)
+                play()
             }
         }
 
-        currentPlayingTrack(this).observe(this, Observer { currentItem ->
-            Picasso.get().load(currentItem?.albumArtUrl).into(audioPlayerAlbumArtIV)
+        currentPlayingTrack?.observe(this, Observer { currentItem ->
+            Picasso.get().load(currentItem?.imageUrl).into(audioPlayerAlbumArtIV)
             audioPlayerAlbumTitleTv.text = currentItem?.title
-            audioPlayerAlbumArtistTv.text = currentItem?.artist
+            audioPlayerAlbumArtistTv.text = currentItem?.artistName
             Log.d(TAG,"TRACK: $currentItem")
-            Log.d(TAG,"Position: ${currentItem.position}")
-            audioPlayerCurrentPosition.text = (currentItem.position/1000).toString()
-            audioPlayerContentDuration.text = (currentItem.duration/1000).toString()
+            Log.d(TAG,"Position: ${currentItem.currentData.position}")
+            audioPlayerCurrentPosition.text = (currentItem.currentData.position/1000).toString()
+            audioPlayerContentDuration.text = (currentItem.currentData.duration/1000).toString()
             audioPlayerProgressBar.progress =
-                ((currentItem.position.toDouble() / currentItem.duration.toDouble()) * 100.0).toInt()
+                ((currentItem.currentData.position.toDouble() / currentItem.currentData.duration.toDouble()) * 100.0).toInt()
         })
 
         audioPlayerForward10s.setOnClickListener {
-            seek(this,5000)
+            seek(5000)
         }
 
         audioPlayerRewind10s.setOnClickListener {
-            seek(this, -3000)
+            seek(-3000)
         }
 
         audioPlayerAutoplaySwitch.setOnCheckedChangeListener { _, autoplay ->
-            val autoLoad = object : AutoLoadListener{
+            val autoLoad = object : AutoLoadListener {
                 override fun onLoadTracks() {
                     Log.d(TAG,"============= LOAD NEW TRACKS")
                     if(load) {
                         val handler = Handler()
                         handler.postDelayed({
                             if(load) {
-                                addAudioToPlaylist(applicationContext, SAMPLES[4])
+                                addTrack(SAMPLES[4])
                                 // add at particular index
-//                                addAudioToPlaylist(applicationContext, SAMPLES[5], 2)
+//                                addTrack(applicationContext, SAMPLES[5], 2)
 //                                removeTrack(applicationContext,0)
 //                                moveTrack(applicationContext,0,2)
                                 load = false
@@ -120,37 +100,36 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
                     }
                 }
             }
-            setAutoplay(this,autoplay,1,autoLoad)
+            setAutoplay(autoplay,1,autoLoad)
         }
 
         audioPlayerSkipNext.setOnClickListener {
-            skipToNext(this)
+            skipToNext()
         }
 
         audioPlayerSkipPrev.setOnClickListener {
-            skipToPrevious(this)
+            skipToPrevious()
         }
 
 
     }
 
     private fun customizeNotification(){
-        customizeNotification(this,true,true,
-            10000,5000,R.mipmap.ic_launcher)
+        customizeNotification(true,true,
+            10000,5000, R.mipmap.ic_launcher)
     }
     private fun setupPlayer() {
-        startNewSession(this)
-        addAudioToPlaylist(this, SAMPLES[0])
-        addAudioToPlaylist(this, SAMPLES[1])
-        addAudioToPlaylist(this, SAMPLES[2])
-        addAudioToPlaylist(this, SAMPLES[3])
+        startNewSession()
+        addTrack(SAMPLES[0])
+        addTrack(SAMPLES[1])
+        addTrack(SAMPLES[2])
+        addTrack(SAMPLES[3])
     }
 
     override fun onBackPressed() {
-        removeNotification(this)
+        removeNotification()
         super.onBackPressed()
-        pause(this)
-
+        pause()
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -199,8 +178,8 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     override fun onDestroy() {
         Log.d(TAG,"=========> apa destroy")
-        analyticsObservable.unsubscribeOn(AndroidSchedulers.mainThread())
         super.onDestroy()
+        disposable.dispose()
     }
 
 
@@ -214,7 +193,5 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             }
         }
     }
-
-
 }
 

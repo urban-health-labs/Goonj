@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 apply plugin: 'com.github.dcendents.android-maven'
@@ -35,10 +35,15 @@ android {
 
 }
 
+androidExtensions {
+    experimental = true
+}
+
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
@@ -46,10 +51,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // AndroidX
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.core:core-ktx:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.1.0'
 
-    implementation 'com.google.android.gms:play-services-cast-framework:17.0.0'
+    implementation 'com.google.android.gms:play-services-cast-framework:17.1.0'
 
 
     // Architecture components
@@ -57,10 +62,10 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:1.1.1"
     kapt "android.arch.persistence.room:compiler:1.1.1"
 
-    // RxJava
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    // RxKotlin
+    api "io.reactivex.rxjava2:rxkotlin:2.4.0"
 
-    // Exo LocalPlayer
+    // Exo LocalAudioPlayer
     implementation 'com.google.android.exoplayer:exoplayer-core:2.10.3'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.10.3'
     implementation 'com.google.android.exoplayer:extension-mediasession:2.10.0'
