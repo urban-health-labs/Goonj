@@ -1,7 +1,7 @@
-package ai.rever.goonj.local
+package ai.rever.goonj.player
 
+import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.interfaces.AudioPlayer
-import ai.rever.goonj.service.GoonjService
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
@@ -9,11 +9,15 @@ import android.media.AudioManager
 import android.os.Build
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
-import java.lang.ref.WeakReference
 
-abstract class FocusAudioPlayer constructor(goonjService: GoonjService): AudioPlayer(goonjService), AudioManager.OnAudioFocusChangeListener {
+abstract class FocusAudioPlayer: AudioPlayer, AudioManager.OnAudioFocusChangeListener {
 
-    val player: SimpleExoPlayer by lazy { ExoPlayerFactory.newSimpleInstance(appContext) }
+    private val mPlayer: SimpleExoPlayer by lazy { ExoPlayerFactory.newSimpleInstance(appContext) }
+
+    val player: SimpleExoPlayer get() {
+//        threadLog()
+        return mPlayer
+    }
 
     val focusLock = Any()
 
@@ -26,8 +30,6 @@ abstract class FocusAudioPlayer constructor(goonjService: GoonjService): AudioPl
 
     private var playbackDelayed = false
     private var resumeOnFocusGain = false
-
-
 
     fun requestAudioFocus(focusLock: Any) {
 

@@ -1,20 +1,24 @@
 package ai.rever.goonj.models
 
+import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.R
 import android.content.Context
-import androidx.annotation.DrawableRes
-import android.graphics.Bitmap
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.net.toUri
 import androidx.mediarouter.media.MediaItemStatus
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.android.exoplayer2.offline.Download
+import com.google.android.gms.cast.MediaInfo
+import com.google.android.gms.cast.MediaLoadRequestData
+import com.google.android.gms.cast.MediaMetadata
+import com.google.android.gms.common.images.WebImage
 import kotlinx.android.parcel.Parcelize
 
 
@@ -67,32 +71,6 @@ val SAMPLES = arrayOf(
     )
 )
 
-//@Entity(tableName = "download_table")
-//class Track(
-//    val url: String,
-//    @PrimaryKey
-//    val id: String,
-//    val title: String,
-//    val artistName: String,
-//    val albumArtUrl : String? = ""
-//) : Serializable {
-//    var downloadedState = Download.STATE_QUEUED
-//    var state = MediaItemStatus.PLAYBACK_STATE_PENDING
-//    var index : Int = 0
-//    var position: Long = 0
-//    var duration: Long = 0
-//    var remoteItemId: String? = null
-//    var bitmapResource: Int = R.mipmap.ic_album_art
-//
-//    @Ignore
-//    var bitmap: Bitmap? = null
-//
-//    override fun toString(): String {
-//        return "$title Description: $artistName DURATION: $duration INDEX: $index state: $state"
-//    }
-//}
-
-
 @Entity(tableName = "download_table")
 @Parcelize
 data class Track (var url: String = "",
@@ -100,53 +78,69 @@ data class Track (var url: String = "",
                   var id: String = "",
                   var title: String = "",
                   var artistName: String = "",
-                  @Ignore
-                  var extras: Bundle? = null,
                   var imageUrl: String? = null,
                   var downloadedState: Int = Download.STATE_QUEUED,
+
                   @Ignore
-                  val currentData: CurrentTrackData = CurrentTrackData()
-): Parcelable
+                  var extras: Bundle? = null,
+                  @Ignore
+                  val state: TrackState = TrackState()
+): Parcelable {
+
+    private val mediaInfo: MediaInfo? get() {
+        if (url.isEmpty()) return null
+        val musicMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
+
+        musicMetadata.putString(MediaMetadata.KEY_TITLE, title)
+        musicMetadata.putString(MediaMetadata.KEY_ARTIST, artistName)
+
+        imageUrl?.let {
+            musicMetadata.addImage(WebImage(it.toUri()))
+        }
+
+        return MediaInfo.Builder(url)
+            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+            .setContentType("audio/*")
+            .setMetadata(musicMetadata)
+            .build()
+    }
+
+    val mediaLoadRequestData: MediaLoadRequestData? get() {
+        return MediaLoadRequestData.Builder()
+            .setMediaInfo(mediaInfo?: return null)
+            .build()
+    }
+
+    val mediaDescription: MediaDescriptionCompat get() {
+        val extras = Bundle()
+        val mediaDescriptionBuilder =  MediaDescriptionCompat.Builder()
+            .setMediaId(id)
+            .setTitle(title)
+            .setDescription(artistName)
+            .setExtras(extras)
+
+        val bitmap = appContext?.defaultBitmap
+        extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
+        extras.putParcelable(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, bitmap)
+
+        mediaDescriptionBuilder.setIconBitmap(bitmap)
+
+        return mediaDescriptionBuilder.build()
+    }
+}
 
 
 @Parcelize
-data class CurrentTrackData(var state: Int = MediaItemStatus.PLAYBACK_STATE_PENDING,
-                            var index: Int = 0,
-                            var position: Long = 0,
-                            var duration: Long = 0,
-                            var remoteItemId: String? = null): Parcelable
+data class TrackState(var state: Int = MediaItemStatus.PLAYBACK_STATE_PENDING,
+                      var index: Int = 0,
+                      var position: Long = 0,
+                      var duration: Long = 0,
+                      var remoteItemId: String? = null): Parcelable
 
 
 
-fun getMediaDescription(context: Context?, track: Track): MediaDescriptionCompat {
-    val extras = Bundle()
-    val mediaDescriptionBuilder =  MediaDescriptionCompat.Builder()
-        .setMediaId(track.id)
-        .setTitle(track.title)
-        .setDescription(track.artistName)
-        .setExtras(extras)
 
-    val bitmap = getBitmap(context, R.mipmap.ic_album_art)
-    extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
-    extras.putParcelable(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, bitmap)
+val Context.defaultBitmap get() = ContextCompat.getDrawable(this, R.mipmap.ic_album_art)
+    ?.toBitmap()
 
-    mediaDescriptionBuilder.setIconBitmap(bitmap)
-
-//    appContext?.let {
-//        if(track.currentData.bitmap != null){
-//            mediaDescriptionBuilder.setIconBitmap(track.currentData.bitmap)
-//        } else {
-//            val bitmap = getBitmap(appContext, track.bitmapResource)
-//            extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
-//            extras.putParcelable(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, bitmap)
-//
-//            mediaDescriptionBuilder.setIconBitmap(bitmap)
-//        }
-//    }
-    return mediaDescriptionBuilder.build()
-}
-
-fun getBitmap(context: Context?, @DrawableRes bitmapResource: Int = R.mipmap.ic_album_art): Bitmap? {
-    return context?.let { ContextCompat.getDrawable(it, bitmapResource)?.toBitmap() }
-}
 

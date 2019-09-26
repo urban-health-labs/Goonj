@@ -3,15 +3,13 @@ package ai.rever.goonjexample
 import ai.rever.goonj.analytics.analyticsObservable
 import ai.rever.goonj.analytics.isLoggable
 import ai.rever.goonj.interfaces.GoonjPlayer
-import ai.rever.goonj.interfaces.AutoLoadListener
 import ai.rever.goonj.models.SAMPLES
+import ai.rever.goonj.models.Track
 import android.os.Bundle
-import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_audio_player.*
 import android.media.AudioManager
 import android.view.KeyEvent
 import android.content.Context
-import android.os.Handler
 import android.util.Log
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
@@ -19,14 +17,21 @@ import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.squareup.picasso.Picasso
-import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
+import java.lang.Exception
+
+fun log(message: String = "Okay") {
+    Log.e("===========>", message)
+}
 
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
-    val TAG = "AUDIO_PLAYER_ACTIVITY"
+//    val TAG = "AUDIO_PLAYER_ACTIVITY"
     var load = true
 
-    private lateinit var disposable: Disposable
+    private var compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,17 +45,57 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         setCastButton()
 
         isLoggable = true
-        disposable = analyticsObservable.subscribe {
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        compositeDisposable += analyticsObservable.subscribe {
             logAnalyticsEvent(it.toString())
         }
 
+
+        isPlayingObservable?.subscribe {
+            audioPlayerPlayPauseToggleBtn.isChecked = !it
+        }?.addTo(compositeDisposable)
+
+        currentPlayingTrackObservable?.subscribe(::onPlayingTrackChange)?.addTo(compositeDisposable)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        compositeDisposable.clear()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.dispose()
+    }
+
+    var knownTrack: Track =  Track()
+
+    private fun onPlayingTrackChange(currentItem: Track) {
+        if (knownTrack.id != currentItem.id) {
+            Picasso.get().load(currentItem.imageUrl).into(audioPlayerAlbumArtIV)
+            audioPlayerAlbumTitleTv.text = currentItem.title
+            audioPlayerAlbumArtistTv.text = currentItem.artistName
+        }
+//        Log.d(TAG, "TRACK: $currentItem")
+//        Log.d(TAG, "Position: ${currentItem.state.position}")
+        try {
+            audioPlayerCurrentPosition.text = (currentItem.state.position / 1000).toString()
+            audioPlayerContentDuration.text = (currentItem.state.duration / 1000).toString()
+            audioPlayerProgressBar.progress =
+                ((currentItem.state.position.toDouble() / currentItem.state.duration.toDouble()) * 100.0).toInt()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        knownTrack = currentItem
     }
 
     private fun setupUI() {
 
-        isPlayingLiveData?.observe(this, Observer { isAudioPlaying ->
-            audioPlayerPlayPauseToggleBtn.isChecked = !isAudioPlaying
-        })
 
         audioPlayerPlayPauseToggleBtn.setOnCheckedChangeListener { _, paused ->
             if (paused) {
@@ -60,17 +105,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             }
         }
 
-        currentPlayingTrack?.observe(this, Observer { currentItem ->
-            Picasso.get().load(currentItem?.imageUrl).into(audioPlayerAlbumArtIV)
-            audioPlayerAlbumTitleTv.text = currentItem?.title
-            audioPlayerAlbumArtistTv.text = currentItem?.artistName
-            Log.d(TAG,"TRACK: $currentItem")
-            Log.d(TAG,"Position: ${currentItem.currentData.position}")
-            audioPlayerCurrentPosition.text = (currentItem.currentData.position/1000).toString()
-            audioPlayerContentDuration.text = (currentItem.currentData.duration/1000).toString()
-            audioPlayerProgressBar.progress =
-                ((currentItem.currentData.position.toDouble() / currentItem.currentData.duration.toDouble()) * 100.0).toInt()
-        })
+
 
         audioPlayerForward10s.setOnClickListener {
             seek(5000)
@@ -81,26 +116,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         }
 
         audioPlayerAutoplaySwitch.setOnCheckedChangeListener { _, autoplay ->
-            val autoLoad = object : AutoLoadListener {
-                override fun onLoadTracks() {
-                    Log.d(TAG,"============= LOAD NEW TRACKS")
-                    if(load) {
-                        val handler = Handler()
-                        handler.postDelayed({
-                            if(load) {
-                                addTrack(SAMPLES[4])
-                                // add at particular index
-//                                addTrack(applicationContext, SAMPLES[5], 2)
-//                                removeTrack(applicationContext,0)
-//                                moveTrack(applicationContext,0,2)
-                                load = false
-                            }
-                        },4000)
-
-                    }
-                }
-            }
-            setAutoplay(autoplay,1,autoLoad)
+            setAutoplay(autoplay)
         }
 
         audioPlayerSkipNext.setOnClickListener {
@@ -110,13 +126,11 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         audioPlayerSkipPrev.setOnClickListener {
             skipToPrevious()
         }
-
-
     }
 
     private fun customizeNotification(){
         customizeNotification(true,true,
-            10000,5000, R.mipmap.ic_launcher)
+            10000, 5000, R.mipmap.ic_launcher)
     }
     private fun setupPlayer() {
         startNewSession()
@@ -127,8 +141,8 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     }
 
     override fun onBackPressed() {
-        removeNotification()
         super.onBackPressed()
+        removeNotification()
         pause()
     }
 
@@ -174,12 +188,6 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             return false
         }
         return true
-    }
-
-    override fun onDestroy() {
-        Log.d(TAG,"=========> apa destroy")
-        super.onDestroy()
-        disposable.dispose()
     }
 
 

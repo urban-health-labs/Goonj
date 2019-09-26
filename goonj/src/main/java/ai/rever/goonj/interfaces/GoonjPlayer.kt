@@ -1,7 +1,8 @@
 package ai.rever.goonj.interfaces
 
-import ai.rever.goonj.GoonjPlayer
+import ai.rever.goonj.Goonj
 import ai.rever.goonj.models.Track
+import io.reactivex.android.schedulers.AndroidSchedulers
 
 /**
  * This interface will be visible to User
@@ -9,29 +10,27 @@ import ai.rever.goonj.models.Track
 interface GoonjPlayer {
 
     fun startNewSession() {
-        GoonjPlayer.startNewSession()
+        Goonj.startNewSession()
     }
 
     fun play() {
-        GoonjPlayer.play()
+        Goonj.resume()
     }
 
     fun pause() {
-        GoonjPlayer.pause()
+        Goonj.pause()
     }
 
     fun seek(positionMS: Long){
-        GoonjPlayer.seekTo(positionMS)
+        Goonj.seekTo(positionMS)
     }
 
-    fun setAutoplay(autoplay : Boolean, indexFromLast: Int,
-                            autoLoadListener: AutoLoadListener
-    ) {
-        GoonjPlayer.setAutoplay(autoplay, indexFromLast, autoLoadListener)
+    fun setAutoplay(autoplay : Boolean) {
+        Goonj.setAutoplay(autoplay)
     }
 
     fun addTrack(track: Track, index: Int ?= null) {
-        GoonjPlayer.addTrack(track, index)
+        Goonj.addTrack(track, index)
     }
 
     fun customizeNotification(useNavigationAction: Boolean = true,
@@ -40,30 +39,32 @@ interface GoonjPlayer {
                               rewindIncrementMs: Long = 0L,
                               smallIcon : Int){
 
-        GoonjPlayer.customiseNotification(useNavigationAction,
+        Goonj.customiseNotification(useNavigationAction,
             usePlayPauseAction,
             fastForwardIncrementMs,
             rewindIncrementMs,
             smallIcon)
     }
 
-    val currentTrack get() = GoonjPlayer.currentTrack
+    val currentTrack get() = Goonj.trackList
 
     fun removeTrack(index : Int){
-        GoonjPlayer.removeTrack(index)
+        Goonj.removeTrack(index)
     }
 
     fun moveTrack(currentIndex : Int, finalIndex : Int){
-        GoonjPlayer.moveTrack(currentIndex, finalIndex)
+        Goonj.moveTrack(currentIndex, finalIndex)
     }
 
-    fun skipToNext() = GoonjPlayer.skipToNext()
+    fun skipToNext() = Goonj.skipToNext()
 
-    fun skipToPrevious() = GoonjPlayer.skipToPrevious()
+    fun skipToPrevious() = Goonj.skipToPrevious()
 
-    fun removeNotification() = GoonjPlayer.removeNotification()
+    fun removeNotification() = Goonj.removeNotification()
 
-    val isPlayingLiveData get() = GoonjPlayer.isPlayingLiveData
+    fun finishTrack() = Goonj.finishTrack()
 
-    val currentPlayingTrack get() = GoonjPlayer.currentPlayingTrack
+    val isPlayingObservable get() = Goonj.isPlayingObservable
+
+    val currentPlayingTrackObservable get() = Goonj.currentPlayingTrack?.subscribeOn(AndroidSchedulers.mainThread())
 }

@@ -1,7 +1,7 @@
 package ai.rever.goonj.download.database
 
+import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.models.Track
-import android.app.Application
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.Room
@@ -14,16 +14,14 @@ abstract class DownloadDatabase : RoomDatabase(){
         @Volatile
         private var INSTANCE: DownloadDatabase? = null
 
-        fun getDatabase(context: Application): DownloadDatabase? {
+        fun getDatabase(): DownloadDatabase? {
             if (INSTANCE == null) {
                 synchronized(DownloadDatabase::class.java) {
                     if (INSTANCE == null) {
-                        INSTANCE = Room.databaseBuilder(
-                            context.applicationContext,
+                        INSTANCE = Room.databaseBuilder(appContext?: return null,
                             DownloadDatabase::class.java,
                             "download_database"
-                        ).allowMainThreadQueries()
-                            .build()
+                        ).allowMainThreadQueries().build()
                     }
                 }
             }
@@ -32,3 +30,4 @@ abstract class DownloadDatabase : RoomDatabase(){
     }
 
 }
+

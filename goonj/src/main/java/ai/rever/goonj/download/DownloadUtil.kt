@@ -1,10 +1,10 @@
 package ai.rever.goonj.download
 
+import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.R
 import ai.rever.goonj.download.database.DownloadRepository
 import ai.rever.goonj.models.Track
 import android.app.Application
-import android.content.Context
 import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import com.google.android.exoplayer2.database.ExoDatabaseProvider
@@ -23,29 +23,27 @@ class DownloadUtil {
 
         private var cache: Cache? = null
         private var downloadManager: DownloadManager? = null
-        lateinit var application: Application
         lateinit var downloadRepository: DownloadRepository
 
         @Synchronized
-        fun getCache(context: Context): Cache {
+        fun getCache(): Cache {
             if (cache == null) {
-                val cacheDirectory = File(context.getExternalFilesDir(null), "downloads")
-                cache =
-                    SimpleCache(cacheDirectory, NoOpCacheEvictor(), ExoDatabaseProvider(context))
+                val cacheDirectory = File(appContext?.getExternalFilesDir(null), "downloads")
+                cache = SimpleCache(cacheDirectory, NoOpCacheEvictor(), ExoDatabaseProvider(appContext))
             }
             return cache as Cache
         }
 
         @Synchronized
-        fun getDownloadManager(context: Context): DownloadManager {
+        fun getDownloadManager(): DownloadManager {
             if (downloadManager == null) {
                 downloadManager = DownloadManager(
-                    context,
-                    ExoDatabaseProvider(context),
-                    getCache(context),
+                    appContext,
+                    ExoDatabaseProvider(appContext),
+                    getCache(),
                     DefaultDataSourceFactory(
-                        context,
-                        Util.getUserAgent(context, context.getString(R.string.app_name))
+                        appContext,
+                        Util.getUserAgent(appContext, appContext?.getString(R.string.app_name))
                     )
                 )
             }
@@ -62,46 +60,39 @@ class DownloadUtil {
                 ),
                 false
             )
-
-            
             downloadRepository.insertDownload(track)
         }
 
-        fun getAllDownloads(context: Application): LiveData<List<Track>> {
-            application = context
-            downloadRepository =
-                DownloadRepository(context)
+        fun getAllDownloads(): LiveData<List<Track>> {
+            downloadRepository = DownloadRepository()
             return downloadRepository.allDownloadedTracks
         }
 
-        fun isMediaDownloaded(context: Application, mediaId: String): Boolean {
-            application = context
-            downloadRepository =
-                DownloadRepository(application)
-            var download = getDownloadManager(context)
+        fun isMediaDownloaded(mediaId: String): Boolean {
+            downloadRepository = DownloadRepository()
+            val download = getDownloadManager()
                 .downloadIndex.getDownload(mediaId)
             return download?.state == Download.STATE_COMPLETED
         }
 
-        fun getMediaDownloadPercentage(context: Application, mediaId: String): Float? {
-            downloadRepository =
-                DownloadRepository(application)
-            var download = getDownloadManager(context)
+        fun getMediaDownloadPercentage(mediaId: String): Float? {
+            downloadRepository = DownloadRepository()
+            val download = getDownloadManager()
                 .downloadIndex.getDownload(mediaId)
             return download?.percentDownloaded
         }
 
         fun getDownloadState(state: Int) : String{
-            when(state){
-                0 -> return "STATE_QUEUED"
-                1 -> return "STATE_STOPPED"
-                2 -> return "STATE_DOWNLOADING"
-                3 -> return "STATE_COMPLETED"
-                4 -> return "STATE_FAILED"
-                5 -> return "STATE_REMOVING"
-                7 -> return "STATE_RESTARTING"
+            return when(state){
+                0 -> "STATE_QUEUED"
+                1 -> "STATE_STOPPED"
+                2 -> "STATE_DOWNLOADING"
+                3 -> "STATE_COMPLETED"
+                4 -> "STATE_FAILED"
+                5 -> "STATE_REMOVING"
+                7 -> "STATE_RESTARTING"
                 else -> {
-                    return "STATE_UNKNOWN"
+                    "STATE_UNKNOWN"
                 }
             }
         }

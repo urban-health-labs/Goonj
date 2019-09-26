@@ -1,6 +1,7 @@
 package ai.rever.goonj.analytics
 
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.subjects.BehaviorSubject
 
 var isLoggable = false
@@ -73,7 +74,7 @@ private val analyticsSubjectBehaviour : BehaviorSubject<AnalyticsModel> = Behavi
 /**
  * analyticsObservable doesn't allows pushing values
  */
-val analyticsObservable get() = analyticsSubjectBehaviour as Observable<AnalyticsModel>
+val analyticsObservable get() = (analyticsSubjectBehaviour as Observable<AnalyticsModel>)
 
 fun logEvent (isRemote: Boolean, behaviour: PlayerAnalyticsEnum, data: Map<String,Any?>){
     analyticsSubjectBehaviour.onNext(

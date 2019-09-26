@@ -1,5 +1,6 @@
-package ai.rever.goonj.cast
+package ai.rever.goonj.player
 
+import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.analytics.*
 import android.os.Bundle
 import androidx.mediarouter.media.MediaItemStatus
@@ -7,36 +8,27 @@ import androidx.mediarouter.media.MediaRouter
 import androidx.mediarouter.media.MediaSessionStatus
 import androidx.mediarouter.media.RemotePlaybackClient
 import ai.rever.goonj.interfaces.AudioPlayer
+import ai.rever.goonj.manager.GoonjPlayerManager
 import ai.rever.goonj.models.Track
-import ai.rever.goonj.service.GoonjService
-import ai.rever.goonj.util.SingletonHolder
 import android.os.Handler
 import androidx.core.net.toUri
-import androidx.lifecycle.MutableLiveData
 import androidx.mediarouter.media.MediaItemStatus.*
 import androidx.mediarouter.media.MediaSessionStatus.*
-import com.google.android.gms.cast.MediaMetadata
-import com.google.android.gms.common.images.WebImage
-import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadRequestData
 import com.google.android.gms.cast.framework.CastContext
 import java.lang.ref.WeakReference
 
-class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(service) {
-
-    companion object: SingletonHolder<RemoteAudioPlayer, GoonjService>(::RemoteAudioPlayer)
+class RemoteAudioPlayer: AudioPlayer {
 
     private var player: RemotePlaybackClient? = null
-
-    private val mIsPlaying: MutableLiveData<Boolean>? by lazy { goonjService?.isPlaying }
-    private val mCurrentPlayingTrack : MutableLiveData<Track>? by lazy { goonjService?.mCurrentPlayingTrack }
 
     private var autoplay : Boolean = true
     private var isHandlerRunning = false
 
     override fun connect(route: MediaRouter.RouteInfo) {
-        // TODO check for play services
-        player = RemotePlaybackClient(goonjService, route)
+        // TODO check for resume services
+
+        player = RemotePlaybackClient(appContext, route)
         player?.setStatusCallback(statusCallback)
     }
 
@@ -45,58 +37,43 @@ class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(servic
     }
 
     override fun enqueue(track: Track, index: Int) {
-        track.currentData.state = PLAYBACK_STATE_PLAYING
+        track.state.state = PLAYBACK_STATE_PLAYING
         play(track)
     }
 
-    override fun play(item: Track) {
-        player?.play(item.url.toUri(), "audio/*",
+    fun play(track: Track) {
+        player?.play(track.url.toUri(), "audio/*",
             null, 0, null,
-            ItemActionCallbackImp("play") { itemId, _ ->
+            ItemActionCallbackImp("resume") { itemId, _ ->
                 if(!isHandlerRunning) {
                     statusHandler()
                 }
 
-                item.currentData.remoteItemId = itemId
+                track.state.remoteItemId = itemId
 
-                if (item.currentData.position > 0) {
-                    seekInternal(item)
+                if (track.state.position > 0) {
+                    seekInternal(track)
                 }
 
-                if (item.currentData.state == PLAYBACK_STATE_PAUSED) {
+                if (track.state.state == PLAYBACK_STATE_PAUSED) {
                     pause()
                 }
 
-                setMediaMetadata(item)
-                mCurrentPlayingTrack?.value = item
-                mIsPlaying?.value = true
+                track.mediaLoadRequestData?.let {
+                    setMediaLoadRequest(it)
+                }
+
+                GoonjPlayerManager.currentPlayingTrack.onNext(track)
+                setIsPlaying(true)
             })
     }
 
-    private fun setMediaMetadata(item: Track){
-        val musicMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
+    private fun setMediaLoadRequest(mediaLoadRequestData: MediaLoadRequestData){
 
-        musicMetadata.putString(MediaMetadata.KEY_TITLE, item.title)
-        musicMetadata.putString(MediaMetadata.KEY_ARTIST, item.artistName)
-
-        item.imageUrl?.let {
-            musicMetadata.addImage(WebImage(it.toUri()))
-        }
-
-        goonjService?.let{
+        appContext?.let{
             val castSession = CastContext.getSharedInstance(it).sessionManager.currentCastSession
             try {
-                val mediaInfo = MediaInfo.Builder(item.url)
-                    .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                    .setContentType("audio/*")
-                    .setMetadata(musicMetadata)
-                    .build()
                 val remoteMediaClient = castSession.remoteMediaClient
-
-                val mediaLoadRequestData = MediaLoadRequestData.Builder()
-                    .setMediaInfo(mediaInfo)
-                    .setAutoplay(true)
-                    .build()
 
                 remoteMediaClient.load(mediaLoadRequestData)
             } catch (e: Exception) {
@@ -107,19 +84,19 @@ class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(servic
     }
 
     override fun seekTo(positionMs: Long) {
-        mCurrentPlayingTrack?.value?.let {
+        GoonjPlayerManager.currentPlayingTrack?.value?.let {
             getStatus(it, true, positionMs)
         }
     }
 
-    fun getStatus(item: Track, seek: Boolean, positionMs: Long) {
-        if (player?.hasSession() != true || item.currentData.remoteItemId == null) {
-            // if trackList is not valid or item id not assigend yet.
+    fun getStatus(track: Track, seek: Boolean, positionMs: Long = 0) {
+        if (player?.hasSession() != true || track.state.remoteItemId == null) {
+            // if trackList is not valid or track id not assigend yet.
             // just return, it's not fatal
             return
         }
 
-        player?.getStatus(item.currentData.remoteItemId, null,
+        player?.getStatus(track.state.remoteItemId, null,
             object : ItemActionCallbackImp("getStatus", ::updateTrackPosition) {
                 override fun onResult(
                     data: Bundle?,
@@ -134,19 +111,19 @@ class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(servic
                         || state == PLAYBACK_STATE_PAUSED
                         || state == PLAYBACK_STATE_PENDING
                     ) {
-                        item.currentData.state = state
-                        item.currentData.position = itemStatus.contentPosition
-                        item.currentData.duration = itemStatus.contentDuration
+                        track.state.state = state
+                        track.state.position = itemStatus.contentPosition
+                        track.state.duration = itemStatus.contentDuration
                     }
                     if (seek) {
                         when {
-                            (item.currentData.position + positionMs) < 0 ->
-                                item.currentData.position = 0
-                            (item.currentData.position + positionMs) < item.currentData.duration ->
-                                item.currentData.position = item.currentData.position + positionMs
-                            else -> item.currentData.position = item.currentData.duration
+                            (track.state.position + positionMs) < 0 ->
+                                track.state.position = 0
+                            (track.state.position + positionMs) < track.state.duration ->
+                                track.state.position = track.state.position + positionMs
+                            else -> track.state.position = track.state.duration - 1
                         }
-                        seekInternal(item)
+                        seekInternal(track)
                     }
                 }
             }
@@ -157,8 +134,10 @@ class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(servic
         pause()
     }
 
-    override fun unsuspend(track: Track) {
-        play(track)
+    override fun unsuspend() {
+        GoonjPlayerManager.currentPlayingTrack.value?.let {
+            play(it)
+        }
     }
 
     override fun pause() {
@@ -168,7 +147,7 @@ class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(servic
         }
 
         player?.pause(null, SessionActionCallbackImp("pause") { _, _ ->
-            mIsPlaying?.value = false
+            setIsPlaying(false)
         })
     }
 
@@ -182,8 +161,7 @@ class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(servic
             if(!isHandlerRunning) {
                 statusHandler()
             }
-            mIsPlaying?.value = true
-
+            setIsPlaying(true)
         })
     }
 
@@ -194,7 +172,7 @@ class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(servic
         }
 
         player?.stop(null, SessionActionCallbackImp("stop") { _, _ ->
-            mIsPlaying?.value = false
+            setIsPlaying(false)
         })
 
     }
@@ -212,8 +190,8 @@ class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(servic
             return
         }
 
-        player?.seek(item.currentData.remoteItemId, item.currentData.position,
-            null, ItemActionCallbackImp("seek", ::updateTrackPosition))
+        player?.seek(item.state.remoteItemId, item.state.position,
+            null, ItemActionCallbackImp("seekTo", ::updateTrackPosition))
 
     }
 
@@ -224,18 +202,17 @@ class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(servic
             PlayerAnalyticsEnum.SET_PLAYER_STATE_REMOTE,
             map
         )
-        mIsPlaying?.value = isPlaying
+        GoonjPlayerManager.isPlayingBehaviorSubject.onNext(isPlaying)
     }
 
     private fun statusHandler(){
         val handler = Handler()
         handler.postDelayed(object: Runnable{
             override fun run() {
-                mCurrentPlayingTrack?.value?.let {
-                    getStatus(it,false,0)
+                GoonjPlayerManager.currentPlayingTrack.value?.let {
+                    getStatus(it,false)
                 }
-
-                if(mIsPlaying?.value == true) {
+                if(GoonjPlayerManager.isPlayingBehaviorSubject.value == true) {
                     isHandlerRunning  = true
                     handler.postDelayed(this, 1000)
                 } else {
@@ -247,15 +224,20 @@ class RemoteAudioPlayer constructor (service: GoonjService) : AudioPlayer(servic
     }
 
     private fun updateTrackPosition(itemId: String?, itemStatus: MediaItemStatus?){
-        mCurrentPlayingTrack?.value?.let { track ->
-            itemStatus?.contentPosition?.let {
-                track.currentData.position = it
+        GoonjPlayerManager.currentPlayingTrack.value?.let { track ->
+            if (track.id == itemId) {
+                itemStatus?.contentPosition?.let {
+                    track.state.position = it
+                }
             }
         }
     }
 
     private val statusCallback get() = StatusCallback(this)
 
+    /**
+     * Making static inner class insure callback does not memory leak, yet access private method
+     */
     class StatusCallback private constructor(): RemotePlaybackClient.StatusCallback() {
 
         private lateinit var weakPlayer: WeakReference<RemoteAudioPlayer>

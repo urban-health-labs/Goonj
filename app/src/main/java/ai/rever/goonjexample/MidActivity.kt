@@ -25,7 +25,7 @@ class MidActivity : AppCompatActivity() {
         }
 
         setupDownloads()
-        getAllDownloads(application).observe(this, Observer {
+        getAllDownloads().observe(this, Observer {
             for(track in it){
                 Log.d(TAG,"TrackID: ${track.title} State: ${getDownloadState(track.downloadedState)}")
                 updateDownloadState()
@@ -49,15 +49,15 @@ class MidActivity : AppCompatActivity() {
     }
 
     fun updateDownloadState(){
-        if(isMediaDownloaded(application, SAMPLES[0].id)){
+        if(isMediaDownloaded(SAMPLES[0].id)){
             activity_mid_download1_btn.visibility = View.GONE
             activity_mid_done1_btn.visibility = View.VISIBLE
         }
-        if(isMediaDownloaded(application, SAMPLES[1].id)){
+        if(isMediaDownloaded(SAMPLES[1].id)){
             activity_mid_download2_btn.visibility = View.GONE
             activity_mid_done2_btn.visibility = View.VISIBLE
         }
-        if(isMediaDownloaded(application, SAMPLES[2].id)){
+        if(isMediaDownloaded(SAMPLES[2].id)){
             activity_mid_download3_btn.visibility = View.GONE
             activity_mid_done3_btn.visibility = View.VISIBLE
         }

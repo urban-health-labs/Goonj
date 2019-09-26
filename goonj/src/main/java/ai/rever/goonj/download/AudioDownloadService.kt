@@ -26,7 +26,7 @@ class AudioDownloadService : DownloadService(
             .buildProgressNotification(R.drawable.exo_icon_play, null, null, downloads)
 
     override fun getDownloadManager(): DownloadManager {
-        return DownloadUtil.getDownloadManager(this)
+        return DownloadUtil.getDownloadManager()
     }
 
     @Nullable
@@ -41,8 +41,7 @@ class AudioDownloadService : DownloadService(
         if(download?.state == Download.STATE_COMPLETED){
 
             mediaId?.let {
-                DownloadRepository(application)
-                    .updateDownload(mediaId,download.state)
+                DownloadRepository().updateDownload(mediaId, download.state)
             }
 
         }
