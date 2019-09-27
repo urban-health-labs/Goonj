@@ -1,5 +1,6 @@
 package ai.rever.goonj.interfaces
 
+import ai.rever.goonj.manager.GoonjPlayerManager
 import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.models.Track
 
@@ -18,12 +19,14 @@ interface AudioPlayer {
 
     fun setAutoplay(autoplay: Boolean)
 
-    fun getTrackPosition(): Long = 0
+    fun seekTo(index: Int, positionMs: Long) {}
+
+    fun getTrackPosition(): Long = GoonjPlayerManager.currentPlayingTrack.value?.trackState?.position?: 0
 
     fun connect(route: MediaRouter.RouteInfo) {}
     fun startNewSession() {}
     fun remove(index : Int){}
-    fun setPlaylist(playlist: List<Track>) {}
+    fun enqueue(trackList: List<Track>) {}
     fun setVolume(volume: Float) {}
     fun moveTrack(currentIndex: Int, finalIndex: Int){}
     fun skipToNext(){}

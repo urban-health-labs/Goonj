@@ -1,12 +1,10 @@
 package ai.rever.goonj.manager
 
-import ai.rever.goonj.Goonj
+import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.player.RemoteAudioPlayer
 import ai.rever.goonj.interfaces.AudioPlayer
 import ai.rever.goonj.player.LocalAudioPlayer
 import ai.rever.goonj.models.Track
-import androidx.lifecycle.MutableLiveData
-import androidx.mediarouter.media.MediaItemStatus
 import io.reactivex.subjects.BehaviorSubject
 
 
@@ -28,9 +26,8 @@ internal object GoonjPlayerManager {
             mIsRemote = value
         }
 
-    internal val isPlayingBehaviorSubject: BehaviorSubject<Boolean> = BehaviorSubject.create()
+    internal val playerStateBehaviorSubject: BehaviorSubject<GoonjPlayerState> = BehaviorSubject.create()
     internal val currentPlayingTrack: BehaviorSubject<Track> = BehaviorSubject.create()
-
 
     private val player: AudioPlayer? get() {
 //        isRemote = mediaRoute?.supportsControlCategory(
@@ -55,7 +52,7 @@ internal object GoonjPlayerManager {
     }
 
     internal fun addTrack(track: Track, index: Int = mTrackList.size) {
-        track.state.index = index
+        track.trackState.index = index
         mTrackList.add(index, track)
 
         player?.enqueue(track, index)

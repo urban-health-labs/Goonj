@@ -10,13 +10,16 @@ import android.os.Build
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
 
-abstract class FocusAudioPlayer: AudioPlayer, AudioManager.OnAudioFocusChangeListener {
+/**
+ *     Call when ready for play: requestAudioFocus(focusLock)
+ *     Call when paused: removeAudioFocus()
+**/
 
-    private val mPlayer: SimpleExoPlayer by lazy { ExoPlayerFactory.newSimpleInstance(appContext) }
 
-    val player: SimpleExoPlayer get() {
-//        threadLog()
-        return mPlayer
+abstract class FocusAudioPlayer: AudioPlayer , AudioManager.OnAudioFocusChangeListener {
+
+    val player: SimpleExoPlayer by lazy {
+        ExoPlayerFactory.newSimpleInstance(appContext)
     }
 
     val focusLock = Any()

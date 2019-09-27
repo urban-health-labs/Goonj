@@ -21,7 +21,7 @@ interface GoonjPlayer {
         Goonj.pause()
     }
 
-    fun seek(positionMS: Long){
+    fun seekTo(positionMS: Long){
         Goonj.seekTo(positionMS)
     }
 
@@ -46,7 +46,8 @@ interface GoonjPlayer {
             smallIcon)
     }
 
-    val currentTrack get() = Goonj.trackList
+
+    val trackList get() = Goonj.trackList
 
     fun removeTrack(index : Int){
         Goonj.removeTrack(index)
@@ -64,7 +65,9 @@ interface GoonjPlayer {
 
     fun finishTrack() = Goonj.finishTrack()
 
-    val isPlayingObservable get() = Goonj.isPlayingObservable
+    val trackPosition get() = Goonj.trackPosition
+
+    val isPlayingObservable get() = Goonj.playerStateObservable
 
     val currentPlayingTrackObservable get() = Goonj.currentPlayingTrack?.subscribeOn(AndroidSchedulers.mainThread())
 }

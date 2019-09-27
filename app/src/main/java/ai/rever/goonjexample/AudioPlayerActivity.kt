@@ -1,6 +1,6 @@
 package ai.rever.goonjexample
 
-import ai.rever.goonj.analytics.analyticsObservable
+import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.analytics.isLoggable
 import ai.rever.goonj.interfaces.GoonjPlayer
 import ai.rever.goonj.models.SAMPLES
@@ -10,7 +10,6 @@ import kotlinx.android.synthetic.main.activity_audio_player.*
 import android.media.AudioManager
 import android.view.KeyEvent
 import android.content.Context
-import android.util.Log
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.cast.framework.CastButtonFactory
@@ -19,12 +18,7 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.squareup.picasso.Picasso
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.plusAssign
 import java.lang.Exception
-
-fun log(message: String = "Okay") {
-    Log.e("===========>", message)
-}
 
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
@@ -51,13 +45,8 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     override fun onResume() {
         super.onResume()
 
-        compositeDisposable += analyticsObservable.subscribe {
-            logAnalyticsEvent(it.toString())
-        }
-
-
         isPlayingObservable?.subscribe {
-            audioPlayerPlayPauseToggleBtn.isChecked = !it
+            audioPlayerPlayPauseToggleBtn.isChecked = it != GoonjPlayerState.PLAYING
         }?.addTo(compositeDisposable)
 
         currentPlayingTrackObservable?.subscribe(::onPlayingTrackChange)?.addTo(compositeDisposable)
@@ -82,12 +71,12 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             audioPlayerAlbumArtistTv.text = currentItem.artistName
         }
 //        Log.d(TAG, "TRACK: $currentItem")
-//        Log.d(TAG, "Position: ${currentItem.state.position}")
+//        Log.d(TAG, "Position: ${currentItem.trackState.position}")
         try {
-            audioPlayerCurrentPosition.text = (currentItem.state.position / 1000).toString()
-            audioPlayerContentDuration.text = (currentItem.state.duration / 1000).toString()
+            audioPlayerCurrentPosition.text = (currentItem.trackState.position / 1000).toString()
+            audioPlayerContentDuration.text = (currentItem.trackState.duration / 1000).toString()
             audioPlayerProgressBar.progress =
-                ((currentItem.state.position.toDouble() / currentItem.state.duration.toDouble()) * 100.0).toInt()
+                ((currentItem.trackState.position.toDouble() / currentItem.trackState.duration.toDouble()) * 100.0).toInt()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -96,23 +85,22 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     private fun setupUI() {
 
-
-        audioPlayerPlayPauseToggleBtn.setOnCheckedChangeListener { _, paused ->
-            if (paused) {
-                pause()
-            } else {
-                play()
+        audioPlayerPlayPauseToggleBtn?.apply {
+            setOnClickListener {
+                if (isChecked) {
+                    pause()
+                } else {
+                    play()
+                }
             }
         }
 
-
-
         audioPlayerForward10s.setOnClickListener {
-            seek(5000)
+            seekTo(trackPosition + 5000)
         }
 
         audioPlayerRewind10s.setOnClickListener {
-            seek(-3000)
+            seekTo(trackPosition - 3000)
         }
 
         audioPlayerAutoplaySwitch.setOnCheckedChangeListener { _, autoplay ->
@@ -138,6 +126,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         addTrack(SAMPLES[1])
         addTrack(SAMPLES[2])
         addTrack(SAMPLES[3])
+        play()
     }
 
     override fun onBackPressed() {
@@ -188,18 +177,6 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             return false
         }
         return true
-    }
-
-
-    private fun logAnalyticsEvent(message : String?, error : Boolean ?= false){
-        val TAG = "ANALYTICS"
-        if(error == true){
-            Log.e(TAG,"=======error: $message")
-        } else if(isLoggable){
-            message?.let {
-                Log.d(TAG,message)
-            }
-        }
     }
 }
 

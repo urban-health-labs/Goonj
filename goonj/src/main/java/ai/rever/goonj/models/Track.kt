@@ -1,6 +1,7 @@
 package ai.rever.goonj.models
 
 import ai.rever.goonj.Goonj.appContext
+import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.R
 import android.content.Context
 import android.support.v4.media.MediaDescriptionCompat
@@ -84,7 +85,7 @@ data class Track (var url: String = "",
                   @Ignore
                   var extras: Bundle? = null,
                   @Ignore
-                  val state: TrackState = TrackState()
+                  val trackState: TrackState = TrackState()
 ): Parcelable {
 
     private val mediaInfo: MediaInfo? get() {
@@ -131,13 +132,11 @@ data class Track (var url: String = "",
 
 
 @Parcelize
-data class TrackState(var state: Int = MediaItemStatus.PLAYBACK_STATE_PENDING,
+data class TrackState(var state: GoonjPlayerState = GoonjPlayerState.IDLE,
                       var index: Int = 0,
                       var position: Long = 0,
                       var duration: Long = 0,
                       var remoteItemId: String? = null): Parcelable
-
-
 
 
 val Context.defaultBitmap get() = ContextCompat.getDrawable(this, R.mipmap.ic_album_art)

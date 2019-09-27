@@ -10,8 +10,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import android.util.Log.e
-import androidx.lifecycle.LiveData
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.lang.ref.WeakReference
@@ -165,9 +163,16 @@ object Goonj {
 
     fun finishTrack() = run { GoonjPlayerManager.finishTrack() }
 
-    val isPlayingObservable: Observable<Boolean>? get() = GoonjPlayerManager.isPlayingBehaviorSubject.observeOn(AndroidSchedulers.mainThread())
+    val playerStateObservable: Observable<GoonjPlayerState>? get() = GoonjPlayerManager.playerStateBehaviorSubject.observeOn(AndroidSchedulers.mainThread())
 
     val currentPlayingTrack: Observable<Track>? get() = GoonjPlayerManager.currentPlayingTrack.observeOn(AndroidSchedulers.mainThread())
 
     val trackList get() = GoonjPlayerManager.trackList
+
+    val trackPosition get() = GoonjPlayerManager.trackPosition
+
+}
+
+enum class GoonjPlayerState {
+    IDLE, BUFFERING, PLAYING, PAUSED, ENDED, CANCELED, ERROR, INVALIDATE
 }

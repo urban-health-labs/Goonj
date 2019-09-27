@@ -1,42 +1,53 @@
 package ai.rever.goonj.player
 
 import ai.rever.goonj.Goonj.appContext
+import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.R
 import ai.rever.goonj.analytics.*
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.net.toUri
 import ai.rever.goonj.download.DownloadUtil
+import ai.rever.goonj.interfaces.AudioPlayer
 import ai.rever.goonj.models.Track
 import ai.rever.goonj.manager.GoonjNotificationManager.playerNotificationManager
 import ai.rever.goonj.manager.GoonjPlayerManager
 import ai.rever.goonj.util.MEDIA_SESSION_TAG
+import android.util.Log
 import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.source.*
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 import java.util.concurrent.TimeUnit
 
-class LocalAudioPlayer: FocusAudioPlayer() {
+class LocalAudioPlayer: AudioPlayer {
 
-    private val trackPositionObservable
-        get() = Observable.interval(500, TimeUnit.MILLISECONDS)
-            .takeWhile { GoonjPlayerManager.isPlayingBehaviorSubject.value?: false}
-            .observeOn(AndroidSchedulers.mainThread())
-            .map { GoonjPlayerManager.trackPosition }
+    private var isSuspended = false
+
+    private val player: SimpleExoPlayer by lazy {
+        val player = ExoPlayerFactory.newSimpleInstance(appContext)
+        val attr = AudioAttributes.Builder().setContentType(C.CONTENT_TYPE_MUSIC).build()
+        player.setAudioAttributes(attr, true)
+        player
+    }
+
+    private val timerObservable
+        get() = Observable.interval(1000, TimeUnit.MILLISECONDS)
+            .takeWhile { !isSuspended &&
+                    GoonjPlayerManager.playerStateBehaviorSubject.value == GoonjPlayerState.PLAYING }
+            .map { (GoonjPlayerManager.currentPlayingTrack.value?.trackState?.position?: 0) + 1000 }
 
     private val compositeDisposable = CompositeDisposable()
-    private var positionDisposable: Disposable? = null
+    private var timerDisposable: Disposable? = null
 
     private val cacheDataSourceFactory: CacheDataSourceFactory by lazy {
         val dataSourceFactory = DefaultDataSourceFactory(appContext,
@@ -57,18 +68,15 @@ class LocalAudioPlayer: FocusAudioPlayer() {
     private val concatenatingMediaSource by lazy { ConcatenatingMediaSource() }
 
     private var autoplay : Boolean = true
-    private val playList get() = GoonjPlayerManager.trackList
-
-    private var isFirstTimeAfterCreation = true
-    private var isFirstTimeAfterNewSession = true
-
+    private val trackList get() = GoonjPlayerManager.trackList
 
     private fun onStart() {
-        compositeDisposable += GoonjPlayerManager.isPlayingBehaviorSubject
+        compositeDisposable += GoonjPlayerManager.playerStateBehaviorSubject
             .subscribe {
-                if (it){
-                    positionDisposable?.dispose()
-                    positionDisposable = trackPositionObservable.subscribe(::onTrackPositionChange)
+                if (it == GoonjPlayerState.PLAYING && !isSuspended){
+                    timerDisposable?.dispose()
+                    onTrackPositionChange()
+                    timerDisposable = timerObservable.subscribe(::onTrackPositionChange)
                 }
             }
 
@@ -82,86 +90,68 @@ class LocalAudioPlayer: FocusAudioPlayer() {
 
         mediaSessionConnector.setQueueNavigator(object: TimelineQueueNavigator(mediaSession) {
             override fun getMediaDescription(player: Player, index: Int): MediaDescriptionCompat {
-                return playList[index].mediaDescription
+                return trackList[index].mediaDescription
             }
         })
 
         addListeners()
     }
 
-    private fun onTrackPositionChange(position: Long)  {
-        position.let { _position ->
-            GoonjPlayerManager.currentPlayingTrack.value?.let { track ->
-                track.state.position = _position
-                GoonjPlayerManager.currentPlayingTrack.onNext(track)
-            }
+
+    private fun onTrackPositionChange(position: Long = getTrackPosition())  {
+        GoonjPlayerManager.currentPlayingTrack.value?.let { track ->
+            track.trackState.position = position
+            GoonjPlayerManager.currentPlayingTrack.onNext(track)
         }
     }
 
-    private fun addAudioToPlaylist(audio: Track, index: Int = playList.size) {
-        val mediaSource =  ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-            .createMediaSource(audio.url.toUri())
-
-        concatenatingMediaSource.addMediaSource(index, mediaSource)
-
-        if(!player.playWhenReady) {
-            player.prepare(concatenatingMediaSource)
-            player.playWhenReady = true
-        }
-    }
 
     private val eventListener = object: ExoPlayerEvenListenerImp() {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             super.onPlayerStateChanged(playWhenReady, playbackState)
 
             updateCurrentlyPlayingTrack()
-            /** if player is ready to resume and is commanded to resume **/
-            if (playWhenReady && playbackState == Player.STATE_READY) {
-                requestAudioFocus(focusLock)
-                GoonjPlayerManager.isPlayingBehaviorSubject.onNext(true)
 
-            } else if (!playWhenReady) {
-                removeAudioFocus()
-                /** attach listener if player is playing for the first time or
-                 * if its playing after a new session is played atleast once**/
-                if (isFirstTimeAfterCreation || !isFirstTimeAfterNewSession) {
-                    /** set false as the player is created**/
-                    isFirstTimeAfterCreation = false
-                    GoonjPlayerManager.isPlayingBehaviorSubject.onNext(false)
-                } else {
-                    /** if the player is playing first time after a new session
-                     * do not attach the listener **/
-                    isFirstTimeAfterNewSession = false
-                }
-            }
-        }
-
-        override fun onTracksChanged(trackGroups: TrackGroupArray?,
-                                     trackSelections: TrackSelectionArray?) {
-            super.onTracksChanged(trackGroups, trackSelections)
-            if(!autoplay) {
-                pause()
-            }
+            GoonjPlayerManager.playerStateBehaviorSubject.onNext(
+                when (playbackState) {
+                    Player.STATE_BUFFERING -> GoonjPlayerState.BUFFERING
+                    Player.STATE_ENDED -> GoonjPlayerState.ENDED
+                    Player.STATE_IDLE -> GoonjPlayerState.IDLE
+                    else -> if (playWhenReady) {
+                        GoonjPlayerState.PLAYING
+                    } else {
+                        GoonjPlayerState.PAUSED
+                    }
+                })
         }
 
         override fun onPositionDiscontinuity(reason: Int) {
             super.onPositionDiscontinuity(reason)
             updateCurrentlyPlayingTrack()
+
         }
     }
 
     private fun updateCurrentlyPlayingTrack() {
-        player.let {
-            val currentTrack = playList[it.currentWindowIndex]
-            val lastKnownTrack = GoonjPlayerManager.currentPlayingTrack.value
+        val currentTrack = trackList[player.currentWindowIndex]
+        val lastKnownTrack = GoonjPlayerManager.currentPlayingTrack.value
 
-            if (currentTrack.id != lastKnownTrack?.id) {
-                GoonjPlayerManager.currentPlayingTrack.onNext(currentTrack)
-                GoonjPlayerManager.onTrackComplete(lastKnownTrack?: return)
-            }
+        if (player.contentDuration > 0) {
+            currentTrack.trackState.duration = player.contentDuration
+        }
+        val playerPosition = getTrackPosition()
+        if (playerPosition > 0) {
+            currentTrack.trackState.position = playerPosition
+        } else {
+            currentTrack.trackState.position = 0
+        }
 
-            if (it.contentDuration > 0) {
-                GoonjPlayerManager.currentPlayingTrack.value?.state?.duration = it.contentDuration
+        GoonjPlayerManager.currentPlayingTrack.onNext(currentTrack)
+
+        if (currentTrack.id != lastKnownTrack?.id) {
+            GoonjPlayerManager.onTrackComplete(lastKnownTrack?: return)
+            if(!autoplay) {
+                pause()
             }
         }
     }
@@ -173,37 +163,45 @@ class LocalAudioPlayer: FocusAudioPlayer() {
 
 
     override fun startNewSession(){
-        isFirstTimeAfterNewSession = true
         concatenatingMediaSource.clear()
     }
 
     override fun release() {
-        positionDisposable?.dispose()
+        timerDisposable?.dispose()
         compositeDisposable.dispose()
-
-        GoonjPlayerManager.isPlayingBehaviorSubject.onNext(false)
 
         mediaSessionConnector.mediaSession.release()
         mediaSessionConnector.setPlayer(null)
 
         playerNotificationManager.setPlayer(null)
+
         player.removeAnalyticsListener(ExoPlayerAnalyticsListenerImp)
         player.removeListener(eventListener)
         player.release()
     }
 
     override fun seekTo(positionMs: Long) {
-        player.let {
-            it.seekTo(it.currentPosition + positionMs)
-        }
+        Log.e("==========>", "$positionMs")
+        player.seekTo(positionMs)
+    }
+
+    override fun seekTo(index: Int, positionMs: Long) {
+        player.seekTo(index, positionMs)
     }
 
     override fun suspend() {
+        isSuspended = true
         pause()
     }
 
     override fun unsuspend() {
-        resume()
+        isSuspended = false
+        GoonjPlayerManager.currentPlayingTrack.value?.trackState?.apply {
+            seekTo(index, position)
+            if (state == GoonjPlayerState.PLAYING) {
+                resume()
+            }
+        }
     }
 
     override fun pause() {
@@ -221,7 +219,21 @@ class LocalAudioPlayer: FocusAudioPlayer() {
     }
 
     override fun enqueue(track: Track, index : Int) {
-        addAudioToPlaylist(track, index)
+
+        val mediaSource =  ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+            .createMediaSource(track.url.toUri())
+
+        concatenatingMediaSource.addMediaSource(index, mediaSource)
+
+        player.prepare(concatenatingMediaSource)
+
+    }
+
+    override fun enqueue(trackList: List<Track>) {
+        startNewSession()
+        for(item in trackList){
+            enqueue(item, this.trackList.size)
+        }
     }
 
     override fun remove(index: Int){
@@ -238,13 +250,6 @@ class LocalAudioPlayer: FocusAudioPlayer() {
 
     override fun skipToPrevious() {
         player.previous()
-    }
-
-    override fun setPlaylist(playlist: List<Track>) {
-        startNewSession()
-        for(item in playlist){
-            addAudioToPlaylist(item)
-        }
     }
 
     override fun setVolume(volume: Float) {
