@@ -3,22 +3,27 @@ package ai.rever.goonj.player
 import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.R
-import ai.rever.goonj.analytics.*
-import android.support.v4.media.MediaDescriptionCompat
-import android.support.v4.media.session.MediaSessionCompat
-import androidx.core.net.toUri
+import ai.rever.goonj.analytics.ExoPlayerAnalyticsListenerImp
+import ai.rever.goonj.analytics.ExoPlayerEvenListenerImp
 import ai.rever.goonj.download.DownloadUtil
 import ai.rever.goonj.interfaces.AudioPlayer
-import ai.rever.goonj.models.Track
 import ai.rever.goonj.manager.GoonjNotificationManager.playerNotificationManager
 import ai.rever.goonj.manager.GoonjPlayerManager
+import ai.rever.goonj.models.Track
 import ai.rever.goonj.util.MEDIA_SESSION_TAG
+import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
-import com.google.android.exoplayer2.*
+import androidx.core.net.toUri
+import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
-import com.google.android.exoplayer2.source.*
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
@@ -27,6 +32,9 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 class LocalAudioPlayer: AudioPlayer {
@@ -133,7 +141,8 @@ class LocalAudioPlayer: AudioPlayer {
     }
 
     private fun updateCurrentlyPlayingTrack() {
-        val currentTrack = trackList[player.currentWindowIndex]
+        if (trackList.isEmpty()) return
+        val currentTrack =  trackList[player.currentWindowIndex]
         val lastKnownTrack = GoonjPlayerManager.currentPlayingTrack.value
 
         if (player.contentDuration > 0) {
@@ -219,8 +228,7 @@ class LocalAudioPlayer: AudioPlayer {
     }
 
     override fun enqueue(track: Track, index : Int) {
-
-        val mediaSource =  ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+        val mediaSource = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
             .createMediaSource(track.url.toUri())
 
         concatenatingMediaSource.addMediaSource(index, mediaSource)

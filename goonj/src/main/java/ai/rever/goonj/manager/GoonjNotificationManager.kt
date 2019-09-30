@@ -2,7 +2,6 @@ package ai.rever.goonj.manager
 
 import ai.rever.goonj.Goonj
 import ai.rever.goonj.R
-import ai.rever.goonj.models.defaultBitmap
 import ai.rever.goonj.util.PLAYBACK_CHANNEL_ID
 import ai.rever.goonj.util.PLAYBACK_NOTIFICATION_ID
 import android.app.Notification
@@ -63,10 +62,13 @@ object GoonjNotificationManager {
 
         @Nullable
         override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback): Bitmap? {
-            // Todo load image from async using glide or picasso give to callback
-
-            return Goonj.appContext?.defaultBitmap
+            val track = GoonjPlayerManager.trackList[player.currentWindowIndex]
+            track.load {
+                callback.onBitmap(it)
+            }
+            return track.bitmap
         }
+
     }
 
     private val notificationListener = object : PlayerNotificationManager.NotificationListener {

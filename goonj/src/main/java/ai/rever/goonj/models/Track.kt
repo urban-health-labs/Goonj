@@ -1,9 +1,11 @@
 package ai.rever.goonj.models
 
+import ai.rever.goonj.Goonj
 import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.R
 import android.content.Context
+import android.graphics.Bitmap
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.os.Bundle
@@ -11,7 +13,6 @@ import android.os.Parcelable
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
-import androidx.mediarouter.media.MediaItemStatus
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
@@ -85,6 +86,8 @@ data class Track (var url: String = "",
                   @Ignore
                   var extras: Bundle? = null,
                   @Ignore
+                  var bitmap: Bitmap? = null,
+                  @Ignore
                   val trackState: TrackState = TrackState()
 ): Parcelable {
 
@@ -114,19 +117,48 @@ data class Track (var url: String = "",
 
     val mediaDescription: MediaDescriptionCompat get() {
         val extras = Bundle()
+
+
         val mediaDescriptionBuilder =  MediaDescriptionCompat.Builder()
             .setMediaId(id)
             .setTitle(title)
             .setDescription(artistName)
             .setExtras(extras)
 
-        val bitmap = appContext?.defaultBitmap
-        extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
-        extras.putParcelable(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, bitmap)
+        if (bitmap != null) {
+            mediaDescriptionBuilder.setIconBitmap(bitmap)
 
-        mediaDescriptionBuilder.setIconBitmap(bitmap)
+            extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
+            extras.putParcelable(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, appContext?.defaultBitmap)
+
+        } else {
+            val bitmap = appContext?.defaultBitmap
+
+            extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
+            extras.putParcelable(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, bitmap)
+
+            mediaDescriptionBuilder.setIconBitmap(bitmap)
+        }
 
         return mediaDescriptionBuilder.build()
+    }
+
+    fun load(callback: (Bitmap?) -> Unit) {
+        if (bitmap != null) {
+            callback(bitmap)
+        }
+
+        val imageLoader = Goonj.imageLoader
+        if (imageLoader == null) {
+            bitmap = appContext?.defaultBitmap
+            callback(bitmap)
+            return
+        }
+
+        imageLoader(this) {
+            bitmap = it
+            callback(it)
+        }
     }
 }
 

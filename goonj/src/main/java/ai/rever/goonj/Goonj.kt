@@ -9,6 +9,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Bitmap
 import android.os.IBinder
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -27,7 +28,7 @@ object Goonj {
 
     internal val appContext get() = weakContext?.get()
     private var weakContext: WeakReference<Context>? = null
-
+    internal var imageLoader: ((Track, (Bitmap?) -> Unit) -> Unit)? = null
     private var holderGoonjPlayerServiceInterface:
             WeakReference<GoonjPlayerServiceInterface?>? = null
 
@@ -61,6 +62,11 @@ object Goonj {
 
     fun initialize(context: Context): Goonj {
         initialize(context, GoonjService::class.java)
+        return this
+    }
+
+    fun setImageLoader(imageLoader: (Track, (Bitmap?) -> Unit) -> Unit): Goonj {
+        this.imageLoader = imageLoader
         return this
     }
 

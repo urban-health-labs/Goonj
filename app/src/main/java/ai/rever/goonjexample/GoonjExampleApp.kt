@@ -1,13 +1,17 @@
 package ai.rever.goonjexample
 
 import ai.rever.goonj.Goonj
+import ai.rever.goonj.models.Track
 import android.app.Application
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.util.Log
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.*
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 
 class GoonjExampleApp: Application(), LifecycleObserver {
 
@@ -22,7 +26,8 @@ class GoonjExampleApp: Application(), LifecycleObserver {
 
         Goonj.initialize(this)
             .setPendingIntentForNotification(pendingIntent)
-            .addOnTrackComplete {  }
+            .addOnTrackComplete(::onTrackComplete)
+            .setImageLoader(::imageLoader)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -30,6 +35,25 @@ class GoonjExampleApp: Application(), LifecycleObserver {
         Log.e("=============>", "destroy")
 
         Goonj.unregister()
+    }
+
+    private fun imageLoader(track: Track, callback: (Bitmap?) -> Unit) {
+        Glide.with(this).asBitmap().load(track.imageUrl)
+            .into(object : CustomTarget<Bitmap>(){
+                override fun onResourceReady(resource: Bitmap,
+                                             transition: Transition<in Bitmap>?) {
+                    callback(resource)
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {
+                    callback(placeholder?.toBitmap())
+                }
+            })
+
+    }
+
+    private fun onTrackComplete(track: Track) {
+
     }
 }
 

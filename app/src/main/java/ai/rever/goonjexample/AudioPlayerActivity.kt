@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.squareup.picasso.Picasso
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import java.lang.Exception
@@ -66,7 +65,8 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
     private fun onPlayingTrackChange(currentItem: Track) {
         if (knownTrack.id != currentItem.id) {
-            Picasso.get().load(currentItem.imageUrl).into(audioPlayerAlbumArtIV)
+//            Picasso.get().load(currentItem.imageUrl).into(audioPlayerAlbumArtIV)
+            currentItem.load { audioPlayerAlbumArtIV.setImageBitmap(it) }
             audioPlayerAlbumTitleTv.text = currentItem.title
             audioPlayerAlbumArtistTv.text = currentItem.artistName
         }

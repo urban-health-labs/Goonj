@@ -54,7 +54,6 @@ internal object GoonjPlayerManager {
     internal fun addTrack(track: Track, index: Int = mTrackList.size) {
         track.trackState.index = index
         mTrackList.add(index, track)
-
         player?.enqueue(track, index)
     }
 
