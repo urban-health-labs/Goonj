@@ -32,16 +32,15 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 class LocalAudioPlayer: AudioPlayer {
 
     private var isSuspended = false
 
-    private val player: SimpleExoPlayer by lazy {
+    private var player: SimpleExoPlayer? = null
+
+    private val simpleExoPlayerGetter get() = run {
         val player = ExoPlayerFactory.newSimpleInstance(appContext)
         val attr = AudioAttributes.Builder().setContentType(C.CONTENT_TYPE_MUSIC).build()
         player.setAudioAttributes(attr, true)
@@ -79,6 +78,7 @@ class LocalAudioPlayer: AudioPlayer {
     private val trackList get() = GoonjPlayerManager.trackList
 
     private fun onStart() {
+        player = simpleExoPlayerGetter
         compositeDisposable += GoonjPlayerManager.playerStateBehaviorSubject
             .subscribe {
                 if (it == GoonjPlayerState.PLAYING && !isSuspended){
@@ -142,32 +142,34 @@ class LocalAudioPlayer: AudioPlayer {
 
     private fun updateCurrentlyPlayingTrack() {
         if (trackList.isEmpty()) return
-        val currentTrack =  trackList[player.currentWindowIndex]
-        val lastKnownTrack = GoonjPlayerManager.currentPlayingTrack.value
+        player?.apply {
+            val currentTrack = trackList[currentWindowIndex]
+            val lastKnownTrack = GoonjPlayerManager.currentPlayingTrack.value
 
-        if (player.contentDuration > 0) {
-            currentTrack.trackState.duration = player.contentDuration
-        }
-        val playerPosition = getTrackPosition()
-        if (playerPosition > 0) {
-            currentTrack.trackState.position = playerPosition
-        } else {
-            currentTrack.trackState.position = 0
-        }
+            if (contentDuration > 0) {
+                currentTrack.trackState.duration = contentDuration
+            }
+            val playerPosition = getTrackPosition()
+            if (playerPosition > 0) {
+                currentTrack.trackState.position = playerPosition
+            } else {
+                currentTrack.trackState.position = 0
+            }
 
-        GoonjPlayerManager.currentPlayingTrack.onNext(currentTrack)
+            GoonjPlayerManager.currentPlayingTrack.onNext(currentTrack)
 
-        if (currentTrack.id != lastKnownTrack?.id) {
-            GoonjPlayerManager.onTrackComplete(lastKnownTrack?: return)
-            if(!autoplay) {
-                pause()
+            if (currentTrack.id != lastKnownTrack?.id) {
+                GoonjPlayerManager.onTrackComplete(lastKnownTrack ?: return)
+                if (!autoplay) {
+                    pause()
+                }
             }
         }
     }
 
     private fun addListeners(){
-        player.addAnalyticsListener(ExoPlayerAnalyticsListenerImp)
-        player.addListener(eventListener)
+        player?.addAnalyticsListener(ExoPlayerAnalyticsListenerImp)
+        player?.addListener(eventListener)
     }
 
 
@@ -184,18 +186,19 @@ class LocalAudioPlayer: AudioPlayer {
 
         playerNotificationManager.setPlayer(null)
 
-        player.removeAnalyticsListener(ExoPlayerAnalyticsListenerImp)
-        player.removeListener(eventListener)
-        player.release()
+        player?.removeAnalyticsListener(ExoPlayerAnalyticsListenerImp)
+        player?.removeListener(eventListener)
+        player?.release()
+        player = null
     }
 
     override fun seekTo(positionMs: Long) {
         Log.e("==========>", "$positionMs")
-        player.seekTo(positionMs)
+        player?.seekTo(positionMs)
     }
 
     override fun seekTo(index: Int, positionMs: Long) {
-        player.seekTo(index, positionMs)
+        player?.seekTo(index, positionMs)
     }
 
     override fun suspend() {
@@ -214,17 +217,16 @@ class LocalAudioPlayer: AudioPlayer {
     }
 
     override fun pause() {
-        player.playWhenReady = false
+        player?.playWhenReady = false
     }
 
     override fun resume() {
-        player.playWhenReady = true
+        player?.playWhenReady = true
         playerNotificationManager.setPlayer(player)
     }
 
     override fun stop() {
-        player.stop()
-        release()
+        pause()
     }
 
     override fun enqueue(track: Track, index : Int) {
@@ -233,7 +235,7 @@ class LocalAudioPlayer: AudioPlayer {
 
         concatenatingMediaSource.addMediaSource(index, mediaSource)
 
-        player.prepare(concatenatingMediaSource)
+        player?.prepare(concatenatingMediaSource)
 
     }
 
@@ -253,18 +255,18 @@ class LocalAudioPlayer: AudioPlayer {
     }
 
     override fun skipToNext() {
-        player.next()
+        player?.next()
     }
 
     override fun skipToPrevious() {
-        player.previous()
+        player?.previous()
     }
 
     override fun setVolume(volume: Float) {
-        player.volume = volume
+        player?.volume = volume
     }
 
-    override fun getTrackPosition() = player.currentPosition
+    override fun getTrackPosition() = player?.currentPosition ?: 0
 
     override fun setAutoplay(autoplay: Boolean) {
         this.autoplay = autoplay

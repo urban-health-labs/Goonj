@@ -73,6 +73,14 @@ object GoonjNotificationManager {
 
     private val notificationListener = object : PlayerNotificationManager.NotificationListener {
 
+        override fun onNotificationStarted(notificationId: Int, notification: Notification?) {
+            Goonj.startForeground(notificationId, notification)
+        }
+
+        override fun onNotificationCancelled(notificationId: Int) {
+            Goonj.stopSelf()
+        }
+
         override fun onNotificationPosted(
             notificationId: Int,
             notification: Notification?,

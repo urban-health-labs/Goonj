@@ -5,6 +5,7 @@ import ai.rever.goonj.models.Track
 import ai.rever.goonj.manager.GoonjNotificationManager
 import ai.rever.goonj.manager.GoonjPlayerManager
 import ai.rever.goonj.service.GoonjService
+import android.app.Notification
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -176,6 +177,16 @@ object Goonj {
     val trackList get() = GoonjPlayerManager.trackList
 
     val trackPosition get() = GoonjPlayerManager.trackPosition
+
+
+    // internal method
+    internal fun startForeground(notificationId: Int, notification: Notification?) = run {
+        startForeground(notificationId, notification)
+    }
+
+    internal fun stopSelf() = run {
+        stopSelf()
+    }
 
 }
 

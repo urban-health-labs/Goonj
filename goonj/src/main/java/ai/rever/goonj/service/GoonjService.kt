@@ -4,11 +4,7 @@ import android.content.Intent
 import android.os.IBinder
 import ai.rever.goonj.interfaces.GoonjPlayerServiceInterface
 import ai.rever.goonj.manager.GoonjPlayerManager
-import ai.rever.goonj.player.LocalAudioPlayer
-import ai.rever.goonj.player.RemoteAudioPlayer
 import android.app.Service
-import android.content.Context
-import androidx.lifecycle.LifecycleService
 
 open class GoonjService: Service(),
     GoonjPlayerServiceInterface {
@@ -56,6 +52,11 @@ open class GoonjService: Service(),
 //        mediaRouter.addCallback(selector, mediaRouterCallback,
 //            MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
 
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     override fun onDestroy() {
