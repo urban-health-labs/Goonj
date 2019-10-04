@@ -19,7 +19,7 @@ allprojects {
 Add the dependency
 ```
 dependencies {
-	implementation 'com.github.rever-ai:goonj:v0.2.5'
+	implementation 'com.github.rever-ai:goonj:v0.2.6'
 }
 ```
 
