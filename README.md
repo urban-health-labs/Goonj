@@ -20,6 +20,9 @@ Add the dependency
 ```
 dependencies {
 	implementation 'com.github.rever-ai:goonj:v0.3'
+	implementation 'com.google.android.exoplayer:exoplayer-core:2.10.3'
+        implementation 'com.google.android.exoplayer:exoplayer-ui:2.10.3'
+        implementation 'com.google.android.exoplayer:extension-mediasession:2.10.0'
 }
 ```
 
