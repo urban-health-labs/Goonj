@@ -5,11 +5,10 @@ import ai.rever.goonj.analytics.isLoggable
 import ai.rever.goonj.interfaces.GoonjPlayer
 import ai.rever.goonj.models.SAMPLES
 import ai.rever.goonj.models.Track
-import android.os.Bundle
-import kotlinx.android.synthetic.main.activity_audio_player.*
-import android.media.AudioManager
-import android.view.KeyEvent
 import android.content.Context
+import android.media.AudioManager
+import android.os.Bundle
+import android.view.KeyEvent
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.cast.framework.CastButtonFactory
@@ -17,7 +16,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
-import java.lang.Exception
+import kotlinx.android.synthetic.main.activity_audio_player.*
 
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
@@ -59,7 +58,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         compositeDisposable.dispose()
     }
 
-    private var knownTrack: Track =  Track()
+    private var knownTrack: Track = Track()
 
     private fun onPlayingTrackChange(currentItem: Track) {
         if (knownTrack.id != currentItem.id) {
@@ -111,10 +110,13 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         }
     }
 
-    private fun customizeNotification(){
-        customizeNotification(true,true,
-            10000, 5000, R.mipmap.ic_launcher)
+    private fun customizeNotification() {
+        customizeNotification(
+            true, true,
+            10000, 5000, R.mipmap.ic_launcher
+        )
     }
+
     private fun setupPlayer() {
         startNewSession()
         addTrack(SAMPLES[0])
@@ -131,7 +133,8 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
-        val audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioManager =
+            applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         return when (event?.keyCode) {
             KEYCODE_VOLUME_UP -> {
@@ -148,7 +151,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
                 )
                 true
             }
-            KEYCODE_BACK ->{
+            KEYCODE_BACK -> {
                 onBackPressed()
                 true
             }
@@ -161,12 +164,12 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             CastButtonFactory.setUpMediaRouteButton(this, audioPlayerMRB)
     }
 
-    private fun isGooglePlayServicesAvailable() : Boolean{
+    private fun isGooglePlayServicesAvailable(): Boolean {
         val apiAvailability = GoogleApiAvailability.getInstance()
         val status = apiAvailability.isGooglePlayServicesAvailable(this)
-        if(status != ConnectionResult.SUCCESS){
-            if(apiAvailability.isUserResolvableError(status)){
-                apiAvailability.getErrorDialog(this,status,2404).show()
+        if (status != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(status)) {
+                apiAvailability.getErrorDialog(this, status, 2404).show()
             }
             return false
         }

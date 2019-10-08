@@ -186,11 +186,6 @@ object Goonj {
 
     val autoplayObservable: Observable<Boolean>? get() = GoonjPlayerManager.autoplayTrackSubject.observeOn(AndroidSchedulers.mainThread())
 
-
-
-    /**
-     * Track progress 0 to 1
-     */
     val trackProgress: Double get() {
         currentTrack?.apply {
             return trackState.position.toDouble() / trackState.duration.toDouble()
