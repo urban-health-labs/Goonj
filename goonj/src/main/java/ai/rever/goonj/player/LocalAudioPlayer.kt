@@ -74,8 +74,6 @@ class LocalAudioPlayer: AudioPlayer {
 
     private val concatenatingMediaSource by lazy { ConcatenatingMediaSource() }
 
-    private var _autoplay = false
-
     private val trackList get() = GoonjPlayerManager.trackList
 
     private fun onStart() {
@@ -161,8 +159,10 @@ class LocalAudioPlayer: AudioPlayer {
 
             if (currentTrack.id != lastKnownTrack?.id) {
                 GoonjPlayerManager.onTrackComplete(lastKnownTrack ?: return)
-                if (!autoplay) {
-                    pause()
+                GoonjPlayerManager.autoplayTrackSubject.value?.let {
+                    if (!it) {
+                        pause()
+                    }
                 }
             }
         }
@@ -194,7 +194,6 @@ class LocalAudioPlayer: AudioPlayer {
     }
 
     override fun seekTo(positionMs: Long) {
-        Log.e("==========>", "$positionMs")
         player?.seekTo(positionMs)
     }
 
@@ -268,13 +267,6 @@ class LocalAudioPlayer: AudioPlayer {
     }
 
     override fun getTrackPosition() = player?.currentPosition ?: 0
-
-    override var autoplay: Boolean
-        get() = _autoplay
-        set(value) {
-            _autoplay = value
-        }
-
 
     override fun onRemoveNotification() {
         playerNotificationManager.setPlayer(null)

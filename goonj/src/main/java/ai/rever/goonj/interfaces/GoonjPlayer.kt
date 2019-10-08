@@ -14,7 +14,7 @@ interface GoonjPlayer {
         Goonj.startNewSession()
     }
 
-    fun play() {
+    fun resume() {
         Goonj.resume()
     }
 
@@ -71,14 +71,16 @@ interface GoonjPlayer {
 
     val playerState: GoonjPlayerState? get() = Goonj.playerState
 
-    val currentTrack: Track? get() = Goonj.currentTrack
 
     val playerStateObservable get() = Goonj.playerStateObservable
 
     val currentTrackObservable get() = Goonj.currentTrackObservable
 
+    val currentTrack: Track? get() = Goonj.currentTrack
+
     val trackList get() = Goonj.trackList
 
     val trackPosition get() = Goonj.trackPosition
 
+    val trackProgress get() = Goonj.trackProgress
 }

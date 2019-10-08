@@ -20,9 +20,6 @@ Add the dependency
 ```
 dependencies {
 	implementation 'com.github.rever-ai:goonj:v0.3'
-	implementation 'com.google.android.exoplayer:exoplayer-core:2.10.3'
-        implementation 'com.google.android.exoplayer:exoplayer-ui:2.10.3'
-        implementation 'com.google.android.exoplayer:extension-mediasession:2.10.0'
 }
 ```
 
@@ -55,18 +52,25 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer
 | -------| ----------- |
 |__startNewSession()__|Starts a new Audio Session. Clears existing playlist.|
 |__addTrack(track : Track, index: Int? = null)__| Add an audio to playlist.|
-|__resume()__ | Resume the player|
-|__pause()__| Pauses the player|
+|__resume()__| Resume the player.|
+|__pause()__| Pauses the player.|
 |__seekTo(positionMs: Long)__|Seek by a certain length. +ve values seek forward, -ve seek backward.|
-|__setAutoplay(autoplay : Boolean)__ | Lets you enable Autoplay with auto-fetch tracks. |
-|__session(context: Context) : List<Samples.Track>__|Returns current playlist|
-|__removeTrack(index : Int)__|Removes track from current Index in the playlist|
-|__moveTrack(currentIndex : Int, finalIndex : Int)__|Moves a prticular track from one place in the playlist to another.|
+|__removeTrack(index : Int)__|Removes track from current Index in the playlist.|
+|__moveTrack(currentIndex : Int, finalIndex : Int)__|Moves a particular track from one place in the playlist to another.|
 |__skipToNext()__|Skip to next track.|
-|__skipToPrevious()__|Skip to previous track|
+|__skipToPrevious()__|Skip to previous track.|
+|__finishTrack()__|Manual finish track.|
+|__customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long, rewindIncrementMs: Long, smallIcon: Int)__|Customise notification which appear while playing.|
+|__removeNotification()__|Remove notification.|
+|__trackList__|Get current playlist|
+|__playerState__|Get player state (GoonjPlayerState)|
+|__currentTrack__|Get current track (Track)|
+|__trackPosition__|Get current track position (Long)|
+|__autoplay__|Enable autoplay with auto-fetch tracks, could be used get current state of autoplay.|
 |__playerStateObservable__|Observable of (GoonjPlayerState) that tells if the Player state. Helps in updating Play/Pause Icon/Button in UI.|
-|__currentPlayingTrack__|Returns a Observable of (Track) that contains details of the Current Track that is playing.|
+|__currentTrackObservable__|Observable of (Track) that contains details of the Current Track that is playing.|
+|__autoplayObservable__|Observable of (Track) that contains details of the Current Track that is playing.|
+
 
 ### Cast
-To support __ChromeCast__, add ``` CastButtonFactory.setUpMediaRouteButton(this, yourMediaRouterButtonInXML) ``` to your Activity/Fragment and add ```yourMediaRouterButtonInXML``` in your XML Layout.
-** Note **: Cast doesn't supports Autoplay.
+Feature under development

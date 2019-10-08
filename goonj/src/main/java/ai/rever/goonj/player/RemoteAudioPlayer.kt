@@ -22,11 +22,9 @@ import java.lang.ref.WeakReference
 class RemoteAudioPlayer: AudioPlayer {
 
     private var player: RemotePlaybackClient? = null
-
-    private var _autoplay = false
-
-
     private var isHandlerRunning = false
+
+    // TODO : Re-create RemoteAudioPlayer with playlist support, for autoplay
 
     override fun connect(route: MediaRouter.RouteInfo) {
         // TODO check for resume services
@@ -171,14 +169,6 @@ class RemoteAudioPlayer: AudioPlayer {
         })
 
     }
-
-    override var autoplay
-        get() = _autoplay
-        set(value) {
-            _autoplay = value
-
-            // TODO : Re-create RemoteAudioPlayer with playlist support
-        }
 
     private fun seekInternal(item: Track) {
         if (player?.hasSession() != true) {

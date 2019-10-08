@@ -17,7 +17,7 @@ interface AudioPlayer {
     fun suspend()
     fun unsuspend()
 
-    var autoplay: Boolean
+//    var autoplay: Boolean
 
     fun seekTo(index: Int, positionMs: Long) {}
 

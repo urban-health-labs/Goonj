@@ -28,7 +28,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
         setContentView(R.layout.activity_audio_player)
 
-        setupUI()
+        setListener()
         customizeNotification()
         setupPlayer()
 
@@ -41,11 +41,11 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     override fun onResume() {
         super.onResume()
 
-        playerStateObservable?.subscribe {
+        playerStateObservable.subscribe {
             audioPlayerPlayPauseToggleBtn.isChecked = it != GoonjPlayerState.PLAYING
         }?.addTo(compositeDisposable)
 
-        currentTrackObservable?.subscribe(::onPlayingTrackChange)
+        currentTrackObservable.subscribe(::onPlayingTrackChange)
             ?.addTo(compositeDisposable)
     }
 
@@ -78,14 +78,14 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         knownTrack = currentItem
     }
 
-    private fun setupUI() {
+    private fun setListener() {
 
         audioPlayerPlayPauseToggleBtn?.apply {
             setOnClickListener {
                 if (isChecked) {
                     pause()
                 } else {
-                    play()
+                    resume()
                 }
             }
         }
@@ -121,7 +121,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         addTrack(SAMPLES[1])
         addTrack(SAMPLES[2])
         addTrack(SAMPLES[3])
-        play()
+        resume()
     }
 
     override fun onBackPressed() {
@@ -130,30 +130,29 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         pause()
     }
 
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
         val audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        when (val keyCode = event.keyCode) {
+        return when (event?.keyCode) {
             KEYCODE_VOLUME_UP -> {
                 audioManager.adjustStreamVolume(
                     AudioManager.STREAM_MUSIC,
                     AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI
                 )
-                return true
+                true
             }
             KEYCODE_VOLUME_DOWN -> {
                 audioManager.adjustStreamVolume(
                     AudioManager.STREAM_MUSIC,
                     AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI
                 )
-                return true
+                true
             }
             KEYCODE_BACK ->{
                 onBackPressed()
-                return true
+                true
             }
-            else ->
-                return super.onKeyDown(keyCode, event)
+            else -> super.dispatchKeyEvent(event)
         }
     }
 

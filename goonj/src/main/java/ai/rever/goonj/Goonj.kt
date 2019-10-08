@@ -127,11 +127,7 @@ object Goonj {
         goonjPlayerServiceInterface = null
     }
 
-    fun resume() = run { GoonjPlayerManager.resume() }
-
-    fun pause() = run { GoonjPlayerManager.pause() }
-
-    fun seekTo(position : Long) = run { GoonjPlayerManager.seekTo(position) }
+    fun startNewSession() = run { GoonjPlayerManager.startNewSession() }
 
     fun addTrack(track : Track, index: Int? = null) = run {
         index?.let {
@@ -139,19 +135,11 @@ object Goonj {
         } ?: GoonjPlayerManager.addTrack(track)
     }
 
-    fun startNewSession() = run { GoonjPlayerManager.startNewSession() }
+    fun resume() = run { GoonjPlayerManager.resume() }
 
+    fun pause() = run { GoonjPlayerManager.pause() }
 
-    fun customiseNotification(useNavigationAction: Boolean,
-                              usePlayPauseAction: Boolean,
-                              fastForwardIncrementMs: Long ,
-                              rewindIncrementMs: Long, smallIcon: Int) = run {
-        GoonjNotificationManager.customiseNotification(
-            useNavigationAction, usePlayPauseAction,
-            fastForwardIncrementMs, rewindIncrementMs, smallIcon
-        )
-    }
-
+    fun seekTo(position : Long) = run { GoonjPlayerManager.seekTo(position) }
 
     fun removeTrack(index : Int) = run { GoonjPlayerManager.removeTrack(index) }
 
@@ -163,30 +151,52 @@ object Goonj {
 
     fun skipToPrevious()  = run { GoonjPlayerManager.skipToPrevious() }
 
-    fun removeNotification() = run { GoonjPlayerManager.removeNotification() }
-
     fun finishTrack() = run { GoonjPlayerManager.finishTrack() }
 
+    fun customiseNotification(useNavigationAction: Boolean,
+                              usePlayPauseAction: Boolean,
+                              fastForwardIncrementMs: Long ,
+                              rewindIncrementMs: Long,
+                              smallIcon: Int) = run {
+        GoonjNotificationManager.customiseNotification(useNavigationAction,
+            usePlayPauseAction, fastForwardIncrementMs, rewindIncrementMs, smallIcon)
+    }
 
-    var autoplay: Boolean
-        get() = GoonjPlayerManager.autoplay
-        set(value) {
-            run {
-                GoonjPlayerManager.autoplay = value
-            }
-        }
+    fun removeNotification() = run { GoonjPlayerManager.removeNotification() }
+
+    val trackList get() = GoonjPlayerManager.trackList
 
     val playerState: GoonjPlayerState? get() = GoonjPlayerManager.playerStateBehaviorSubject.value
 
     val currentTrack: Track? get() = GoonjPlayerManager.currentTrackSubject.value
 
-    val playerStateObservable: Observable<GoonjPlayerState>? get() = GoonjPlayerManager.playerStateBehaviorSubject.observeOn(AndroidSchedulers.mainThread())
+    val trackPosition: Long get() = GoonjPlayerManager.trackPosition
 
-    val currentTrackObservable: Observable<Track>? get() = GoonjPlayerManager.currentTrackSubject.observeOn(AndroidSchedulers.mainThread())
+    var autoplay: Boolean
+        get() = GoonjPlayerManager.autoplayTrackSubject.value?: false
+        set(value) {
+            run {
+                GoonjPlayerManager.autoplayTrackSubject.onNext(value)
+            }
+        }
 
-    val trackList get() = GoonjPlayerManager.trackList
+    val playerStateObservable: Observable<GoonjPlayerState> get() = GoonjPlayerManager.playerStateBehaviorSubject.observeOn(AndroidSchedulers.mainThread())
 
-    val trackPosition get() = GoonjPlayerManager.trackPosition
+    val currentTrackObservable: Observable<Track> get() = GoonjPlayerManager.currentTrackSubject.observeOn(AndroidSchedulers.mainThread())
+
+    val autoplayObservable: Observable<Boolean>? get() = GoonjPlayerManager.autoplayTrackSubject.observeOn(AndroidSchedulers.mainThread())
+
+
+
+    /**
+     * Track progress 0 to 1
+     */
+    val trackProgress: Double get() {
+        currentTrack?.apply {
+            return trackState.position.toDouble() / trackState.duration.toDouble()
+        }
+        return 0.toDouble()
+    }
 
     // internal method
     internal fun startForeground(notificationId: Int, notification: Notification?) = run {

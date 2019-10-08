@@ -27,7 +27,10 @@ internal object GoonjPlayerManager {
         }
 
     internal val playerStateBehaviorSubject: BehaviorSubject<GoonjPlayerState> = BehaviorSubject.create()
+
     internal val currentTrackSubject: BehaviorSubject<Track> = BehaviorSubject.create()
+
+    internal val autoplayTrackSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
 
     private val player: AudioPlayer? get() {
 //        isRemote = mediaRoute?.supportsControlCategory(
@@ -67,12 +70,6 @@ internal object GoonjPlayerManager {
         mTrackList.clear()
         player?.startNewSession()
     }
-
-    internal var autoplay: Boolean
-        get() = player?.autoplay ?: false
-        set(value) {
-            player?.autoplay = value
-        }
 
     internal fun removeTrack(index : Int){
         mTrackList.removeAt(index)
