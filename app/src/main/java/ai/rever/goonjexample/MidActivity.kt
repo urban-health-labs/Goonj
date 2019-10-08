@@ -34,7 +34,7 @@ class MidActivity : AppCompatActivity() {
 
     }
 
-    fun setupDownloads(){
+    private fun setupDownloads(){
         activity_mid_download1_btn.setOnClickListener {
             addDownload(application, SAMPLES[0])
         }
@@ -48,7 +48,7 @@ class MidActivity : AppCompatActivity() {
          updateDownloadState()
     }
 
-    fun updateDownloadState(){
+    private fun updateDownloadState(){
         if(isMediaDownloaded(SAMPLES[0].id)){
             activity_mid_download1_btn.visibility = View.GONE
             activity_mid_done1_btn.visibility = View.VISIBLE
