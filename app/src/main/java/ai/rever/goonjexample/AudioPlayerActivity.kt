@@ -45,7 +45,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             audioPlayerPlayPauseToggleBtn.isChecked = it != GoonjPlayerState.PLAYING
         }?.addTo(compositeDisposable)
 
-        currentPlayingTrackObservable?.subscribe(::onPlayingTrackChange)
+        currentTrackObservable?.subscribe(::onPlayingTrackChange)
             ?.addTo(compositeDisposable)
     }
 
@@ -98,8 +98,8 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             seekTo(trackPosition - 3000)
         }
 
-        audioPlayerAutoplaySwitch.setOnCheckedChangeListener { _, autoplay ->
-            setAutoplay(autoplay)
+        audioPlayerAutoplaySwitch.setOnCheckedChangeListener { _, currentState ->
+            autoplay = currentState
         }
 
         audioPlayerSkipNext.setOnClickListener {

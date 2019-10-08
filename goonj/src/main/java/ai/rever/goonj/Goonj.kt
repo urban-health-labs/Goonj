@@ -152,7 +152,6 @@ object Goonj {
         )
     }
 
-    fun setAutoplay(autoplay : Boolean) = run { GoonjPlayerManager.setAutoplay(autoplay) }
 
     fun removeTrack(index : Int) = run { GoonjPlayerManager.removeTrack(index) }
 
@@ -168,14 +167,26 @@ object Goonj {
 
     fun finishTrack() = run { GoonjPlayerManager.finishTrack() }
 
+
+    var autoplay: Boolean
+        get() = GoonjPlayerManager.autoplay
+        set(value) {
+            run {
+                GoonjPlayerManager.autoplay = value
+            }
+        }
+
+    val playerState: GoonjPlayerState? get() = GoonjPlayerManager.playerStateBehaviorSubject.value
+
+    val currentTrack: Track? get() = GoonjPlayerManager.currentTrackSubject.value
+
     val playerStateObservable: Observable<GoonjPlayerState>? get() = GoonjPlayerManager.playerStateBehaviorSubject.observeOn(AndroidSchedulers.mainThread())
 
-    val currentPlayingTrack: Observable<Track>? get() = GoonjPlayerManager.currentPlayingTrack.observeOn(AndroidSchedulers.mainThread())
+    val currentTrackObservable: Observable<Track>? get() = GoonjPlayerManager.currentTrackSubject.observeOn(AndroidSchedulers.mainThread())
 
     val trackList get() = GoonjPlayerManager.trackList
 
     val trackPosition get() = GoonjPlayerManager.trackPosition
-
 
     // internal method
     internal fun startForeground(notificationId: Int, notification: Notification?) = run {

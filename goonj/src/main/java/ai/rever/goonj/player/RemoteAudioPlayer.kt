@@ -23,7 +23,9 @@ class RemoteAudioPlayer: AudioPlayer {
 
     private var player: RemotePlaybackClient? = null
 
-    private var autoplay : Boolean = true
+    private var _autoplay = false
+
+
     private var isHandlerRunning = false
 
     override fun connect(route: MediaRouter.RouteInfo) {
@@ -64,7 +66,7 @@ class RemoteAudioPlayer: AudioPlayer {
                     setMediaLoadRequest(it)
                 }
 
-                GoonjPlayerManager.currentPlayingTrack.onNext(track)
+                GoonjPlayerManager.currentTrackSubject.onNext(track)
                 setStatus(itemStatus, defaultState = GoonjPlayerState.PAUSED)
             })
     }
@@ -89,7 +91,7 @@ class RemoteAudioPlayer: AudioPlayer {
     }
 
     fun getStatus(seek: Boolean, positionMs: Long = 0) {
-        val track = GoonjPlayerManager.currentPlayingTrack.value
+        val track = GoonjPlayerManager.currentTrackSubject.value
         if (player?.hasSession() != true || track?.trackState?.remoteItemId == null) {
             // if trackList is not valid or track id not assigend yet.
             // just return, it's not fatal
@@ -128,7 +130,7 @@ class RemoteAudioPlayer: AudioPlayer {
     }
 
     override fun unsuspend() {
-        GoonjPlayerManager.currentPlayingTrack.value?.let {
+        GoonjPlayerManager.currentTrackSubject.value?.let {
             play(it)
         }
     }
@@ -170,12 +172,13 @@ class RemoteAudioPlayer: AudioPlayer {
 
     }
 
+    override var autoplay
+        get() = _autoplay
+        set(value) {
+            _autoplay = value
 
-    override fun setAutoplay(autoplay: Boolean) {
-        this.autoplay = autoplay
-
-        // TODO : Re-create RemoteAudioPlayer with playlist support
-    }
+            // TODO : Re-create RemoteAudioPlayer with playlist support
+        }
 
     private fun seekInternal(item: Track) {
         if (player?.hasSession() != true) {
@@ -196,7 +199,7 @@ class RemoteAudioPlayer: AudioPlayer {
             map
         )
 
-        val track = GoonjPlayerManager.currentPlayingTrack.value?: return
+        val track = GoonjPlayerManager.currentTrackSubject.value?: return
         if (itemStatus?.apply {
                 track.trackState.state = when (playbackState) {
                 PLAYBACK_STATE_BUFFERING -> GoonjPlayerState.BUFFERING
@@ -239,7 +242,7 @@ class RemoteAudioPlayer: AudioPlayer {
     }
 
     private fun updateTrackPosition(itemId: String?, itemStatus: MediaItemStatus?){
-        GoonjPlayerManager.currentPlayingTrack.value?.let { track ->
+        GoonjPlayerManager.currentTrackSubject.value?.let { track ->
             if (track.id == itemId) {
                 itemStatus?.contentPosition?.let {
                     track.trackState.position = it

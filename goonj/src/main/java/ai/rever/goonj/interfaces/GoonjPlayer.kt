@@ -1,8 +1,9 @@
 package ai.rever.goonj.interfaces
 
 import ai.rever.goonj.Goonj
+import ai.rever.goonj.GoonjPlayerState
+import ai.rever.goonj.manager.GoonjPlayerManager
 import ai.rever.goonj.models.Track
-import io.reactivex.android.schedulers.AndroidSchedulers
 
 /**
  * This interface will be visible to User
@@ -25,9 +26,13 @@ interface GoonjPlayer {
         Goonj.seekTo(positionMS)
     }
 
-    fun setAutoplay(autoplay : Boolean) {
-        Goonj.setAutoplay(autoplay)
-    }
+
+    var autoplay: Boolean
+        get() = Goonj.autoplay
+        set(value) {
+            Goonj.autoplay = value
+        }
+
 
     fun addTrack(track: Track, index: Int ?= null) {
         Goonj.addTrack(track, index)
@@ -47,7 +52,6 @@ interface GoonjPlayer {
     }
 
 
-    val trackList get() = Goonj.trackList
 
     fun removeTrack(index : Int){
         Goonj.removeTrack(index)
@@ -65,9 +69,16 @@ interface GoonjPlayer {
 
     fun finishTrack() = Goonj.finishTrack()
 
-    val trackPosition get() = Goonj.trackPosition
+    val playerState: GoonjPlayerState? get() = Goonj.playerState
+
+    val currentTrack: Track? get() = Goonj.currentTrack
 
     val playerStateObservable get() = Goonj.playerStateObservable
 
-    val currentPlayingTrackObservable get() = Goonj.currentPlayingTrack
+    val currentTrackObservable get() = Goonj.currentTrackObservable
+
+    val trackList get() = Goonj.trackList
+
+    val trackPosition get() = Goonj.trackPosition
+
 }

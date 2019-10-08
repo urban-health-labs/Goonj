@@ -17,11 +17,11 @@ interface AudioPlayer {
     fun suspend()
     fun unsuspend()
 
-    fun setAutoplay(autoplay: Boolean)
+    var autoplay: Boolean
 
     fun seekTo(index: Int, positionMs: Long) {}
 
-    fun getTrackPosition(): Long = GoonjPlayerManager.currentPlayingTrack.value?.trackState?.position?: 0
+    fun getTrackPosition(): Long = GoonjPlayerManager.currentTrackSubject.value?.trackState?.position?: 0
 
     fun connect(route: MediaRouter.RouteInfo) {}
     fun startNewSession() {}
