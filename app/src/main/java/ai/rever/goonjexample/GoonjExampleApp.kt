@@ -26,7 +26,6 @@ class GoonjExampleApp: Application(), LifecycleObserver {
 
         Goonj.initialize(this)
             .setPendingIntentForNotification(pendingIntent)
-            .addOnTrackComplete(::onTrackComplete)
             .setImageLoader(::imageLoader)
     }
 

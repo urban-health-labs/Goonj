@@ -6,6 +6,7 @@ import ai.rever.goonj.interfaces.AudioPlayer
 import ai.rever.goonj.player.LocalAudioPlayer
 import ai.rever.goonj.models.Track
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 
 
 internal object GoonjPlayerManager {
@@ -31,6 +32,8 @@ internal object GoonjPlayerManager {
     internal val currentTrackSubject: BehaviorSubject<Track> = BehaviorSubject.create()
 
     internal val autoplayTrackSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
+
+    internal val trackCompleteSubject = PublishSubject.create<Track>()
 
     private val player: AudioPlayer? get() {
 //        isRemote = mediaRoute?.supportsControlCategory(
@@ -98,14 +101,6 @@ internal object GoonjPlayerManager {
         player?.onRemoveNotification()
     }
 
-    internal fun addOnTrackComplete(trackCompletion: (Track) -> Unit) {
-        trackCompletions.add(trackCompletion)
-    }
-
-    internal fun removeOnTrackComplete(trackCompletion: (Track) -> Unit) {
-        trackCompletions.remove(trackCompletion)
-    }
-
     internal fun finishTrack(){
         pause()
         removeNotification()
@@ -113,9 +108,8 @@ internal object GoonjPlayerManager {
     }
 
     internal fun onTrackComplete(track: Track) {
-        trackCompletions.forEach { it(track) }
+        trackCompleteSubject.onNext(track)
     }
 
-    private var trackCompletions: ArrayList<(Track) -> Unit> = arrayListOf()
 }
 

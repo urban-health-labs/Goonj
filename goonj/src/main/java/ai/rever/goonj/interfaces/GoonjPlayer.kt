@@ -4,28 +4,47 @@ import ai.rever.goonj.Goonj
 import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.manager.GoonjPlayerManager
 import ai.rever.goonj.models.Track
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Flowable
+import io.reactivex.Observable
 
 /**
  * This interface will be visible to User
  */
 interface GoonjPlayer {
 
-    fun startNewSession() {
-        Goonj.startNewSession()
-    }
+    fun startNewSession() = Goonj.startNewSession()
 
-    fun resume() {
-        Goonj.resume()
-    }
+    fun resume() = Goonj.resume()
 
-    fun pause() {
-        Goonj.pause()
-    }
+    fun pause() = Goonj.pause()
 
-    fun seekTo(positionMS: Long){
-        Goonj.seekTo(positionMS)
-    }
+    fun finishTrack() = Goonj.finishTrack()
 
+    fun seekTo(positionMS: Long) = Goonj.seekTo(positionMS)
+
+    fun addTrack(track: Track, index: Int ?= null) = Goonj.addTrack(track, index)
+
+    fun removeTrack(index : Int) = Goonj.removeTrack(index)
+
+    fun moveTrack(currentIndex : Int, finalIndex : Int) = Goonj.moveTrack(currentIndex, finalIndex)
+
+    fun skipToNext() = Goonj.skipToNext()
+
+    fun skipToPrevious() = Goonj.skipToPrevious()
+
+    fun customizeNotification(useNavigationAction: Boolean = true,
+                              usePlayPauseAction: Boolean = true,
+                              fastForwardIncrementMs: Long = 0L,
+                              rewindIncrementMs: Long = 0L,
+                              smallIcon : Int) =
+        Goonj.customiseNotification(useNavigationAction,
+            usePlayPauseAction,
+            fastForwardIncrementMs,
+            rewindIncrementMs,
+            smallIcon)
+
+    fun removeNotification() = Goonj.removeNotification()
 
     var autoplay: Boolean
         get() = Goonj.autoplay
@@ -33,54 +52,21 @@ interface GoonjPlayer {
             Goonj.autoplay = value
         }
 
-
-    fun addTrack(track: Track, index: Int ?= null) {
-        Goonj.addTrack(track, index)
-    }
-
-    fun customizeNotification(useNavigationAction: Boolean = true,
-                              usePlayPauseAction: Boolean = true,
-                              fastForwardIncrementMs: Long = 0L,
-                              rewindIncrementMs: Long = 0L,
-                              smallIcon : Int){
-
-        Goonj.customiseNotification(useNavigationAction,
-            usePlayPauseAction,
-            fastForwardIncrementMs,
-            rewindIncrementMs,
-            smallIcon)
-    }
-
-
-
-    fun removeTrack(index : Int){
-        Goonj.removeTrack(index)
-    }
-
-    fun moveTrack(currentIndex : Int, finalIndex : Int){
-        Goonj.moveTrack(currentIndex, finalIndex)
-    }
-
-    fun skipToNext() = Goonj.skipToNext()
-
-    fun skipToPrevious() = Goonj.skipToPrevious()
-
-    fun removeNotification() = Goonj.removeNotification()
-
-    fun finishTrack() = Goonj.finishTrack()
-
     val playerState: GoonjPlayerState? get() = Goonj.playerState
-
-
-    val playerStateObservable get() = Goonj.playerStateObservable
-
-    val currentTrackObservable get() = Goonj.currentTrackObservable
 
     val currentTrack: Track? get() = Goonj.currentTrack
 
-    val trackList get() = Goonj.trackList
+    val trackList: List<Track> get() = Goonj.trackList
 
-    val trackPosition get() = Goonj.trackPosition
+    val trackPosition: Long get() = Goonj.trackPosition
 
-    val trackProgress get() = Goonj.trackProgress
+    val trackProgress: Double get() = Goonj.trackProgress
+
+    val playerStateFlowable: Flowable<GoonjPlayerState> get() = Goonj.playerStateFlowable
+
+    val currentTrackFlowable: Flowable<Track> get() = Goonj.currentTrackFlowable
+
+    val autoplayFlowable: Flowable<Boolean> get() = Goonj.autoplayFlowable
+
+    val trackCompletionObservable: Observable<Track> get() = Goonj.trackCompletionObservable
 }

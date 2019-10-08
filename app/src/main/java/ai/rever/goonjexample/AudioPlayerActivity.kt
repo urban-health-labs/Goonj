@@ -40,12 +40,11 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     override fun onResume() {
         super.onResume()
 
-        playerStateObservable.subscribe {
+        playerStateFlowable.subscribe {
             audioPlayerPlayPauseToggleBtn.isChecked = it != GoonjPlayerState.PLAYING
-        }?.addTo(compositeDisposable)
+        }.addTo(compositeDisposable)
 
-        currentTrackObservable.subscribe(::onPlayingTrackChange)
-            ?.addTo(compositeDisposable)
+        currentTrackFlowable.subscribe(::onPlayingTrackChange).addTo(compositeDisposable)
     }
 
     override fun onPause() {

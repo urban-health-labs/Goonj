@@ -12,8 +12,9 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
 import android.os.IBinder
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Flowable
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import java.lang.ref.WeakReference
 
 //fun log(message: String) {
@@ -24,12 +25,14 @@ import java.lang.ref.WeakReference
 //    log("thread ${Thread.currentThread().name}")
 //}
 
-
 object Goonj {
 
     internal val appContext get() = weakContext?.get()
+
     private var weakContext: WeakReference<Context>? = null
+
     internal var imageLoader: ((Track, (Bitmap?) -> Unit) -> Unit)? = null
+
     private var holderGoonjPlayerServiceInterface:
             WeakReference<GoonjPlayerServiceInterface?>? = null
 
@@ -39,7 +42,6 @@ object Goonj {
             holderGoonjPlayerServiceInterface = WeakReference(value)
             runOnSet()
         }
-
 
     private var mServiceConnection: ServiceConnection? = null
 
@@ -85,13 +87,6 @@ object Goonj {
         return this
     }
 
-    fun addOnTrackComplete(trackCompletion: (Track) -> Unit): Goonj {
-        run {
-            GoonjPlayerManager.addOnTrackComplete(trackCompletion)
-        }
-        return this
-    }
-
     private fun <T: GoonjService> register(audioServiceClass: Class<T>) {
         if(mServiceConnection == null){
             mServiceConnection = object : ServiceConnection{
@@ -129,17 +124,19 @@ object Goonj {
 
     fun startNewSession() = run { GoonjPlayerManager.startNewSession() }
 
+    fun resume() = run { GoonjPlayerManager.resume() }
+
+    fun pause() = run { GoonjPlayerManager.pause() }
+
+    fun finishTrack() = run { GoonjPlayerManager.finishTrack() }
+
+    fun seekTo(position : Long) = run { GoonjPlayerManager.seekTo(position) }
+
     fun addTrack(track : Track, index: Int? = null) = run {
         index?.let {
             GoonjPlayerManager.addTrack(track, it)
         } ?: GoonjPlayerManager.addTrack(track)
     }
-
-    fun resume() = run { GoonjPlayerManager.resume() }
-
-    fun pause() = run { GoonjPlayerManager.pause() }
-
-    fun seekTo(position : Long) = run { GoonjPlayerManager.seekTo(position) }
 
     fun removeTrack(index : Int) = run { GoonjPlayerManager.removeTrack(index) }
 
@@ -151,7 +148,6 @@ object Goonj {
 
     fun skipToPrevious()  = run { GoonjPlayerManager.skipToPrevious() }
 
-    fun finishTrack() = run { GoonjPlayerManager.finishTrack() }
 
     fun customiseNotification(useNavigationAction: Boolean,
                               usePlayPauseAction: Boolean,
@@ -164,6 +160,19 @@ object Goonj {
 
     fun removeNotification() = run { GoonjPlayerManager.removeNotification() }
 
+    var autoplay: Boolean
+        get() = GoonjPlayerManager.autoplayTrackSubject.value?: false
+        set(value) = run {
+            GoonjPlayerManager.autoplayTrackSubject.onNext(value)
+        }
+
+    val trackProgress: Double get() {
+        currentTrack?.apply {
+            return trackState.position.toDouble() / trackState.duration.toDouble()
+        }
+        return 0.toDouble()
+    }
+
     val trackList get() = GoonjPlayerManager.trackList
 
     val playerState: GoonjPlayerState? get() = GoonjPlayerManager.playerStateBehaviorSubject.value
@@ -172,26 +181,13 @@ object Goonj {
 
     val trackPosition: Long get() = GoonjPlayerManager.trackPosition
 
-    var autoplay: Boolean
-        get() = GoonjPlayerManager.autoplayTrackSubject.value?: false
-        set(value) {
-            run {
-                GoonjPlayerManager.autoplayTrackSubject.onNext(value)
-            }
-        }
+    val playerStateFlowable: Flowable<GoonjPlayerState> get() = GoonjPlayerManager.playerStateBehaviorSubject.toFlowable(BackpressureStrategy.LATEST)
 
-    val playerStateObservable: Observable<GoonjPlayerState> get() = GoonjPlayerManager.playerStateBehaviorSubject.observeOn(AndroidSchedulers.mainThread())
+    val currentTrackFlowable: Flowable<Track> get() = GoonjPlayerManager.currentTrackSubject.toFlowable(BackpressureStrategy.LATEST)
 
-    val currentTrackObservable: Observable<Track> get() = GoonjPlayerManager.currentTrackSubject.observeOn(AndroidSchedulers.mainThread())
+    val autoplayFlowable: Flowable<Boolean> get() = GoonjPlayerManager.autoplayTrackSubject.toFlowable(BackpressureStrategy.LATEST)
 
-    val autoplayObservable: Observable<Boolean>? get() = GoonjPlayerManager.autoplayTrackSubject.observeOn(AndroidSchedulers.mainThread())
-
-    val trackProgress: Double get() {
-        currentTrack?.apply {
-            return trackState.position.toDouble() / trackState.duration.toDouble()
-        }
-        return 0.toDouble()
-    }
+    val trackCompletionObservable: Observable<Track> get() = GoonjPlayerManager.trackCompleteSubject
 
     // internal method
     internal fun startForeground(notificationId: Int, notification: Notification?) = run {

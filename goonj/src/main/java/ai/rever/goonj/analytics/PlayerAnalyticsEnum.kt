@@ -1,7 +1,6 @@
 package ai.rever.goonj.analytics
 
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.subjects.BehaviorSubject
 
 var isLoggable = false
