@@ -21,9 +21,6 @@ import java.lang.Exception
 
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
-//    val TAG = "AUDIO_PLAYER_ACTIVITY"
-    var load = true
-
     private var compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,11 +41,12 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     override fun onResume() {
         super.onResume()
 
-        isPlayingObservable?.subscribe {
+        playerStateObservable?.subscribe {
             audioPlayerPlayPauseToggleBtn.isChecked = it != GoonjPlayerState.PLAYING
         }?.addTo(compositeDisposable)
 
-        currentPlayingTrackObservable?.subscribe(::onPlayingTrackChange)?.addTo(compositeDisposable)
+        currentPlayingTrackObservable?.subscribe(::onPlayingTrackChange)
+            ?.addTo(compositeDisposable)
     }
 
     override fun onPause() {
@@ -61,17 +59,14 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         compositeDisposable.dispose()
     }
 
-    var knownTrack: Track =  Track()
+    private var knownTrack: Track =  Track()
 
     private fun onPlayingTrackChange(currentItem: Track) {
         if (knownTrack.id != currentItem.id) {
-//            Picasso.get().load(currentItem.imageUrl).into(audioPlayerAlbumArtIV)
             currentItem.load { audioPlayerAlbumArtIV.setImageBitmap(it) }
             audioPlayerAlbumTitleTv.text = currentItem.title
             audioPlayerAlbumArtistTv.text = currentItem.artistName
         }
-//        Log.d(TAG, "TRACK: $currentItem")
-//        Log.d(TAG, "Position: ${currentItem.trackState.position}")
         try {
             audioPlayerCurrentPosition.text = (currentItem.trackState.position / 1000).toString()
             audioPlayerContentDuration.text = (currentItem.trackState.duration / 1000).toString()

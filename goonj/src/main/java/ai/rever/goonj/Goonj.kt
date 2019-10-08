@@ -61,8 +61,15 @@ object Goonj {
         }
     }
 
-    fun initialize(context: Context): Goonj {
-        initialize(context, GoonjService::class.java)
+    fun initialize(context: Context): Goonj = initialize(context, GoonjService::class.java)
+
+    fun <S: GoonjService> initialize(context: Context, audioServiceClass: Class<S>): Goonj {
+        weakContext = if (context.applicationContext == null) {
+            WeakReference(context)
+        } else {
+            WeakReference(context.applicationContext)
+        }
+        register(audioServiceClass)
         return this
     }
 
@@ -83,15 +90,6 @@ object Goonj {
             GoonjPlayerManager.addOnTrackComplete(trackCompletion)
         }
         return this
-    }
-
-    fun <S: GoonjService> initialize(context: Context, audioServiceClass: Class<S>) {
-        weakContext = if (context.applicationContext == null) {
-            WeakReference(context)
-        } else {
-            WeakReference(context.applicationContext)
-        }
-        register(audioServiceClass)
     }
 
     private fun <T: GoonjService> register(audioServiceClass: Class<T>) {

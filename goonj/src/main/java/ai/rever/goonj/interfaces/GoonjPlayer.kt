@@ -67,7 +67,7 @@ interface GoonjPlayer {
 
     val trackPosition get() = Goonj.trackPosition
 
-    val isPlayingObservable get() = Goonj.playerStateObservable
+    val playerStateObservable get() = Goonj.playerStateObservable
 
-    val currentPlayingTrackObservable get() = Goonj.currentPlayingTrack?.subscribeOn(AndroidSchedulers.mainThread())
+    val currentPlayingTrackObservable get() = Goonj.currentPlayingTrack
 }
