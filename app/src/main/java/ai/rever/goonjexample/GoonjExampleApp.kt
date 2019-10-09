@@ -3,7 +3,6 @@ package ai.rever.goonjexample
 import ai.rever.goonj.Goonj
 import ai.rever.goonj.models.Track
 import android.app.Application
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.util.Log
@@ -12,6 +11,7 @@ import androidx.lifecycle.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import io.reactivex.disposables.Disposable
 
 class GoonjExampleApp: Application(), LifecycleObserver {
 
@@ -20,13 +20,16 @@ class GoonjExampleApp: Application(), LifecycleObserver {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
 
+    private lateinit var disposable: Disposable
+
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onAppCreate() {
-        val pendingIntent = Intent(applicationContext, AudioPlayerActivity::class.java)
 
-        Goonj.initialize(this)
-            .setPendingIntentForNotification(pendingIntent)
-            .setImageLoader(::imageLoader)
+        Goonj.register<AudioPlayerActivity>(this)
+
+        Goonj.imageLoader = ::imageLoader
+
+        disposable = Goonj.trackCompletionObservable.subscribe(::onTrackComplete)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -34,6 +37,7 @@ class GoonjExampleApp: Application(), LifecycleObserver {
         Log.e("=============>", "destroy")
 
         Goonj.unregister()
+        disposable.dispose()
     }
 
     private fun imageLoader(track: Track, callback: (Bitmap?) -> Unit) {
@@ -52,7 +56,11 @@ class GoonjExampleApp: Application(), LifecycleObserver {
     }
 
     private fun onTrackComplete(track: Track) {
-
+        /**
+         * Could be used for
+         *   i)   updating completed track to server or some database
+         *   ii)  adding additional track to playlist after calculating left track count to play
+         */
     }
 }
 

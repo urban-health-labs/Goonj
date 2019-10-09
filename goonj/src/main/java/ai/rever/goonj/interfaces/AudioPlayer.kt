@@ -4,7 +4,7 @@ import ai.rever.goonj.manager.GoonjPlayerManager
 import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.models.Track
 
-interface AudioPlayer {
+internal interface AudioPlayer {
 
     fun release()
     fun seekTo(positionMs : Long)

@@ -3,9 +3,9 @@
 # Goonj 
 ### An all purpose music player library
 
-## How to add Goonj to your Android application
+## Goonj integrate to your android project in under a minute
 ### Step 1:
-Add it in your root build.gradle at the end of repositories:
+Add following in build.gradle (Project level):
 ```
 allprojects {
 	repositories {
@@ -16,39 +16,47 @@ allprojects {
 ````
 
 ### Step 2: 
-Add the dependency
+Add following in build.gradle (App level):
 ```
 dependencies {
-	implementation 'com.github.rever-ai:goonj:v0.3'
+	implementation 'com.github.rever-ai:goonj:v0.3.+'
 }
 ```
 
 ## Usage
-### Register Service
-In your onCreate(), add the following lines:
+### Register Goonj
+To register Goonj, add following line:
 ```
-Goonj.initialize(this)
+Goonj.register<AudioPlayerActivity>(context)
 ````
-where __pendingIntent__ is the Intent which defines what is activity that on click on Notification will take to. Example: 
-```
-val pendingIntent = Intent(applicationContext, AudioPlayerActivity::class.java)
-Goonj.setPendingIntentForNotification(pendingIntent)
-```
+where __AudioPlayerActivity__ is activity that will open on clicking Notification.
 
-### Unregister Service
-In your onDestroy(), add the following lines:
+### Unregister Goonj
+To unregister Goonj, add following line:
 ```
 Goonj.unregister()
 ```
 
-### Implement GoonjPlayer Interface
-To use Audio player actions, implement __GoonjPlayer__ interface in your Activity/Fragment.
+To use player actions, implement __GoonjPlayer__ interface or use __Goonj__ singleton instance
+
+### GoonjPlayer Interface could be implemented in following way
 ```
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer
+
+    ....
+    someMethod()
+    val property = someProperty
+    ....
+
 ```
 
-### Methods
-| Method | Description |
+### Goonj Singleton could be used in following way
+```
+Goonj.someMethod() or Goonj.someProperty
+```
+
+### Goonj(Singleton) or GoonjPlayer(Interface)
+| Method/Property | Description |
 | -------| ----------- |
 |__startNewSession()__|Starts a new Audio Session. Clears existing playlist.|
 |__resume()__| Resume the player.|
@@ -61,7 +69,12 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer
 |__skipToNext()__|Skip to next track.|
 |__skipToPrevious()__|Skip to previous track.|
 |__customiseNotification(useNavigationAction: Boolean, usePlayPauseAction: Boolean, fastForwardIncrementMs: Long, rewindIncrementMs: Long, smallIcon: Int)__|Customise notification which appear while playing.|
+|__changeActivityIntentForNotification(intent: Intent)__|Set activity on notification click.|
 |__removeNotification()__|Remove notification.|
+|__register<ActivityType>(context: Context)__|Simplest way to register Goonj.|
+|__register(context: Context, activityIntent: Intent)__|Extras with intent could be sent.|
+|__register<S: GoonjService>(context: Context, activityIntent: Intent, audioServiceClass: Class<S>)__|Advanced registration for custom AudioService implementation.|
+|__unregister()__|unregister Goonj|
 |__autoplay__|Enable autoplay with auto-fetch tracks, could be used get current state of autoplay.|
 |__trackList__|Get current playlist.|
 |__playerState__|Get player state (GoonjPlayerState).|

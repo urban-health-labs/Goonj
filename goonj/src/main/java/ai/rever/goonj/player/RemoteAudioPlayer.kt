@@ -19,7 +19,7 @@ import com.google.android.gms.cast.MediaLoadRequestData
 import com.google.android.gms.cast.framework.CastContext
 import java.lang.ref.WeakReference
 
-class RemoteAudioPlayer: AudioPlayer {
+internal class RemoteAudioPlayer: AudioPlayer {
 
     private var player: RemotePlaybackClient? = null
     private var isHandlerRunning = false

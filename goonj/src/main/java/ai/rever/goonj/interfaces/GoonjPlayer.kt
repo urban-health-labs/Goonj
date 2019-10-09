@@ -2,9 +2,8 @@ package ai.rever.goonj.interfaces
 
 import ai.rever.goonj.Goonj
 import ai.rever.goonj.GoonjPlayerState
-import ai.rever.goonj.manager.GoonjPlayerManager
 import ai.rever.goonj.models.Track
-import io.reactivex.BackpressureStrategy
+import android.content.Intent
 import io.reactivex.Flowable
 import io.reactivex.Observable
 
@@ -13,38 +12,35 @@ import io.reactivex.Observable
  */
 interface GoonjPlayer {
 
-    fun startNewSession() = Goonj.startNewSession()
+    fun startNewSession() = Goonj::startNewSession
 
-    fun resume() = Goonj.resume()
+    fun resume() = Goonj::resume
 
-    fun pause() = Goonj.pause()
+    fun pause() = Goonj::pause
 
-    fun finishTrack() = Goonj.finishTrack()
+    fun finishTrack() = Goonj::finishTrack
 
-    fun seekTo(positionMS: Long) = Goonj.seekTo(positionMS)
+    fun seekTo(positionMS: Long) = Goonj::seekTo
 
-    fun addTrack(track: Track, index: Int ?= null) = Goonj.addTrack(track, index)
+    fun addTrack(track: Track, index: Int ?= null) = Goonj::addTrack
 
-    fun removeTrack(index : Int) = Goonj.removeTrack(index)
+    fun removeTrack(index : Int) = Goonj::removeTrack
 
-    fun moveTrack(currentIndex : Int, finalIndex : Int) = Goonj.moveTrack(currentIndex, finalIndex)
+    fun moveTrack(currentIndex : Int, finalIndex : Int) = Goonj::moveTrack
 
-    fun skipToNext() = Goonj.skipToNext()
+    fun skipToNext() = Goonj::skipToNext
 
-    fun skipToPrevious() = Goonj.skipToPrevious()
+    fun skipToPrevious() = Goonj::skipToPrevious
 
     fun customizeNotification(useNavigationAction: Boolean = true,
                               usePlayPauseAction: Boolean = true,
                               fastForwardIncrementMs: Long = 0L,
                               rewindIncrementMs: Long = 0L,
-                              smallIcon : Int) =
-        Goonj.customiseNotification(useNavigationAction,
-            usePlayPauseAction,
-            fastForwardIncrementMs,
-            rewindIncrementMs,
-            smallIcon)
+                              smallIcon : Int) = Goonj::customiseNotification
 
-    fun removeNotification() = Goonj.removeNotification()
+    fun changeActivityIntentForNotification(intent: Intent) = Goonj::changeActivityIntentForNotification
+
+    fun removeNotification() = Goonj::removeNotification
 
     var autoplay: Boolean
         get() = Goonj.autoplay

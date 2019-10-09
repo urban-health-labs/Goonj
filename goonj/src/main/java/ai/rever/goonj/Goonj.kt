@@ -5,6 +5,7 @@ import ai.rever.goonj.models.Track
 import ai.rever.goonj.manager.GoonjNotificationManager
 import ai.rever.goonj.manager.GoonjPlayerManager
 import ai.rever.goonj.service.GoonjService
+import android.app.Activity
 import android.app.Notification
 import android.content.ComponentName
 import android.content.Context
@@ -25,13 +26,12 @@ import java.lang.ref.WeakReference
 //    log("thread ${Thread.currentThread().name}")
 //}
 
+
 object Goonj {
 
     internal val appContext get() = weakContext?.get()
 
     private var weakContext: WeakReference<Context>? = null
-
-    internal var imageLoader: ((Track, (Bitmap?) -> Unit) -> Unit)? = null
 
     private var holderGoonjPlayerServiceInterface:
             WeakReference<GoonjPlayerServiceInterface?>? = null
@@ -63,28 +63,35 @@ object Goonj {
         }
     }
 
-    fun initialize(context: Context): Goonj = initialize(context, GoonjService::class.java)
-
-    fun <S: GoonjService> initialize(context: Context, audioServiceClass: Class<S>): Goonj {
-        weakContext = if (context.applicationContext == null) {
-            WeakReference(context)
-        } else {
-            WeakReference(context.applicationContext)
-        }
-        register(audioServiceClass)
-        return this
+    /**
+     * Shortest way to register
+     */
+    inline fun<reified T: Activity>register(context: Context) {
+        val ctx = if (context.applicationContext == null) context else context.applicationContext
+        register(context, Intent(ctx, T::class.java))
     }
 
-    fun setImageLoader(imageLoader: (Track, (Bitmap?) -> Unit) -> Unit): Goonj {
-        this.imageLoader = imageLoader
-        return this
-    }
+    /**
+     * Extra parameter could be attached with activity intent
+     * e.g.:
+     *   val activityIntent = Intent(applicationContext, Activity)
+     *   activityIntent.putExtras(KEY, VALUE)
+     */
+    fun register(context: Context, activityIntent: Intent) = register(context, activityIntent, GoonjService::class.java)
 
-    fun setPendingIntentForNotification(intent: Intent): Goonj {
-        run {
-            GoonjNotificationManager.pendingIntent = intent
+    /**
+     * Custom GoonjService could be passed
+     *
+     * Note: GoonjService must added to app manifest
+     */
+    fun <S: GoonjService> register(context: Context, activityIntent: Intent, audioServiceClass: Class<S>) {
+        if (appContext == null) {
+            val ctx = if (context.applicationContext == null) context else context.applicationContext
+            weakContext = WeakReference(ctx)
+            register(audioServiceClass)
         }
-        return this
+
+        changeActivityIntentForNotification(activityIntent)
     }
 
     private fun <T: GoonjService> register(audioServiceClass: Class<T>) {
@@ -119,6 +126,8 @@ object Goonj {
         mServiceConnection?.let {
             appContext?.unbindService(it)
         }
+        imageLoader = null
+        weakContext = null
         goonjPlayerServiceInterface = null
     }
 
@@ -148,7 +157,6 @@ object Goonj {
 
     fun skipToPrevious()  = run { GoonjPlayerManager.skipToPrevious() }
 
-
     fun customiseNotification(useNavigationAction: Boolean,
                               usePlayPauseAction: Boolean,
                               fastForwardIncrementMs: Long ,
@@ -158,7 +166,15 @@ object Goonj {
             usePlayPauseAction, fastForwardIncrementMs, rewindIncrementMs, smallIcon)
     }
 
+    fun changeActivityIntentForNotification(intent: Intent) {
+        run {
+            GoonjNotificationManager.activityIntent = intent
+        }
+    }
+
     fun removeNotification() = run { GoonjPlayerManager.removeNotification() }
+
+    var imageLoader: ((Track, (Bitmap?) -> Unit) -> Unit)? = null
 
     var autoplay: Boolean
         get() = GoonjPlayerManager.autoplayTrackSubject.value?: false
@@ -197,7 +213,6 @@ object Goonj {
     internal fun stopSelf() = run {
         stopSelf()
     }
-
 }
 
 enum class GoonjPlayerState {

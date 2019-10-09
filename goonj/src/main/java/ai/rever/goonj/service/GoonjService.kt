@@ -6,8 +6,7 @@ import ai.rever.goonj.interfaces.GoonjPlayerServiceInterface
 import ai.rever.goonj.manager.GoonjPlayerManager
 import android.app.Service
 
-open class GoonjService: Service(),
-    GoonjPlayerServiceInterface {
+open class GoonjService: Service(), GoonjPlayerServiceInterface {
 
 
 //    private val mediaRouter: MediaRouter by lazy { MediaRouter.getInstance(this) }

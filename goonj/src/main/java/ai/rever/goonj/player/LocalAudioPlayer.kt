@@ -34,7 +34,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 import java.util.concurrent.TimeUnit
 
-class LocalAudioPlayer: AudioPlayer {
+internal class LocalAudioPlayer: AudioPlayer {
 
     private var isSuspended = false
 

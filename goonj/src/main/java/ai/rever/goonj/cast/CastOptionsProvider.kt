@@ -10,7 +10,7 @@ import com.google.android.gms.cast.framework.media.MediaIntentReceiver
 import com.google.android.gms.cast.framework.media.NotificationOptions
 
 
-class CastOptionsProvider : OptionsProvider {
+internal class CastOptionsProvider : OptionsProvider {
     override fun getCastOptions(context: Context): CastOptions {
         val buttonActions = ArrayList<String>()
 

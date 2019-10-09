@@ -12,7 +12,7 @@ import androidx.annotation.Nullable
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 
-object GoonjNotificationManager {
+internal object GoonjNotificationManager {
 
     val playerNotificationManager: PlayerNotificationManager by lazy {
         PlayerNotificationManager.createWithNotificationChannel(
@@ -23,7 +23,7 @@ object GoonjNotificationManager {
         )
     }
 
-    var pendingIntent = Intent()
+    var activityIntent = Intent()
 
     /**
      * Customize Notification Manager
@@ -52,7 +52,7 @@ object GoonjNotificationManager {
         override fun createCurrentContentIntent(player: Player): PendingIntent? {
             return PendingIntent.getActivity(
                 Goonj.appContext,0,
-                pendingIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                activityIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
         @Nullable
@@ -88,7 +88,7 @@ object GoonjNotificationManager {
         ) {
             notification?.contentIntent = PendingIntent.getActivity(
                 Goonj.appContext, PLAYBACK_NOTIFICATION_ID,
-                pendingIntent,
+                activityIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT
             )
         }

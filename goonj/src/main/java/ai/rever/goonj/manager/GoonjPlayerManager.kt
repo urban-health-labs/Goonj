@@ -27,13 +27,13 @@ internal object GoonjPlayerManager {
             mIsRemote = value
         }
 
-    internal val playerStateBehaviorSubject: BehaviorSubject<GoonjPlayerState> = BehaviorSubject.create()
+    val playerStateBehaviorSubject: BehaviorSubject<GoonjPlayerState> = BehaviorSubject.create()
 
-    internal val currentTrackSubject: BehaviorSubject<Track> = BehaviorSubject.create()
+    val currentTrackSubject: BehaviorSubject<Track> = BehaviorSubject.create()
 
-    internal val autoplayTrackSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
+    val autoplayTrackSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
 
-    internal val trackCompleteSubject = PublishSubject.create<Track>()
+    val trackCompleteSubject = PublishSubject.create<Track>()
 
     private val player: AudioPlayer? get() {
 //        isRemote = mediaRoute?.supportsControlCategory(
@@ -49,37 +49,37 @@ internal object GoonjPlayerManager {
 
 //    private val mediaRoute get() = appContext?.let { MediaRouter.getInstance(it).selectedRoute }
 
-    internal val trackList: List<Track> get() = mTrackList
-    internal val trackPosition get() = player?.getTrackPosition()?: 0
+    val trackList: List<Track> get() = mTrackList
+    val trackPosition get() = player?.getTrackPosition()?: 0
 
-    internal fun onStart() {
+    fun onStart() {
         this.remoteAudioPlayer = RemoteAudioPlayer()
         this.localAudioPlayer = LocalAudioPlayer()
     }
 
-    internal fun addTrack(track: Track, index: Int = mTrackList.size) {
+    fun addTrack(track: Track, index: Int = mTrackList.size) {
         track.trackState.index = index
         mTrackList.add(index, track)
         player?.enqueue(track, index)
     }
 
-    internal fun pause() = player?.pause()
+    fun pause() = player?.pause()
 
-    internal fun resume() = player?.resume()
+    fun resume() = player?.resume()
 
-    internal fun seekTo(positionMS: Long) = player?.seekTo(positionMS)
+    fun seekTo(positionMS: Long) = player?.seekTo(positionMS)
 
-    internal fun startNewSession(){
+    fun startNewSession(){
         mTrackList.clear()
         player?.startNewSession()
     }
 
-    internal fun removeTrack(index : Int){
+    fun removeTrack(index : Int){
         mTrackList.removeAt(index)
         player?.remove(index)
     }
 
-    internal fun moveTrack(currentIndex: Int, finalIndex: Int){
+    fun moveTrack(currentIndex: Int, finalIndex: Int){
         val currentTrack = mTrackList[currentIndex]
 
         mTrackList.removeAt(currentIndex)
@@ -88,26 +88,26 @@ internal object GoonjPlayerManager {
         player?.moveTrack(currentIndex, finalIndex)
     }
 
-    internal fun skipToNext() = player?.skipToNext()
+    fun skipToNext() = player?.skipToNext()
 
-    internal fun skipToPrevious() = player?.skipToPrevious()
+    fun skipToPrevious() = player?.skipToPrevious()
 
-    internal fun release() {
+    fun release() {
         remoteAudioPlayer?.release()
         localAudioPlayer?.release()
     }
 
-    internal fun removeNotification() {
+    fun removeNotification() {
         player?.onRemoveNotification()
     }
 
-    internal fun finishTrack(){
+    fun finishTrack(){
         pause()
         removeNotification()
         onTrackComplete(currentTrackSubject.value ?: return)
     }
 
-    internal fun onTrackComplete(track: Track) {
+    fun onTrackComplete(track: Track) {
         trackCompleteSubject.onNext(track)
     }
 

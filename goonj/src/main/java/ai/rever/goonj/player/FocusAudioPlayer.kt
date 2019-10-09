@@ -16,7 +16,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 **/
 
 
-abstract class FocusAudioPlayer: AudioPlayer , AudioManager.OnAudioFocusChangeListener {
+internal abstract class FocusAudioPlayer: AudioPlayer, AudioManager.OnAudioFocusChangeListener {
 
     val player: SimpleExoPlayer by lazy {
         ExoPlayerFactory.newSimpleInstance(appContext)
