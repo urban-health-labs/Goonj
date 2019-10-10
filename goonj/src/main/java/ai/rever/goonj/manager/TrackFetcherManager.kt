@@ -1,7 +1,6 @@
 package ai.rever.goonj.manager
 
 import ai.rever.goonj.Goonj
-import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.models.Track
 import io.reactivex.disposables.Disposable
 
@@ -12,7 +11,7 @@ internal object TrackFetcherManager {
 
     private var lastKnownTrack = Track()
 
-    var trackPreFetcher: (((List<Track>)->Unit)->Unit)? = null
+    var trackPreFetcher: (((List<Track?>)->Unit)->Unit)? = null
 
     var tryPrefetchAtProgress = 0.5
     var preFetchDistanceWithAutoplay = 5
@@ -53,7 +52,7 @@ internal object TrackFetcherManager {
                 if (nextList.isEmpty()) {
                     isFetched = true
                 } else {
-                    nextList.forEach { Goonj.addTrack(it) }
+                    nextList.forEach { it?.let { Goonj.addTrack(it) } }
                 }
             }
         }
