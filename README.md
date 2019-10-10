@@ -19,7 +19,7 @@ allprojects {
 Add following in build.gradle (App level):
 ```
 dependencies {
-	implementation 'com.github.rever-ai:goonj:v0.4'
+	implementation 'com.github.rever-ai:goonj:0.4'
 	// Exo Player
     implementation 'com.google.android.exoplayer:exoplayer-core:2.10.3'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.10.3'
