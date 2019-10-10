@@ -223,6 +223,8 @@ object Goonj {
 
     val currentTrack: Track? get() = GoonjPlayerManager.currentTrackSubject.value
 
+    val lastCompletedTrack: Track? get() = GoonjPlayerManager.lastCompletedTrack
+
     val trackPosition: Long get() = GoonjPlayerManager.trackPosition
 
     val playerStateFlowable: Flowable<GoonjPlayerState> get() = GoonjPlayerManager.playerStateSubject.toFlowable(BackpressureStrategy.LATEST).observeOn(AndroidSchedulers.mainThread())

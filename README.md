@@ -89,6 +89,7 @@ Goonj.someMethod() or Goonj.someProperty
 |__trackList__|Get current playlist.|
 |__playerState__|Get player state (GoonjPlayerState).|
 |__currentTrack__|Get current track (Track).|
+|__lastCompletedTrack__|Get last completed track (Track).|
 |__trackPosition__|Get current track position in milli-seconds (Long).|
 |__trackProgress__|Get current track progress between 0 to 1 (Double).|
 |__playerStateFlowable__|Flowable of (GoonjPlayerState) that tells if the Player state. Helps in updating Play/Pause Icon/Button in UI.|

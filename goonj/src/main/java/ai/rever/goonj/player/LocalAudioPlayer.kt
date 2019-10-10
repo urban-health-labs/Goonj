@@ -141,22 +141,22 @@ internal class LocalAudioPlayer: AudioPlayer {
     private fun updateCurrentlyPlayingTrack() {
         if (trackList.isEmpty()) return
         player?.apply {
-            trackList[currentWindowIndex].let { currentTrack ->
+            trackList[currentWindowIndex].let { exoTrack ->
                 val lastKnownTrack = GoonjPlayerManager.currentTrackSubject.value
 
                 if (contentDuration > 0) {
-                    currentTrack.state.duration = contentDuration
+                    exoTrack.state.duration = contentDuration
                 }
                 val playerPosition = getTrackPosition()
                 if (playerPosition > 0) {
-                    currentTrack.state.position = playerPosition
+                    exoTrack.state.position = playerPosition
                 } else {
-                    currentTrack.state.position = 0
+                    exoTrack.state.position = 0
                 }
 
-                GoonjPlayerManager.currentTrackSubject.onNext(currentTrack)
+                GoonjPlayerManager.currentTrackSubject.onNext(exoTrack)
 
-                if (currentTrack.id != lastKnownTrack?.id) {
+                if (exoTrack.id != lastKnownTrack?.id) {
                     GoonjPlayerManager.onTrackComplete(lastKnownTrack ?: return)
                     GoonjPlayerManager.autoplayTrackSubject.value?.let {
                         if (!it) {

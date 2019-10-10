@@ -36,14 +36,16 @@ internal object GoonjPlayerManager {
 
     private var mTrackList: MutableList<Track> = mutableListOf()
 
+    internal var lastCompletedTrack: Track? = null
+
     private var remoteAudioPlayer: AudioPlayer? = null
     private var localAudioPlayer: AudioPlayer? = null
 
 //    private val mediaRoute get() = appContext?.let { MediaRouter.getInstance(it).selectedRoute }
 
     val trackList: List<Track> get() = mTrackList
-    val trackPosition get() = player?.getTrackPosition()?: 0
 
+    val trackPosition get() = player?.getTrackPosition()?: 0
 
     val playerStateSubject: BehaviorSubject<GoonjPlayerState> = BehaviorSubject.createDefault(GoonjPlayerState.IDLE)
 
@@ -115,8 +117,8 @@ internal object GoonjPlayerManager {
     }
 
     fun onTrackComplete(track: Track) {
+        lastCompletedTrack = track
         trackCompleteSubject.onNext(track)
     }
-
 }
 

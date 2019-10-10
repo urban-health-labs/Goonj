@@ -84,6 +84,8 @@ interface GoonjPlayer {
 
     val currentTrack: Track? get() = Goonj.currentTrack
 
+    val lastCompletedTrack: Track? get() = Goonj.lastCompletedTrack
+
     val trackList: List<Track> get() = Goonj.trackList
 
     val trackPosition: Long get() = Goonj.trackPosition
