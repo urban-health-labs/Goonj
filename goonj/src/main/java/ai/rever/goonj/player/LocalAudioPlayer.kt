@@ -13,7 +13,6 @@ import ai.rever.goonj.models.Track
 import ai.rever.goonj.util.MEDIA_SESSION_TAG
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
-import android.util.Log
 import androidx.core.net.toUri
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayerFactory
@@ -51,7 +50,7 @@ internal class LocalAudioPlayer: AudioPlayer {
         get() = Observable.interval(1000, TimeUnit.MILLISECONDS)
             .takeWhile { !isSuspended &&
                     GoonjPlayerManager.playerStateBehaviorSubject.value == GoonjPlayerState.PLAYING }
-            .map { (GoonjPlayerManager.currentTrackSubject.value?.trackState?.position?: 0) + 1000 }
+            .map { (GoonjPlayerManager.currentTrackSubject.value?.state?.position?: 0) + 1000 }
 
     private val compositeDisposable = CompositeDisposable()
     private var timerDisposable: Disposable? = null
@@ -107,7 +106,7 @@ internal class LocalAudioPlayer: AudioPlayer {
 
     private fun onTrackPositionChange(position: Long = getTrackPosition())  {
         GoonjPlayerManager.currentTrackSubject.value?.let { track ->
-            track.trackState.position = position
+            track.state.position = position
             GoonjPlayerManager.currentTrackSubject.onNext(track)
         }
     }
@@ -146,13 +145,13 @@ internal class LocalAudioPlayer: AudioPlayer {
             val lastKnownTrack = GoonjPlayerManager.currentTrackSubject.value
 
             if (contentDuration > 0) {
-                currentTrack.trackState.duration = contentDuration
+                currentTrack.state.duration = contentDuration
             }
             val playerPosition = getTrackPosition()
             if (playerPosition > 0) {
-                currentTrack.trackState.position = playerPosition
+                currentTrack.state.position = playerPosition
             } else {
-                currentTrack.trackState.position = 0
+                currentTrack.state.position = 0
             }
 
             GoonjPlayerManager.currentTrackSubject.onNext(currentTrack)
@@ -208,9 +207,9 @@ internal class LocalAudioPlayer: AudioPlayer {
 
     override fun unsuspend() {
         isSuspended = false
-        GoonjPlayerManager.currentTrackSubject.value?.trackState?.apply {
+        GoonjPlayerManager.currentTrackSubject.value?.state?.apply {
             seekTo(index, position)
-            if (state == GoonjPlayerState.PLAYING) {
+            if (GoonjPlayerManager.playerStateBehaviorSubject.value == GoonjPlayerState.PLAYING) {
                 resume()
             }
         }

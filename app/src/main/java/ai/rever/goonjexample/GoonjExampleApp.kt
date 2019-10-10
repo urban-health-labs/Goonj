@@ -1,6 +1,7 @@
 package ai.rever.goonjexample
 
 import ai.rever.goonj.Goonj
+import ai.rever.goonj.models.SAMPLES
 import ai.rever.goonj.models.Track
 import android.app.Application
 import android.graphics.Bitmap
@@ -29,6 +30,11 @@ class GoonjExampleApp: Application(), LifecycleObserver {
 
         Goonj.imageLoader = ::imageLoader
 
+        Goonj.trackFetcher = ::trackFetcher
+
+        Goonj.prefetchDistanceWithAutoplay = 2
+        Goonj.prefetchDistanceWithoutAutoplay = 1
+
         disposable = Goonj.trackCompletionObservable.subscribe(::onTrackComplete)
     }
 
@@ -53,6 +59,20 @@ class GoonjExampleApp: Application(), LifecycleObserver {
                 }
             })
 
+    }
+
+    private fun trackFetcher(currentList: List<Track>, callback: (List<Track>) -> Unit) {
+        val fetched = arrayListOf<Track>()
+        var nextIndex = currentList.size - 1
+        if (Goonj.autoplay) {
+            fetched.add(SAMPLES[++nextIndex % SAMPLES.size])
+            fetched.add(SAMPLES[++nextIndex % SAMPLES.size])
+            fetched.add(SAMPLES[++nextIndex % SAMPLES.size])
+        } else {
+            fetched.add(SAMPLES[++nextIndex % SAMPLES.size])
+            fetched.add(SAMPLES[++nextIndex % SAMPLES.size])
+        }
+        callback(fetched)
     }
 
     private fun onTrackComplete(track: Track) {

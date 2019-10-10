@@ -21,7 +21,7 @@ internal interface AudioPlayer {
 
     fun seekTo(index: Int, positionMs: Long) {}
 
-    fun getTrackPosition(): Long = GoonjPlayerManager.currentTrackSubject.value?.trackState?.position?: 0
+    fun getTrackPosition(): Long = GoonjPlayerManager.currentTrackSubject.value?.state?.position?: 0
 
     fun connect(route: MediaRouter.RouteInfo) {}
     fun startNewSession() {}

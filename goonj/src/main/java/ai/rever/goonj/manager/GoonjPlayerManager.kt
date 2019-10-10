@@ -27,11 +27,11 @@ internal object GoonjPlayerManager {
             mIsRemote = value
         }
 
-    val playerStateBehaviorSubject: BehaviorSubject<GoonjPlayerState> = BehaviorSubject.create()
-
-    val currentTrackSubject: BehaviorSubject<Track> = BehaviorSubject.create()
+    val playerStateBehaviorSubject: BehaviorSubject<GoonjPlayerState> = BehaviorSubject.createDefault(GoonjPlayerState.IDLE)
 
     val autoplayTrackSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
+
+    val currentTrackSubject: BehaviorSubject<Track> = BehaviorSubject.create()
 
     val trackCompleteSubject = PublishSubject.create<Track>()
 
@@ -55,10 +55,17 @@ internal object GoonjPlayerManager {
     fun onStart() {
         this.remoteAudioPlayer = RemoteAudioPlayer()
         this.localAudioPlayer = LocalAudioPlayer()
+        TrackFetcherManager.onStart()
+    }
+
+    fun release() {
+        remoteAudioPlayer?.release()
+        localAudioPlayer?.release()
+        TrackFetcherManager.release()
     }
 
     fun addTrack(track: Track, index: Int = mTrackList.size) {
-        track.trackState.index = index
+        track.state.index = index
         mTrackList.add(index, track)
         player?.enqueue(track, index)
     }
@@ -91,11 +98,6 @@ internal object GoonjPlayerManager {
     fun skipToNext() = player?.skipToNext()
 
     fun skipToPrevious() = player?.skipToPrevious()
-
-    fun release() {
-        remoteAudioPlayer?.release()
-        localAudioPlayer?.release()
-    }
 
     fun removeNotification() {
         player?.onRemoveNotification()

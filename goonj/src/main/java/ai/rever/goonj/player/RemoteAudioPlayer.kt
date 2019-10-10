@@ -38,7 +38,7 @@ internal class RemoteAudioPlayer: AudioPlayer {
     }
 
     override fun enqueue(track: Track, index: Int) {
-        track.trackState.state = GoonjPlayerState.PLAYING
+        GoonjPlayerManager.playerStateBehaviorSubject.onNext(GoonjPlayerState.PLAYING)
         play(track)
     }
 
@@ -50,13 +50,13 @@ internal class RemoteAudioPlayer: AudioPlayer {
                     statusHandler()
                 }
 
-                track.trackState.remoteItemId = itemId
+                track.state.remoteItemId = itemId
 
-                if (track.trackState.position > 0) {
+                if (track.state.position > 0) {
                     seekInternal(track)
                 }
 
-                if (track.trackState.state == GoonjPlayerState.PLAYING) {
+                if (GoonjPlayerManager.playerStateBehaviorSubject.value == GoonjPlayerState.PLAYING) {
                     pause()
                 }
 
@@ -90,13 +90,13 @@ internal class RemoteAudioPlayer: AudioPlayer {
 
     fun getStatus(seek: Boolean, positionMs: Long = 0) {
         val track = GoonjPlayerManager.currentTrackSubject.value
-        if (player?.hasSession() != true || track?.trackState?.remoteItemId == null) {
+        if (player?.hasSession() != true || track?.state?.remoteItemId == null) {
             // if trackList is not valid or track id not assigend yet.
             // just return, it's not fatal
             return
         }
 
-        player?.getStatus(track.trackState.remoteItemId, null,
+        player?.getStatus(track.state.remoteItemId, null,
             object : ItemActionCallbackImp("getStatus", ::updateTrackPosition) {
                 override fun onResult(
                     data: Bundle?,
@@ -109,10 +109,10 @@ internal class RemoteAudioPlayer: AudioPlayer {
                     if (seek) {
                         when {
                             (positionMs) < 0 ->
-                                track.trackState.position = 0
-                            (positionMs) < track.trackState.duration ->
-                                track.trackState.position = positionMs
-                            else -> track.trackState.position = track.trackState.duration - 1
+                                track.state.position = 0
+                            (positionMs) < track.state.duration ->
+                                track.state.position = positionMs
+                            else -> track.state.position = track.state.duration - 1
                         }
                         seekInternal(track)
                     }
@@ -176,7 +176,7 @@ internal class RemoteAudioPlayer: AudioPlayer {
             return
         }
 
-        player?.seek(item.trackState.remoteItemId, item.trackState.position,
+        player?.seek(item.state.remoteItemId, item.state.position,
             null, ItemActionCallbackImp("seekTo", ::updateTrackPosition))
 
     }
@@ -191,28 +191,28 @@ internal class RemoteAudioPlayer: AudioPlayer {
 
         val track = GoonjPlayerManager.currentTrackSubject.value?: return
         if (itemStatus?.apply {
-                track.trackState.state = when (playbackState) {
-                PLAYBACK_STATE_BUFFERING -> GoonjPlayerState.BUFFERING
-                PLAYBACK_STATE_PENDING -> GoonjPlayerState.IDLE
-                PLAYBACK_STATE_CANCELED -> GoonjPlayerState.CANCELED
-                PLAYBACK_STATE_FINISHED -> GoonjPlayerState.ENDED
-                PLAYBACK_STATE_PLAYING -> GoonjPlayerState.PLAYING
-                PLAYBACK_STATE_ERROR -> GoonjPlayerState.ERROR
-                PLAYBACK_STATE_PAUSED -> GoonjPlayerState.PAUSED
-                PLAYBACK_STATE_INVALIDATED -> GoonjPlayerState.INVALIDATE
-                else -> GoonjPlayerState.IDLE
-            }
+                GoonjPlayerManager.playerStateBehaviorSubject.onNext(
+                    when (playbackState) {
+                    PLAYBACK_STATE_BUFFERING -> GoonjPlayerState.BUFFERING
+                    PLAYBACK_STATE_PENDING -> GoonjPlayerState.IDLE
+                    PLAYBACK_STATE_CANCELED -> GoonjPlayerState.CANCELED
+                    PLAYBACK_STATE_FINISHED -> GoonjPlayerState.ENDED
+                    PLAYBACK_STATE_PLAYING -> GoonjPlayerState.PLAYING
+                    PLAYBACK_STATE_ERROR -> GoonjPlayerState.ERROR
+                    PLAYBACK_STATE_PAUSED -> GoonjPlayerState.PAUSED
+                    PLAYBACK_STATE_INVALIDATED -> GoonjPlayerState.INVALIDATE
+                    else -> GoonjPlayerState.IDLE }
+                )
             if (contentPosition > 0) {
-                track.trackState.position = contentPosition
+                track.state.position = contentPosition
             }
             if (contentDuration > 0) {
-                track.trackState.duration = contentDuration
+                track.state.duration = contentDuration
             }
 
         } == null) {
-            track.trackState.state = defaultState
+            GoonjPlayerManager.playerStateBehaviorSubject.onNext(defaultState)
         }
-        GoonjPlayerManager.playerStateBehaviorSubject.onNext(track.trackState.state)
     }
 
     private fun statusHandler(){
@@ -235,7 +235,7 @@ internal class RemoteAudioPlayer: AudioPlayer {
         GoonjPlayerManager.currentTrackSubject.value?.let { track ->
             if (track.id == itemId) {
                 itemStatus?.contentPosition?.let {
-                    track.trackState.position = it
+                    track.state.position = it
                 }
             }
         }

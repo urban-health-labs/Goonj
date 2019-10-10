@@ -88,7 +88,7 @@ data class Track (var url: String = "",
                   @Ignore
                   var bitmap: Bitmap? = null,
                   @Ignore
-                  val trackState: TrackState = TrackState()
+                  val state: TrackState = TrackState()
 ): Parcelable {
 
     private val mediaInfo: MediaInfo? get() {
@@ -164,11 +164,12 @@ data class Track (var url: String = "",
 
 
 @Parcelize
-data class TrackState(var state: GoonjPlayerState = GoonjPlayerState.IDLE,
-                      var index: Int = 0,
+data class TrackState(var index: Int = 0,
                       var position: Long = 0,
-                      var duration: Long = 0,
-                      var remoteItemId: String? = null): Parcelable
+                      var duration: Long = 1, // divide safe
+                      var remoteItemId: String? = null): Parcelable {
+    val progress: Double get() = position.toDouble() / duration.toDouble()
+}
 
 
 val Context.defaultBitmap get() = ContextCompat.getDrawable(this, R.mipmap.ic_album_art)

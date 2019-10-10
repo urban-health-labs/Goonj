@@ -16,6 +16,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_audio_player.*
 
 class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
@@ -40,11 +41,11 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     override fun onResume() {
         super.onResume()
 
-        playerStateFlowable.subscribe {
+        compositeDisposable += playerStateFlowable.subscribe {
             audioPlayerPlayPauseToggleBtn.isChecked = it != GoonjPlayerState.PLAYING
-        }.addTo(compositeDisposable)
+        }
 
-        currentTrackFlowable.subscribe(::onPlayingTrackChange).addTo(compositeDisposable)
+        compositeDisposable += currentTrackFlowable.subscribe(::onPlayingTrackChange)
     }
 
     override fun onPause() {
@@ -66,10 +67,10 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             audioPlayerAlbumArtistTv.text = currentItem.artistName
         }
         try {
-            audioPlayerCurrentPosition.text = (currentItem.trackState.position / 1000).toString()
-            audioPlayerContentDuration.text = (currentItem.trackState.duration / 1000).toString()
+            audioPlayerCurrentPosition.text = (currentItem.state.position / 1000).toString()
+            audioPlayerContentDuration.text = (currentItem.state.duration / 1000).toString()
             audioPlayerProgressBar.progress =
-                ((currentItem.trackState.position.toDouble() / currentItem.trackState.duration.toDouble()) * 100.0).toInt()
+                ((currentItem.state.position.toDouble() / currentItem.state.duration.toDouble()) * 100.0).toInt()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -119,9 +120,6 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
     private fun setupPlayer() {
         startNewSession()
         addTrack(SAMPLES[0])
-        addTrack(SAMPLES[1])
-        addTrack(SAMPLES[2])
-        addTrack(SAMPLES[3])
         resume()
     }
 

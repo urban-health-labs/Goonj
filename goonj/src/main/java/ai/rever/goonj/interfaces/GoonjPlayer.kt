@@ -4,6 +4,7 @@ import ai.rever.goonj.Goonj
 import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.models.Track
 import android.content.Intent
+import android.graphics.Bitmap
 import io.reactivex.Flowable
 import io.reactivex.Observable
 
@@ -42,6 +43,31 @@ interface GoonjPlayer {
 
     fun removeNotification() = Goonj::removeNotification
 
+    var imageLoader
+        get() = Goonj.imageLoader
+        set(value) {
+            Goonj.imageLoader = value
+        }
+
+    var trackFetcher
+        get() = Goonj.trackFetcher
+        set(value) {
+            Goonj.trackFetcher = value
+        }
+
+    var prefetchDistanceWithAutoplay
+        get() = Goonj.prefetchDistanceWithAutoplay
+        set(value){
+            Goonj.prefetchDistanceWithAutoplay = value
+        }
+
+
+    var prefetchDistanceWithoutAutoplay
+        get() = Goonj.prefetchDistanceWithoutAutoplay
+        set(value){
+            Goonj.prefetchDistanceWithoutAutoplay = value
+        }
+
     var autoplay: Boolean
         get() = Goonj.autoplay
         set(value) {
@@ -65,4 +91,5 @@ interface GoonjPlayer {
     val autoplayFlowable: Flowable<Boolean> get() = Goonj.autoplayFlowable
 
     val trackCompletionObservable: Observable<Track> get() = Goonj.trackCompletionObservable
+
 }

@@ -4,6 +4,7 @@ import ai.rever.goonj.interfaces.GoonjPlayerServiceInterface
 import ai.rever.goonj.models.Track
 import ai.rever.goonj.manager.GoonjNotificationManager
 import ai.rever.goonj.manager.GoonjPlayerManager
+import ai.rever.goonj.manager.TrackFetcherManager
 import ai.rever.goonj.service.GoonjService
 import android.app.Activity
 import android.app.Notification
@@ -176,6 +177,25 @@ object Goonj {
 
     var imageLoader: ((Track, (Bitmap?) -> Unit) -> Unit)? = null
 
+    var trackFetcher
+        get() = TrackFetcherManager.trackFetcher
+        set(value) {
+            TrackFetcherManager.trackFetcher = value
+        }
+
+    var prefetchDistanceWithAutoplay
+        get() = TrackFetcherManager.prefetchDistanceWithAutoplay
+        set(value){
+            TrackFetcherManager.prefetchDistanceWithAutoplay = value
+        }
+
+
+    var prefetchDistanceWithoutAutoplay
+        get() = TrackFetcherManager.prefetchDistanceWithoutAutoplay
+        set(value){
+            TrackFetcherManager.prefetchDistanceWithoutAutoplay = value
+        }
+
     var autoplay: Boolean
         get() = GoonjPlayerManager.autoplayTrackSubject.value?: false
         set(value) = run {
@@ -184,14 +204,14 @@ object Goonj {
 
     val trackProgress: Double get() {
         currentTrack?.apply {
-            return trackState.position.toDouble() / trackState.duration.toDouble()
+            return state.progress
         }
         return 0.toDouble()
     }
 
     val trackList get() = GoonjPlayerManager.trackList
 
-    val playerState: GoonjPlayerState? get() = GoonjPlayerManager.playerStateBehaviorSubject.value
+    val playerState: GoonjPlayerState get() = GoonjPlayerManager.playerStateBehaviorSubject.value?: GoonjPlayerState.IDLE
 
     val currentTrack: Track? get() = GoonjPlayerManager.currentTrackSubject.value
 
