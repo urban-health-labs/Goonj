@@ -5,6 +5,7 @@ import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.R
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.os.Bundle
@@ -171,7 +172,6 @@ data class TrackState(var index: Int = 0,
 }
 
 
-val Context.defaultBitmap get() = ContextCompat.getDrawable(this, R.mipmap.ic_album_art)
-    ?.toBitmap()
+val Context.defaultBitmap: Bitmap get() = BitmapFactory.decodeResource(resources, R.drawable.ic_album)
 
 
