@@ -30,10 +30,10 @@ class GoonjExampleApp: Application(), LifecycleObserver {
 
         Goonj.imageLoader = ::imageLoader
 
-        Goonj.trackFetcher = ::trackFetcher
+        Goonj.trackPreFetcher = ::trackFetcher
 
-        Goonj.prefetchDistanceWithAutoplay = 2
-        Goonj.prefetchDistanceWithoutAutoplay = 1
+        Goonj.preFetchDistanceWithAutoplay = 2
+        Goonj.preFetchDistanceWithoutAutoplay = 1
 
         disposable = Goonj.trackCompletionObservable.subscribe(::onTrackComplete)
     }
@@ -61,9 +61,9 @@ class GoonjExampleApp: Application(), LifecycleObserver {
 
     }
 
-    private fun trackFetcher(currentList: List<Track>, callback: (List<Track>) -> Unit) {
+    private fun trackFetcher(callback: (List<Track>) -> Unit) {
         val fetched = arrayListOf<Track>()
-        var nextIndex = currentList.size - 1
+        var nextIndex = Goonj.trackList.size - 1
         if (Goonj.autoplay) {
             fetched.add(SAMPLES[++nextIndex % SAMPLES.size])
             fetched.add(SAMPLES[++nextIndex % SAMPLES.size])

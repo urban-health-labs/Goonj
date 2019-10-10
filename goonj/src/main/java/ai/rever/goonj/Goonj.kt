@@ -17,6 +17,7 @@ import android.os.IBinder
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import java.lang.ref.WeakReference
 
 //fun log(message: String) {
@@ -177,23 +178,30 @@ object Goonj {
 
     var imageLoader: ((Track, (Bitmap?) -> Unit) -> Unit)? = null
 
-    var trackFetcher
-        get() = TrackFetcherManager.trackFetcher
+
+    var tryPreFetchAtProgress
+        get() = TrackFetcherManager.tryPrefetchAtProgress
         set(value) {
-            TrackFetcherManager.trackFetcher = value
+            TrackFetcherManager.tryPrefetchAtProgress = value
         }
 
-    var prefetchDistanceWithAutoplay
-        get() = TrackFetcherManager.prefetchDistanceWithAutoplay
+    var trackPreFetcher
+        get() = TrackFetcherManager.trackPreFetcher
+        set(value) {
+            TrackFetcherManager.trackPreFetcher = value
+        }
+
+    var preFetchDistanceWithAutoplay
+        get() = TrackFetcherManager.preFetchDistanceWithAutoplay
         set(value){
-            TrackFetcherManager.prefetchDistanceWithAutoplay = value
+            TrackFetcherManager.preFetchDistanceWithAutoplay = value
         }
 
 
-    var prefetchDistanceWithoutAutoplay
-        get() = TrackFetcherManager.prefetchDistanceWithoutAutoplay
+    var preFetchDistanceWithoutAutoplay
+        get() = TrackFetcherManager.preFetchDistanceWithoutAutoplay
         set(value){
-            TrackFetcherManager.prefetchDistanceWithoutAutoplay = value
+            TrackFetcherManager.preFetchDistanceWithoutAutoplay = value
         }
 
     var autoplay: Boolean
@@ -211,19 +219,21 @@ object Goonj {
 
     val trackList get() = GoonjPlayerManager.trackList
 
-    val playerState: GoonjPlayerState get() = GoonjPlayerManager.playerStateBehaviorSubject.value?: GoonjPlayerState.IDLE
+    val playerState: GoonjPlayerState get() = GoonjPlayerManager.playerStateSubject.value?: GoonjPlayerState.IDLE
 
     val currentTrack: Track? get() = GoonjPlayerManager.currentTrackSubject.value
 
     val trackPosition: Long get() = GoonjPlayerManager.trackPosition
 
-    val playerStateFlowable: Flowable<GoonjPlayerState> get() = GoonjPlayerManager.playerStateBehaviorSubject.toFlowable(BackpressureStrategy.LATEST)
+    val playerStateFlowable: Flowable<GoonjPlayerState> get() = GoonjPlayerManager.playerStateSubject.toFlowable(BackpressureStrategy.LATEST).observeOn(AndroidSchedulers.mainThread())
 
-    val currentTrackFlowable: Flowable<Track> get() = GoonjPlayerManager.currentTrackSubject.toFlowable(BackpressureStrategy.LATEST)
+    val currentTrackFlowable: Flowable<Track> get() = GoonjPlayerManager.currentTrackSubject.toFlowable(BackpressureStrategy.LATEST).observeOn(AndroidSchedulers.mainThread())
 
-    val autoplayFlowable: Flowable<Boolean> get() = GoonjPlayerManager.autoplayTrackSubject.toFlowable(BackpressureStrategy.LATEST)
+    val trackListFlowable: Flowable<List<Track>> get() = GoonjPlayerManager.trackListSubject.toFlowable(BackpressureStrategy.LATEST).observeOn(AndroidSchedulers.mainThread())
 
-    val trackCompletionObservable: Observable<Track> get() = GoonjPlayerManager.trackCompleteSubject
+    val autoplayFlowable: Flowable<Boolean> get() = GoonjPlayerManager.autoplayTrackSubject.toFlowable(BackpressureStrategy.LATEST).observeOn(AndroidSchedulers.mainThread())
+
+    val trackCompletionObservable: Observable<Track> get() = GoonjPlayerManager.trackCompleteSubject.observeOn(AndroidSchedulers.mainThread())
 
     // internal method
     internal fun startForeground(notificationId: Int, notification: Notification?) = run {

@@ -4,7 +4,6 @@ import ai.rever.goonj.Goonj
 import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.models.Track
 import android.content.Intent
-import android.graphics.Bitmap
 import io.reactivex.Flowable
 import io.reactivex.Observable
 
@@ -13,35 +12,36 @@ import io.reactivex.Observable
  */
 interface GoonjPlayer {
 
-    fun startNewSession() = Goonj::startNewSession
+    fun startNewSession() = Goonj.startNewSession()
 
-    fun resume() = Goonj::resume
+    fun resume() = Goonj.resume()
 
-    fun pause() = Goonj::pause
+    fun pause() = Goonj.pause()
 
-    fun finishTrack() = Goonj::finishTrack
+    fun finishTrack() = Goonj.finishTrack()
 
-    fun seekTo(positionMS: Long) = Goonj::seekTo
+    fun seekTo(positionMS: Long) = Goonj.seekTo(positionMS)
 
-    fun addTrack(track: Track, index: Int ?= null) = Goonj::addTrack
+    fun addTrack(track: Track, index: Int ?= null) = Goonj.addTrack(track, index)
 
-    fun removeTrack(index : Int) = Goonj::removeTrack
+    fun removeTrack(index : Int) = Goonj.removeTrack(index)
 
-    fun moveTrack(currentIndex : Int, finalIndex : Int) = Goonj::moveTrack
+    fun moveTrack(currentIndex : Int, finalIndex : Int) = Goonj.moveTrack(currentIndex, finalIndex)
 
-    fun skipToNext() = Goonj::skipToNext
+    fun skipToNext() = Goonj.skipToNext()
 
-    fun skipToPrevious() = Goonj::skipToPrevious
+    fun skipToPrevious() = Goonj.skipToPrevious()
 
     fun customizeNotification(useNavigationAction: Boolean = true,
                               usePlayPauseAction: Boolean = true,
                               fastForwardIncrementMs: Long = 0L,
                               rewindIncrementMs: Long = 0L,
-                              smallIcon : Int) = Goonj::customiseNotification
+                              smallIcon : Int) = Goonj.customiseNotification(useNavigationAction,
+        usePlayPauseAction, fastForwardIncrementMs, rewindIncrementMs, smallIcon)
 
-    fun changeActivityIntentForNotification(intent: Intent) = Goonj::changeActivityIntentForNotification
+    fun changeActivityIntentForNotification(intent: Intent) = Goonj.changeActivityIntentForNotification(intent)
 
-    fun removeNotification() = Goonj::removeNotification
+    fun removeNotification() = Goonj.removeNotification()
 
     var imageLoader
         get() = Goonj.imageLoader
@@ -49,23 +49,29 @@ interface GoonjPlayer {
             Goonj.imageLoader = value
         }
 
-    var trackFetcher
-        get() = Goonj.trackFetcher
+    var tryPrefetchAtProgress
+        get() = Goonj.tryPreFetchAtProgress
         set(value) {
-            Goonj.trackFetcher = value
-        }
-
-    var prefetchDistanceWithAutoplay
-        get() = Goonj.prefetchDistanceWithAutoplay
-        set(value){
-            Goonj.prefetchDistanceWithAutoplay = value
+            Goonj.tryPreFetchAtProgress = value
         }
 
 
-    var prefetchDistanceWithoutAutoplay
-        get() = Goonj.prefetchDistanceWithoutAutoplay
+    var trackPreFetcher
+        get() = Goonj.trackPreFetcher
+        set(value) {
+            Goonj.trackPreFetcher = value
+        }
+
+    var preFetchDistanceWithAutoplay
+        get() = Goonj.preFetchDistanceWithAutoplay
         set(value){
-            Goonj.prefetchDistanceWithoutAutoplay = value
+            Goonj.preFetchDistanceWithAutoplay = value
+        }
+
+    var preFetchDistanceWithoutAutoplay
+        get() = Goonj.preFetchDistanceWithoutAutoplay
+        set(value){
+            Goonj.preFetchDistanceWithoutAutoplay = value
         }
 
     var autoplay: Boolean
@@ -87,6 +93,8 @@ interface GoonjPlayer {
     val playerStateFlowable: Flowable<GoonjPlayerState> get() = Goonj.playerStateFlowable
 
     val currentTrackFlowable: Flowable<Track> get() = Goonj.currentTrackFlowable
+
+    val trackListFlowable: Flowable<List<Track>> get() = Goonj.trackListFlowable
 
     val autoplayFlowable: Flowable<Boolean> get() = Goonj.autoplayFlowable
 

@@ -27,14 +27,6 @@ internal object GoonjPlayerManager {
             mIsRemote = value
         }
 
-    val playerStateBehaviorSubject: BehaviorSubject<GoonjPlayerState> = BehaviorSubject.createDefault(GoonjPlayerState.IDLE)
-
-    val autoplayTrackSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
-
-    val currentTrackSubject: BehaviorSubject<Track> = BehaviorSubject.create()
-
-    val trackCompleteSubject = PublishSubject.create<Track>()
-
     private val player: AudioPlayer? get() {
 //        isRemote = mediaRoute?.supportsControlCategory(
 //            MediaControlIntent.CATEGORY_REMOTE_PLAYBACK)?: false
@@ -52,6 +44,18 @@ internal object GoonjPlayerManager {
     val trackList: List<Track> get() = mTrackList
     val trackPosition get() = player?.getTrackPosition()?: 0
 
+
+    val playerStateSubject: BehaviorSubject<GoonjPlayerState> = BehaviorSubject.createDefault(GoonjPlayerState.IDLE)
+
+    val autoplayTrackSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
+
+    val currentTrackSubject: BehaviorSubject<Track> = BehaviorSubject.create()
+
+    val trackListSubject: BehaviorSubject<List<Track>> = BehaviorSubject.createDefault(mTrackList)
+
+    val trackCompleteSubject = PublishSubject.create<Track>()
+
+
     fun onStart() {
         this.remoteAudioPlayer = RemoteAudioPlayer()
         this.localAudioPlayer = LocalAudioPlayer()
@@ -64,10 +68,11 @@ internal object GoonjPlayerManager {
         TrackFetcherManager.release()
     }
 
-    fun addTrack(track: Track, index: Int = mTrackList.size) {
+    fun addTrack(track: Track, index: Int = trackList.size) {
         track.state.index = index
         mTrackList.add(index, track)
         player?.enqueue(track, index)
+        trackListSubject.onNext(mTrackList)
     }
 
     fun pause() = player?.pause()
@@ -76,7 +81,7 @@ internal object GoonjPlayerManager {
 
     fun seekTo(positionMS: Long) = player?.seekTo(positionMS)
 
-    fun startNewSession(){
+    fun startNewSession() {
         mTrackList.clear()
         player?.startNewSession()
     }

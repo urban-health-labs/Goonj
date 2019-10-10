@@ -12,11 +12,11 @@ internal object TrackFetcherManager {
 
     private var lastKnownTrack = Track()
 
-    var trackFetcher: ((List<Track>, (List<Track>)->Unit)->Unit)? = null
+    var trackPreFetcher: (((List<Track>)->Unit)->Unit)? = null
 
-    var prefetchDistanceWithAutoplay = 5
-    var prefetchDistanceWithoutAutoplay = 2
-
+    var tryPrefetchAtProgress = 0.5
+    var preFetchDistanceWithAutoplay = 5
+    var preFetchDistanceWithoutAutoplay = 2
 
     internal fun onStart() {
         disposable = Goonj.currentTrackFlowable.subscribe { track ->
@@ -25,14 +25,14 @@ internal object TrackFetcherManager {
                 isFetched = false
             }
 
-            if (!isFetching && !isFetched) {
-                if (Goonj.playerState == GoonjPlayerState.PLAYING && (track.state.progress * 100).toInt() > 50) {
+            if (!isFetching && !isFetched && trackPreFetcher != null) {
+                if (track.state.progress > tryPrefetchAtProgress) {
                     if (Goonj.autoplay) {
-                        if ((Goonj.trackList.size - (track.state.index + 1)) > prefetchDistanceWithAutoplay) {
+                        if ((Goonj.trackList.size - (track.state.index + 1)) < preFetchDistanceWithAutoplay) {
                             onFetch()
                         }
                     } else {
-                        if ((Goonj.trackList.size - (track.state.index + 1)) > prefetchDistanceWithoutAutoplay) {
+                        if ((Goonj.trackList.size - (track.state.index + 1)) < preFetchDistanceWithoutAutoplay) {
                             onFetch()
                         }
                     }
@@ -46,13 +46,14 @@ internal object TrackFetcherManager {
     }
 
     private fun onFetch() {
-        if (trackFetcher != null && !isFetching) {
+        trackPreFetcher?.apply {
             isFetching = true
-            trackFetcher?.invoke(Goonj.trackList) { newTracks ->
-                if (newTracks.isEmpty()) {
+            invoke { nextList ->
+                isFetching = false
+                if (nextList.isEmpty()) {
                     isFetched = true
                 } else {
-                    newTracks.forEach { Goonj.addTrack(it) }
+                    nextList.forEach { Goonj.addTrack(it) }
                 }
             }
         }

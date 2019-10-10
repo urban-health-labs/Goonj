@@ -2,7 +2,6 @@ package ai.rever.goonj.models
 
 import ai.rever.goonj.Goonj
 import ai.rever.goonj.Goonj.appContext
-import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.R
 import android.content.Context
 import android.graphics.Bitmap

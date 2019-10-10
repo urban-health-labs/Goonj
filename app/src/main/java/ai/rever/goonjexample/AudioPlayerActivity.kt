@@ -15,7 +15,6 @@ import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_audio_player.*
 
@@ -45,7 +44,16 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             audioPlayerPlayPauseToggleBtn.isChecked = it != GoonjPlayerState.PLAYING
         }
 
+        compositeDisposable += autoplayFlowable.subscribe {
+            audioPlayerAutoplaySwitch.isChecked = it
+        }
+
         compositeDisposable += currentTrackFlowable.subscribe(::onPlayingTrackChange)
+
+        compositeDisposable += trackListFlowable.subscribe {
+            tvLoadedTrackCount.text = "Loaded track count: ${it.size}"
+        }
+
     }
 
     override fun onPause() {
@@ -66,14 +74,10 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             audioPlayerAlbumTitleTv.text = currentItem.title
             audioPlayerAlbumArtistTv.text = currentItem.artistName
         }
-        try {
-            audioPlayerCurrentPosition.text = (currentItem.state.position / 1000).toString()
-            audioPlayerContentDuration.text = (currentItem.state.duration / 1000).toString()
-            audioPlayerProgressBar.progress =
-                ((currentItem.state.position.toDouble() / currentItem.state.duration.toDouble()) * 100.0).toInt()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        audioPlayerCurrentPosition.text = (currentItem.state.position / 1000).toString()
+        audioPlayerContentDuration.text = (currentItem.state.duration / 1000).toString()
+        audioPlayerProgressBar.progress =
+            ((currentItem.state.position.toDouble() / currentItem.state.duration.toDouble()) * 100.0).toInt()
         knownTrack = currentItem
     }
 
@@ -97,8 +101,10 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
             seekTo(trackPosition - 3000)
         }
 
-        audioPlayerAutoplaySwitch.setOnCheckedChangeListener { _, currentState ->
-            autoplay = currentState
+        audioPlayerAutoplaySwitch.apply {
+            setOnClickListener {
+                autoplay = isChecked
+            }
         }
 
         audioPlayerSkipNext.setOnClickListener {

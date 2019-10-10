@@ -75,6 +75,11 @@ Goonj.someMethod() or Goonj.someProperty
 |__register(context: Context, activityIntent: Intent)__|Extras with intent could be sent.|
 |__register<S: GoonjService>(context: Context, activityIntent: Intent, audioServiceClass: Class<S>)__|Advanced registration for custom AudioService implementation.|
 |__unregister()__|unregister Goonj|
+|__imageLoader__|Track image loader, used to load image in notification (((Track, (Bitmap?) -> Unit) -> Unit))|
+|__tryPreFetchAtProgress__|Try pre-fetching at track progress|
+|__trackPreFetcher__|Track pre-fetcher, which could be used to load further tracks|
+|__preFetchDistanceWithAutoplay__|Try pre-fetching when this much track left to play, while on autoplay|
+|__preFetchDistanceWithoutAutoplay__|Try pre-fetching when this much track left to play, while not on autoplay|
 |__autoplay__|Enable autoplay with auto-fetch tracks, could be used get current state of autoplay.|
 |__trackList__|Get current playlist.|
 |__playerState__|Get player state (GoonjPlayerState).|

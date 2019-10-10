@@ -38,7 +38,7 @@ internal class RemoteAudioPlayer: AudioPlayer {
     }
 
     override fun enqueue(track: Track, index: Int) {
-        GoonjPlayerManager.playerStateBehaviorSubject.onNext(GoonjPlayerState.PLAYING)
+        GoonjPlayerManager.playerStateSubject.onNext(GoonjPlayerState.PLAYING)
         play(track)
     }
 
@@ -56,7 +56,7 @@ internal class RemoteAudioPlayer: AudioPlayer {
                     seekInternal(track)
                 }
 
-                if (GoonjPlayerManager.playerStateBehaviorSubject.value == GoonjPlayerState.PLAYING) {
+                if (GoonjPlayerManager.playerStateSubject.value == GoonjPlayerState.PLAYING) {
                     pause()
                 }
 
@@ -191,7 +191,7 @@ internal class RemoteAudioPlayer: AudioPlayer {
 
         val track = GoonjPlayerManager.currentTrackSubject.value?: return
         if (itemStatus?.apply {
-                GoonjPlayerManager.playerStateBehaviorSubject.onNext(
+                GoonjPlayerManager.playerStateSubject.onNext(
                     when (playbackState) {
                     PLAYBACK_STATE_BUFFERING -> GoonjPlayerState.BUFFERING
                     PLAYBACK_STATE_PENDING -> GoonjPlayerState.IDLE
@@ -211,7 +211,7 @@ internal class RemoteAudioPlayer: AudioPlayer {
             }
 
         } == null) {
-            GoonjPlayerManager.playerStateBehaviorSubject.onNext(defaultState)
+            GoonjPlayerManager.playerStateSubject.onNext(defaultState)
         }
     }
 
@@ -220,7 +220,7 @@ internal class RemoteAudioPlayer: AudioPlayer {
         handler.postDelayed(object: Runnable{
             override fun run() {
                 getStatus(false)
-                if(GoonjPlayerManager.playerStateBehaviorSubject.value == GoonjPlayerState.PLAYING) {
+                if(GoonjPlayerManager.playerStateSubject.value == GoonjPlayerState.PLAYING) {
                     isHandlerRunning  = true
                     handler.postDelayed(this, 1000)
                 } else {

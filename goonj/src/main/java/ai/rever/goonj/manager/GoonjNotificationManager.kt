@@ -25,6 +25,8 @@ internal object GoonjNotificationManager {
 
     var activityIntent = Intent()
 
+    val trackList get() = GoonjPlayerManager.trackList
+
     /**
      * Customize Notification Manager
      * @param useNavigationAction Display Previous/Next Action
@@ -45,7 +47,7 @@ internal object GoonjNotificationManager {
 
     private val notificationAdapter = object : PlayerNotificationManager.MediaDescriptionAdapter {
         override fun getCurrentContentTitle(player: Player): String {
-            return GoonjPlayerManager.trackList[player.currentWindowIndex].title
+            return trackList[player.currentWindowIndex].title
         }
 
         @Nullable
@@ -57,15 +59,13 @@ internal object GoonjNotificationManager {
 
         @Nullable
         override fun getCurrentContentText(player: Player): String? {
-            return GoonjPlayerManager.trackList[player.currentWindowIndex].artistName
+            return trackList[player.currentWindowIndex].artistName
         }
 
         @Nullable
         override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback): Bitmap? {
-            val track = GoonjPlayerManager.trackList[player.currentWindowIndex]
-            track.load {
-                callback.onBitmap(it)
-            }
+            val track = trackList[player.currentWindowIndex]
+            track.load(callback::onBitmap)
             return track.bitmap
         }
 
