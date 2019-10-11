@@ -1,5 +1,6 @@
 package ai.rever.goonj.player
 
+import ai.rever.goonj.Goonj
 import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.R
@@ -7,21 +8,16 @@ import ai.rever.goonj.analytics.ExoPlayerAnalyticsListenerImp
 import ai.rever.goonj.analytics.ExoPlayerEvenListenerImp
 import ai.rever.goonj.download.DownloadUtil
 import ai.rever.goonj.interfaces.AudioPlayer
-import ai.rever.goonj.manager.GoonjNotificationManager.playerNotificationManager
+import ai.rever.goonj.manager.GoonjNotificationManager
 import ai.rever.goonj.manager.GoonjPlayerManager
+import ai.rever.goonj.manager.GoonjSessionMediaConnector
 import ai.rever.goonj.models.Track
-import ai.rever.goonj.util.MEDIA_SESSION_TAG
-import android.support.v4.media.MediaDescriptionCompat
-import android.support.v4.media.session.MediaSessionCompat
-import android.util.Log.e
 import androidx.core.net.toUri
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.audio.AudioAttributes
-import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
-import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
@@ -69,13 +65,11 @@ internal class LocalAudioPlayer: AudioPlayer {
         )
     }
 
-    private val mediaSessionConnector: MediaSessionConnector by lazy {
-        MediaSessionConnector(MediaSessionCompat(appContext, MEDIA_SESSION_TAG))
-    }
+
 
     private val concatenatingMediaSource by lazy { ConcatenatingMediaSource() }
 
-    private fun onStart() {
+    private fun onCreate() {
         player = simpleExoPlayerGetter
         compositeDisposable += GoonjPlayerManager.playerStateSubject
             .subscribe {
@@ -86,21 +80,12 @@ internal class LocalAudioPlayer: AudioPlayer {
                 }
             }
 
-        val mediaSession = mediaSessionConnector.mediaSession
-        mediaSession.isActive = true
-
-        mediaSessionConnector.setPlayer(player)
-        playerNotificationManager.setPlayer(player)
-
-        playerNotificationManager.setMediaSessionToken(mediaSession.sessionToken)
-
-        mediaSessionConnector.setQueueNavigator(object: TimelineQueueNavigator(mediaSession) {
-            override fun getMediaDescription(player: Player, index: Int): MediaDescriptionCompat {
-                return trackList[index].mediaDescription
-            }
-        })
 
         addListeners()
+        player?.let {
+            GoonjSessionMediaConnector.onCreate(it)
+        }
+        GoonjNotificationManager.setPlayer(player)
     }
 
 
@@ -126,6 +111,7 @@ internal class LocalAudioPlayer: AudioPlayer {
                     else -> if (playWhenReady) {
                         GoonjPlayerState.PLAYING
                     } else {
+                        Goonj.stopForeground(false)
                         GoonjPlayerState.PAUSED
                     }
                 })
@@ -176,16 +162,16 @@ internal class LocalAudioPlayer: AudioPlayer {
 
     override fun startNewSession(){
         concatenatingMediaSource.clear()
+        GoonjNotificationManager.setPlayer(player)
     }
 
     override fun release() {
         timerDisposable?.dispose()
         compositeDisposable.dispose()
 
-        mediaSessionConnector.mediaSession.release()
-        mediaSessionConnector.setPlayer(null)
+        GoonjPlayerManager.removeNotification()
 
-        playerNotificationManager.setPlayer(null)
+        GoonjSessionMediaConnector.release()
 
         player?.removeAnalyticsListener(ExoPlayerAnalyticsListenerImp)
         player?.removeListener(eventListener)
@@ -222,7 +208,7 @@ internal class LocalAudioPlayer: AudioPlayer {
 
     override fun resume() {
         player?.playWhenReady = true
-        playerNotificationManager.setPlayer(player)
+        GoonjNotificationManager.setPlayer(player)
     }
 
     override fun stop() {
@@ -273,10 +259,10 @@ internal class LocalAudioPlayer: AudioPlayer {
     override fun getTrackPosition() = player?.currentPosition ?: 0
 
     override fun onRemoveNotification() {
-        playerNotificationManager.setPlayer(null)
+        GoonjNotificationManager.setPlayer(null)
     }
 
     init {
-        onStart()
+        onCreate()
     }
 }

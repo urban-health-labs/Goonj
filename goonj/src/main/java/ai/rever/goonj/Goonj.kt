@@ -174,7 +174,9 @@ object Goonj {
         }
     }
 
-    fun removeNotification() = run { GoonjPlayerManager.removeNotification() }
+    fun removeNotification() = run {
+        GoonjPlayerManager.removeNotification()
+    }
 
     var imageLoader: ((Track, (Bitmap?) -> Unit) -> Unit)? = null
 
@@ -240,6 +242,10 @@ object Goonj {
     // internal method
     internal fun startForeground(notificationId: Int, notification: Notification?) = run {
         startForeground(notificationId, notification)
+    }
+
+    internal fun stopForeground(removeNotification: Boolean) = run {
+        stopForeground(removeNotification)
     }
 
     internal fun stopSelf() = run {

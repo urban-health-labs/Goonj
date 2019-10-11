@@ -1,5 +1,6 @@
 package ai.rever.goonj.manager
 
+import ai.rever.goonj.Goonj
 import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.player.RemoteAudioPlayer
 import ai.rever.goonj.interfaces.AudioPlayer
@@ -108,6 +109,7 @@ internal object GoonjPlayerManager {
 
     fun removeNotification() {
         player?.onRemoveNotification()
+        Goonj.stopForeground(true)
     }
 
     fun finishTrack(){
