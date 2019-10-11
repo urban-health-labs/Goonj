@@ -8,6 +8,7 @@ import ai.rever.goonj.player.LocalAudioPlayer
 import ai.rever.goonj.models.Track
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
+import java.util.*
 
 
 internal object GoonjPlayerManager {
@@ -73,6 +74,7 @@ internal object GoonjPlayerManager {
 
     fun addTrack(track: Track, index: Int = trackList.size) {
         track.state.index = index
+        track.state.addedAt = Date().time
         mTrackList.add(index, track)
         player?.enqueue(track, index)
         trackListSubject.onNext(mTrackList)
@@ -119,6 +121,7 @@ internal object GoonjPlayerManager {
     }
 
     fun onTrackComplete(track: Track) {
+        track.state.completedAt = Date().time
         lastCompletedTrack = track
         trackCompleteSubject.onNext(track)
     }

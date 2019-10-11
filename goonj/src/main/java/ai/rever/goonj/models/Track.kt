@@ -167,6 +167,9 @@ data class Track (var url: String = "",
 data class TrackState(var index: Int = 0,
                       var position: Long = 0,
                       var duration: Long = 1, // divide safe
+                      var addedAt: Long = 0,
+                      var playedAt: Long = 0,
+                      var completedAt: Long =  0,
                       var remoteItemId: String? = null): Parcelable {
     val progress: Double get() = position.toDouble() / duration.toDouble()
 }

@@ -29,6 +29,7 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 internal class LocalAudioPlayer: AudioPlayer {
@@ -149,6 +150,7 @@ internal class LocalAudioPlayer: AudioPlayer {
                 GoonjPlayerManager.currentTrackSubject.onNext(exoTrack)
 
                 if (exoTrack.id != lastKnownTrack?.id) {
+                    exoTrack.state.playedAt = Date().time
                     GoonjPlayerManager.onTrackComplete(lastKnownTrack ?: return)
                     GoonjPlayerManager.autoplayTrackSubject.value?.let {
                         if (!it) {
