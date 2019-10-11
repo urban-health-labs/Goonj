@@ -13,6 +13,7 @@ import android.os.Parcelable
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
+import androidx.core.os.bundleOf
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
@@ -84,7 +85,7 @@ data class Track (var url: String = "",
                   var downloadedState: Int = Download.STATE_QUEUED,
 
                   @Ignore
-                  var extras: Bundle? = null,
+                  val extras: Bundle = bundleOf(),
                   @Ignore
                   var bitmap: Bitmap? = null,
                   @Ignore
