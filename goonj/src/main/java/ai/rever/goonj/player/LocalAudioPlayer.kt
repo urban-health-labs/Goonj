@@ -180,7 +180,9 @@ internal class LocalAudioPlayer: AudioPlayer {
     }
 
     override fun seekTo(positionMs: Long) {
-        player?.seekTo(positionMs)
+        if (positionMs < player?.duration?: 0) {
+            player?.seekTo(positionMs)
+        }
     }
 
     override fun seekTo(index: Int, positionMs: Long) {
