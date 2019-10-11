@@ -8,6 +8,7 @@ import ai.rever.goonj.models.Track
 import android.content.Context
 import android.media.AudioManager
 import android.os.Bundle
+import android.util.Log.e
 import android.view.KeyEvent
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
@@ -42,6 +43,7 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
 
         compositeDisposable += playerStateFlowable.subscribe {
             audioPlayerPlayPauseToggleBtn.isChecked = it != GoonjPlayerState.PLAYING
+//            e("===========>", "$it")
         }
 
         compositeDisposable += autoplayFlowable.subscribe {

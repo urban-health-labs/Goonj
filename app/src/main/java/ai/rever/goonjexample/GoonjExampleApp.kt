@@ -12,7 +12,9 @@ import androidx.lifecycle.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.disposables.Disposable
+import io.reactivex.plugins.RxJavaPlugins
 
 class GoonjExampleApp: Application(), LifecycleObserver {
 
@@ -25,6 +27,10 @@ class GoonjExampleApp: Application(), LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onAppCreate() {
+
+        RxJavaPlugins.setErrorHandler {
+            Log.e("============>", it.localizedMessage ?: "empty")
+        }
 
         Goonj.register<AudioPlayerActivity>(this)
 
@@ -81,6 +87,7 @@ class GoonjExampleApp: Application(), LifecycleObserver {
          *   i)   updating completed track to server or some database
          *   ii)  adding additional track to playlist after calculating left track count to play
          */
+//        Log.e("===========>", track.title)
     }
 }
 

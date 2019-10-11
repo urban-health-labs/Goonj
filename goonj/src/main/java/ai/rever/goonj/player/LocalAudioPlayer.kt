@@ -2,6 +2,7 @@ package ai.rever.goonj.player
 
 import ai.rever.goonj.Goonj
 import ai.rever.goonj.Goonj.appContext
+import ai.rever.goonj.Goonj.currentTrack
 import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.R
 import ai.rever.goonj.analytics.ExoPlayerAnalyticsListenerImp
@@ -106,7 +107,12 @@ internal class LocalAudioPlayer: AudioPlayer {
             GoonjPlayerManager.playerStateSubject.onNext(
                 when (playbackState) {
                     Player.STATE_BUFFERING -> GoonjPlayerState.BUFFERING
-                    Player.STATE_ENDED -> GoonjPlayerState.ENDED
+                    Player.STATE_ENDED -> {
+                        GoonjPlayerManager.currentTrackSubject.value?.let {
+                            GoonjPlayerManager.onTrackComplete(it)
+                        }
+                        GoonjPlayerState.ENDED
+                    }
                     Player.STATE_IDLE -> GoonjPlayerState.IDLE
                     else -> if (playWhenReady) {
                         GoonjPlayerState.PLAYING
