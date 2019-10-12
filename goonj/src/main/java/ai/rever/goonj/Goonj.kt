@@ -159,11 +159,11 @@ object Goonj {
 
     fun skipToPrevious()  = run { GoonjPlayerManager.skipToPrevious() }
 
-    fun customiseNotification(useNavigationAction: Boolean,
-                              usePlayPauseAction: Boolean,
-                              fastForwardIncrementMs: Long ,
-                              rewindIncrementMs: Long,
-                              smallIcon: Int) = run {
+    fun customiseNotification(useNavigationAction: Boolean = true,
+                              usePlayPauseAction: Boolean = true,
+                              fastForwardIncrementMs: Long = 0,
+                              rewindIncrementMs: Long = 0,
+                              smallIcon: Int = R.drawable.ic_album) = run {
         GoonjNotificationManager.customiseNotification(useNavigationAction,
             usePlayPauseAction, fastForwardIncrementMs, rewindIncrementMs, smallIcon)
     }

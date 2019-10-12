@@ -2,6 +2,7 @@ package ai.rever.goonj.interfaces
 
 import ai.rever.goonj.Goonj
 import ai.rever.goonj.GoonjPlayerState
+import ai.rever.goonj.R
 import ai.rever.goonj.models.Track
 import android.content.Intent
 import io.reactivex.Flowable
@@ -34,9 +35,9 @@ interface GoonjPlayer {
 
     fun customizeNotification(useNavigationAction: Boolean = true,
                               usePlayPauseAction: Boolean = true,
-                              fastForwardIncrementMs: Long = 0L,
-                              rewindIncrementMs: Long = 0L,
-                              smallIcon : Int) = Goonj.customiseNotification(useNavigationAction,
+                              fastForwardIncrementMs: Long = 0,
+                              rewindIncrementMs: Long = 0,
+                              smallIcon : Int = R.drawable.ic_album) = Goonj.customiseNotification(useNavigationAction,
         usePlayPauseAction, fastForwardIncrementMs, rewindIncrementMs, smallIcon)
 
     fun changeActivityIntentForNotification(intent: Intent) = Goonj.changeActivityIntentForNotification(intent)
