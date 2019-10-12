@@ -85,7 +85,7 @@ data class Track (var url: String = "",
                   var downloadedState: Int = Download.STATE_QUEUED,
 
                   @Ignore
-                  val extras: Bundle = bundleOf(),
+                  val extras: Bundle = Bundle(),
                   @Ignore
                   var bitmap: Bitmap? = null,
                   @Ignore
