@@ -150,7 +150,7 @@ internal class LocalAudioPlayer: AudioPlayer {
                 GoonjPlayerManager.currentTrackSubject.onNext(exoTrack)
 
                 if (exoTrack.id != lastKnownTrack?.id) {
-                    exoTrack.state.playedAt = Date().time
+                    exoTrack.state.playedAt = Date()
                     GoonjPlayerManager.onTrackComplete(lastKnownTrack ?: return)
                     GoonjPlayerManager.autoplayTrackSubject.value?.let {
                         if (!it) {

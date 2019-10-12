@@ -177,6 +177,6 @@ data class TrackState(var index: Int = 0,
 }
 
 
-val Context.defaultBitmap: Bitmap? get() = BitmapFactory.decodeResource(resources, R.drawable.ic_album)
+internal val Context.defaultBitmap: Bitmap? get() = BitmapFactory.decodeResource(resources, R.drawable.ic_album)
 
 
