@@ -163,7 +163,7 @@ internal class LocalAudioPlayer: AudioPlayer {
     }
 
     private fun addListeners(){
-        player?.addAnalyticsListener(ExoPlayerAnalyticsListenerImp)
+//        player?.addAnalyticsListener(ExoPlayerAnalyticsListenerImp)
         player?.addListener(eventListener)
     }
 
@@ -181,7 +181,7 @@ internal class LocalAudioPlayer: AudioPlayer {
 
         GoonjSessionMediaConnector.release()
 
-        player?.removeAnalyticsListener(ExoPlayerAnalyticsListenerImp)
+//        player?.removeAnalyticsListener(ExoPlayerAnalyticsListenerImp)
         player?.removeListener(eventListener)
         player?.release()
         player = null
