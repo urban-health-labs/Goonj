@@ -11,7 +11,6 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.1"
 
-
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 29
@@ -26,6 +25,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "IS_DEBUG", "true"
         }
     }
     compileOptions {
