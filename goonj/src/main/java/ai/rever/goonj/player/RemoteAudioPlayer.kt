@@ -3,6 +3,7 @@ package ai.rever.goonj.player
 import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.analytics.*
+import ai.rever.goonj.analytics.GoonjAnalytics.logEvent
 import android.os.Bundle
 import androidx.mediarouter.media.MediaItemStatus
 import androidx.mediarouter.media.MediaRouter

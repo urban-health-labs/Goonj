@@ -1,14 +1,12 @@
 package ai.rever.goonjexample
 
 import ai.rever.goonj.GoonjPlayerState
-import ai.rever.goonj.analytics.isLoggable
 import ai.rever.goonj.interfaces.GoonjPlayer
 import ai.rever.goonj.models.SAMPLES
 import ai.rever.goonj.models.Track
 import android.content.Context
 import android.media.AudioManager
 import android.os.Bundle
-import android.util.Log.e
 import android.view.KeyEvent
 import android.view.KeyEvent.*
 import androidx.appcompat.app.AppCompatActivity
@@ -33,8 +31,6 @@ class AudioPlayerActivity : AppCompatActivity(), GoonjPlayer {
         setupPlayer()
 
         setCastButton()
-
-        isLoggable = true
 
     }
 

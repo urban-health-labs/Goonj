@@ -1,5 +1,6 @@
 package ai.rever.goonj.analytics
 
+import ai.rever.goonj.analytics.GoonjAnalytics.logEvent
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.analytics.AnalyticsListener
 import com.google.android.exoplayer2.metadata.Metadata

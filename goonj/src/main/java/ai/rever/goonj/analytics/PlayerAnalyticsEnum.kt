@@ -3,8 +3,6 @@ package ai.rever.goonj.analytics
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
-var isLoggable = false
-
 enum class PlayerAnalyticsEnum{
     ON_PLAYER_STATE_CHANGED,
     ON_SEEK_PROCESSED,
@@ -52,7 +50,7 @@ const val ERROR_REMOTE = "ErrorRemote"
 const val ERROR_REMOTE_CODE = "ErrorRemoteCode"
 const val IS_REMOTE_PLAYING = "IsRemotePlaying"
 
-data class AnalyticsModel(
+data class GoonjAnalyticsModel(
     val isRemote : Boolean,
     val type : PlayerAnalyticsEnum,
     val parameter: Map<String, Any?>
@@ -69,20 +67,18 @@ data class AnalyticsModel(
 
 }
 
-private val analyticsSubjectBehaviour : BehaviorSubject<AnalyticsModel> = BehaviorSubject.create()
-/**
- * analyticsObservable doesn't allows pushing values
- */
-val analyticsObservable get() = (analyticsSubjectBehaviour as Observable<AnalyticsModel>)
+object GoonjAnalytics {
 
-fun logEvent (isRemote: Boolean, behaviour: PlayerAnalyticsEnum, data: Map<String,Any?>){
-    analyticsSubjectBehaviour.onNext(
-        AnalyticsModel(
-            isRemote,
-            behaviour,
-            data
+    private val analyticsSubjectBehaviour = BehaviorSubject.create<GoonjAnalyticsModel>()
+    val analyticsObservable get() = (analyticsSubjectBehaviour as Observable<GoonjAnalyticsModel>)
+
+    fun logEvent(isRemote: Boolean, behaviour: PlayerAnalyticsEnum, data: Map<String, Any?>) {
+        analyticsSubjectBehaviour.onNext(
+            GoonjAnalyticsModel(
+                isRemote,
+                behaviour,
+                data
+            )
         )
-    )
+    }
 }
-
-
