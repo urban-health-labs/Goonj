@@ -7,6 +7,6 @@
         <meta-data
                 android:name=
                         "com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-                android:value="ai.rever.goonj.audioplayer.cast.CastOptionsProvider" />
+                android:value="ai.rever.goonj.cast.CastOptionsProvider" />
     </application>
 </manifest>
