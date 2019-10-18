@@ -1,7 +1,6 @@
 package ai.rever.goonjexample
 
 import ai.rever.goonj.Goonj
-import ai.rever.goonj.models.SAMPLES
 import ai.rever.goonj.models.Track
 import android.app.Application
 import android.graphics.Bitmap
@@ -12,7 +11,6 @@ import androidx.lifecycle.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.disposables.Disposable
 import io.reactivex.plugins.RxJavaPlugins
 

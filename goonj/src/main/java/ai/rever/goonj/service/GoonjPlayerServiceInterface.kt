@@ -1,4 +1,4 @@
-package ai.rever.goonj.interfaces
+package ai.rever.goonj.service
 
 import android.app.Notification
 

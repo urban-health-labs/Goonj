@@ -1,10 +1,12 @@
 package ai.rever.goonj
 
-import ai.rever.goonj.interfaces.GoonjPlayerServiceInterface
+import ai.rever.goonj.download.DownloadState
+import ai.rever.goonj.download.GoonjDownloadManager
+import ai.rever.goonj.service.GoonjPlayerServiceInterface
 import ai.rever.goonj.models.Track
-import ai.rever.goonj.manager.GoonjNotificationManager
+import ai.rever.goonj.manager.LocalPlayerNotificationManager
 import ai.rever.goonj.manager.GoonjPlayerManager
-import ai.rever.goonj.manager.TrackFetcherManager
+import ai.rever.goonj.manager.TrackPreFetcherManager
 import ai.rever.goonj.service.GoonjService
 import android.app.Activity
 import android.app.Notification
@@ -164,13 +166,13 @@ object Goonj {
                               fastForwardIncrementMs: Long = 0,
                               rewindIncrementMs: Long = 0,
                               smallIcon: Int = R.drawable.ic_album) = run {
-        GoonjNotificationManager.customiseNotification(useNavigationAction,
+        LocalPlayerNotificationManager.customiseNotification(useNavigationAction,
             usePlayPauseAction, fastForwardIncrementMs, rewindIncrementMs, smallIcon)
     }
 
     fun changeActivityIntentForNotification(intent: Intent) {
         run {
-            GoonjNotificationManager.activityIntent = intent
+            LocalPlayerNotificationManager.activityIntent = intent
         }
     }
 
@@ -182,28 +184,28 @@ object Goonj {
 
 
     var tryPreFetchAtProgress
-        get() = TrackFetcherManager.tryPrefetchAtProgress
+        get() = TrackPreFetcherManager.tryPrefetchAtProgress
         set(value) {
-            TrackFetcherManager.tryPrefetchAtProgress = value
+            TrackPreFetcherManager.tryPrefetchAtProgress = value
         }
 
     var trackPreFetcher
-        get() = TrackFetcherManager.trackPreFetcher
+        get() = TrackPreFetcherManager.trackPreFetcher
         set(value) {
-            TrackFetcherManager.trackPreFetcher = value
+            TrackPreFetcherManager.trackPreFetcher = value
         }
 
     var preFetchDistanceWithAutoplay
-        get() = TrackFetcherManager.preFetchDistanceWithAutoplay
+        get() = TrackPreFetcherManager.preFetchDistanceWithAutoplay
         set(value){
-            TrackFetcherManager.preFetchDistanceWithAutoplay = value
+            TrackPreFetcherManager.preFetchDistanceWithAutoplay = value
         }
 
 
     var preFetchDistanceWithoutAutoplay
-        get() = TrackFetcherManager.preFetchDistanceWithoutAutoplay
+        get() = TrackPreFetcherManager.preFetchDistanceWithoutAutoplay
         set(value){
-            TrackFetcherManager.preFetchDistanceWithoutAutoplay = value
+            TrackPreFetcherManager.preFetchDistanceWithoutAutoplay = value
         }
 
     var autoplay: Boolean
@@ -236,6 +238,8 @@ object Goonj {
     val trackListFlowable: Flowable<List<Track>> get() = GoonjPlayerManager.trackListSubject.toFlowable(BackpressureStrategy.LATEST).observeOn(AndroidSchedulers.mainThread())
 
     val autoplayFlowable: Flowable<Boolean> get() = GoonjPlayerManager.autoplayTrackSubject.toFlowable(BackpressureStrategy.LATEST).observeOn(AndroidSchedulers.mainThread())
+
+    val downloadStateFlowable: Flowable<DownloadState> get() = GoonjDownloadManager.downloadStateBehaviorSubject.toFlowable(BackpressureStrategy.LATEST).observeOn(AndroidSchedulers.mainThread())
 
     val trackCompletionObservable: Observable<Track> get() = GoonjPlayerManager.trackCompleteSubject.observeOn(AndroidSchedulers.mainThread())
 

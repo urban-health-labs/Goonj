@@ -1,18 +1,17 @@
-package ai.rever.goonj.player
+package ai.rever.goonj.player.imp
 
 import ai.rever.goonj.Goonj
 import ai.rever.goonj.Goonj.appContext
-import ai.rever.goonj.Goonj.currentTrack
 import ai.rever.goonj.GoonjPlayerState
 import ai.rever.goonj.R
 import ai.rever.goonj.analytics.ExoPlayerAnalyticsListenerImp
 import ai.rever.goonj.analytics.ExoPlayerEvenListenerImp
-import ai.rever.goonj.download.DownloadUtil
-import ai.rever.goonj.interfaces.AudioPlayer
-import ai.rever.goonj.manager.GoonjNotificationManager
+import ai.rever.goonj.download.GoonjDownloadManager
+import ai.rever.goonj.manager.LocalPlayerNotificationManager
 import ai.rever.goonj.manager.GoonjPlayerManager
-import ai.rever.goonj.manager.GoonjSessionMediaConnector
+import ai.rever.goonj.manager.LocalPlayerSMCManager
 import ai.rever.goonj.models.Track
+import ai.rever.goonj.player.AudioPlayer
 import androidx.core.net.toUri
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayerFactory
@@ -28,7 +27,7 @@ import com.google.android.exoplayer2.util.Util
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxkotlin.addTo
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -51,45 +50,63 @@ internal class LocalAudioPlayer: AudioPlayer {
                     GoonjPlayerManager.playerStateSubject.value == GoonjPlayerState.PLAYING }
             .map { (GoonjPlayerManager.currentTrackSubject.value?.state?.position?: 0) + 1000 }
 
-    private val compositeDisposable = CompositeDisposable()
-    private var timerDisposable: Disposable? = null
-    private val trackList get() = GoonjPlayerManager.trackList
-
-    private val cacheDataSourceFactory: CacheDataSourceFactory by lazy {
-        val dataSourceFactory = DefaultDataSourceFactory(appContext,
-            Util.getUserAgent(appContext, appContext?.getString(R.string.app_name))
-        )
-
-        CacheDataSourceFactory(
-            DownloadUtil.getCache(),
-            dataSourceFactory,
-            CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR
-        )
-    }
-
-
-
-    private val concatenatingMediaSource by lazy { ConcatenatingMediaSource() }
-
-    private fun onCreate() {
-        player = simpleExoPlayerGetter
-        compositeDisposable += GoonjPlayerManager.playerStateSubject
-            .subscribe {
-                if (it == GoonjPlayerState.PLAYING && !isSuspended){
-                    timerDisposable?.dispose()
+    private val trackObservable
+        get() = GoonjPlayerManager.playerStateSubject
+            .switchMap {
+                if (it == GoonjPlayerState.PLAYING && !isSuspended) {
                     onTrackPositionChange()
-                    timerDisposable = timerObservable.subscribe(::onTrackPositionChange)
+                    timerObservable
+                } else {
+                    Observable.just(GoonjPlayerManager.currentTrackSubject.value?.state?.position?: 0)
                 }
             }
 
 
-        addListeners()
-        player?.let {
-            GoonjSessionMediaConnector.onCreate(it)
+    private val compositeDisposable = CompositeDisposable()
+    private var timerDisposable: Disposable? = null
+    private val trackList get() = GoonjPlayerManager.trackList
+
+    private val cacheDataSourceFactory by lazy {
+        with (DefaultDataSourceFactory(appContext, Util.getUserAgent(appContext, appContext?.getString(R.string.app_name)))) {
+            CacheDataSourceFactory(GoonjDownloadManager.cache, this,
+                CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
         }
-        GoonjNotificationManager.setPlayer(player)
     }
 
+    private val concatenatingMediaSource by lazy { ConcatenatingMediaSource() }
+
+    private fun onCreate() {
+        player = simpleExoPlayerGetter.also {
+            /**
+             * Here ordering is important
+             */
+            LocalPlayerSMCManager.subscribe(it).addTo(compositeDisposable)
+
+            LocalPlayerNotificationManager.setPlayer(it)
+        }
+
+        trackObservable.subscribe(::onTrackPositionChange).addTo(compositeDisposable)
+
+        addListeners()
+    }
+
+    override fun isDisposed(): Boolean {
+        return compositeDisposable.isDisposed
+    }
+
+    override fun dispose() {
+        concatenatingMediaSource.clear()
+
+        timerDisposable?.dispose()
+        compositeDisposable.dispose()
+
+        GoonjPlayerManager.removeNotification()
+
+        removeListeners()
+
+        player?.release()
+        player = null
+    }
 
     private fun onTrackPositionChange(position: Long = getTrackPosition())  {
         GoonjPlayerManager.currentTrackSubject.value?.let { track ->
@@ -132,8 +149,8 @@ internal class LocalAudioPlayer: AudioPlayer {
     }
 
     private fun updateCurrentlyPlayingTrack() {
-        if (trackList.isEmpty()) return
         player?.apply {
+            if (trackList.size <= currentWindowIndex) return
             trackList[currentWindowIndex].let { exoTrack ->
                 val lastKnownTrack = GoonjPlayerManager.currentTrackSubject.value
 
@@ -167,24 +184,15 @@ internal class LocalAudioPlayer: AudioPlayer {
         player?.addListener(eventListener)
     }
 
+    private fun removeListeners() {
+        player?.removeAnalyticsListener(ExoPlayerAnalyticsListenerImp)
+        player?.removeListener(eventListener)
+    }
+
 
     override fun startNewSession(){
         concatenatingMediaSource.clear()
-        GoonjNotificationManager.setPlayer(player)
-    }
-
-    override fun release() {
-        timerDisposable?.dispose()
-        compositeDisposable.dispose()
-
-        GoonjPlayerManager.removeNotification()
-
-        GoonjSessionMediaConnector.release()
-
-        player?.removeAnalyticsListener(ExoPlayerAnalyticsListenerImp)
-        player?.removeListener(eventListener)
-        player?.release()
-        player = null
+        LocalPlayerNotificationManager.setPlayer(player)
     }
 
     override fun seekTo(positionMs: Long) {
@@ -218,7 +226,7 @@ internal class LocalAudioPlayer: AudioPlayer {
 
     override fun resume() {
         player?.playWhenReady = true
-        GoonjNotificationManager.setPlayer(player)
+        LocalPlayerNotificationManager.setPlayer(player)
     }
 
     override fun stop() {
@@ -269,7 +277,7 @@ internal class LocalAudioPlayer: AudioPlayer {
     override fun getTrackPosition() = player?.currentPosition ?: 0
 
     override fun onRemoveNotification() {
-        GoonjNotificationManager.setPlayer(null)
+        LocalPlayerNotificationManager.setPlayer(null)
     }
 
     init {

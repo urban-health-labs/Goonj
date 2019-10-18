@@ -1,4 +1,4 @@
-package ai.rever.goonj.player
+package ai.rever.goonj.player.imp
 
 import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.GoonjPlayerState
@@ -9,15 +9,16 @@ import androidx.mediarouter.media.MediaItemStatus
 import androidx.mediarouter.media.MediaRouter
 import androidx.mediarouter.media.MediaSessionStatus
 import androidx.mediarouter.media.RemotePlaybackClient
-import ai.rever.goonj.interfaces.AudioPlayer
 import ai.rever.goonj.manager.GoonjPlayerManager
 import ai.rever.goonj.models.Track
+import ai.rever.goonj.player.AudioPlayer
 import android.os.Handler
 import androidx.core.net.toUri
 import androidx.mediarouter.media.MediaItemStatus.*
 import androidx.mediarouter.media.MediaSessionStatus.*
 import com.google.android.gms.cast.MediaLoadRequestData
 import com.google.android.gms.cast.framework.CastContext
+import io.reactivex.disposables.CompositeDisposable
 import java.lang.ref.WeakReference
 
 internal class RemoteAudioPlayer: AudioPlayer {
@@ -34,9 +35,15 @@ internal class RemoteAudioPlayer: AudioPlayer {
         player?.setStatusCallback(statusCallback)
     }
 
-    override fun release() {
+    private val compositeDisposable = CompositeDisposable()
+
+    override fun isDisposed() = compositeDisposable.isDisposed
+
+    override fun dispose() {
+        compositeDisposable.dispose()
         player?.release()
     }
+
 
     override fun enqueue(track: Track, index: Int) {
         GoonjPlayerManager.playerStateSubject.onNext(GoonjPlayerState.PLAYING)
@@ -242,7 +249,9 @@ internal class RemoteAudioPlayer: AudioPlayer {
         }
     }
 
-    private val statusCallback get() = StatusCallback(this)
+    private val statusCallback get() = StatusCallback(
+        this
+    )
 
     /**
      * Making static inner class insure callback does not memory leak, yet access private method

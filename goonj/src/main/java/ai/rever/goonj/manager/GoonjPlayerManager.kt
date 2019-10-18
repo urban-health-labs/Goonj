@@ -2,14 +2,17 @@ package ai.rever.goonj.manager
 
 import ai.rever.goonj.Goonj
 import ai.rever.goonj.GoonjPlayerState
-import ai.rever.goonj.player.RemoteAudioPlayer
-import ai.rever.goonj.interfaces.AudioPlayer
-import ai.rever.goonj.player.LocalAudioPlayer
+import ai.rever.goonj.download.GoonjDownloadManager
+import ai.rever.goonj.player.imp.RemoteAudioPlayer
+import ai.rever.goonj.player.AudioPlayer
+import ai.rever.goonj.player.imp.LocalAudioPlayer
 import ai.rever.goonj.models.Track
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import java.util.*
-
 
 internal object GoonjPlayerManager {
 
@@ -59,17 +62,28 @@ internal object GoonjPlayerManager {
 
     val trackCompleteSubject = PublishSubject.create<Track>()
 
+    private val compositeDisposable = CompositeDisposable()
 
-    fun onStart() {
-        this.remoteAudioPlayer = RemoteAudioPlayer()
-        this.localAudioPlayer = LocalAudioPlayer()
-        TrackFetcherManager.onStart()
-    }
+    val subscribe get() = object: Disposable {
 
-    fun release() {
-        remoteAudioPlayer?.release()
-        localAudioPlayer?.release()
-        TrackFetcherManager.release()
+        init {
+            remoteAudioPlayer = RemoteAudioPlayer().apply { addTo(compositeDisposable) }
+
+            localAudioPlayer = LocalAudioPlayer().apply { addTo(compositeDisposable) }
+
+            TrackPreFetcherManager.subscribe.addTo(compositeDisposable)
+
+            GoonjDownloadManager.subscribe.addTo(compositeDisposable)
+        }
+
+
+        override fun isDisposed(): Boolean {
+            return compositeDisposable.isDisposed
+        }
+
+        override fun dispose() {
+            compositeDisposable.dispose()
+        }
     }
 
     fun addTrack(track: Track, index: Int = trackList.size) {

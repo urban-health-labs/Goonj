@@ -1,20 +1,20 @@
 package ai.rever.goonjexample
 
-import ai.rever.goonj.download.DownloadUtil.Companion.addDownload
-import ai.rever.goonj.download.DownloadUtil.Companion.getAllDownloads
-import ai.rever.goonj.download.DownloadUtil.Companion.getDownloadState
-import ai.rever.goonj.download.DownloadUtil.Companion.isMediaDownloaded
+import ai.rever.goonj.Goonj
+import ai.rever.goonj.download.GoonjDownloadManager.addDownload
+import ai.rever.goonj.download.GoonjDownloadManager.isTrackDownloaded
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_mid.*
-import ai.rever.goonj.models.SAMPLES
-import android.util.Log
 import android.view.View
-import androidx.lifecycle.Observer
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 
 class MidActivity : AppCompatActivity() {
     val TAG = "MID_ACTIVITY"
+
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,39 +25,42 @@ class MidActivity : AppCompatActivity() {
         }
 
         setupDownloads()
-        getAllDownloads().observe(this, Observer {
-            for(track in it){
-                Log.d(TAG,"TrackID: ${track.title} State: ${getDownloadState(track.downloadedState)}")
-                updateDownloadState()
-            }
-        })
 
+        Goonj.downloadStateFlowable.subscribe {
+            updateDownloadState()
+        }.addTo(compositeDisposable)
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.dispose()
     }
 
     private fun setupDownloads(){
         activity_mid_download1_btn.setOnClickListener {
-            addDownload(application, SAMPLES[0])
+            addDownload(SAMPLES[0])
         }
 
         activity_mid_download2_btn.setOnClickListener {
-            addDownload(application, SAMPLES[1])
+            addDownload(SAMPLES[1])
         }
         activity_mid_download3_btn.setOnClickListener {
-            addDownload(application, SAMPLES[2])
+            addDownload(SAMPLES[2])
         }
-         updateDownloadState()
+        updateDownloadState()
     }
 
     private fun updateDownloadState(){
-        if(isMediaDownloaded(SAMPLES[0].id)){
+        if(isTrackDownloaded(SAMPLES[0].url)){
             activity_mid_download1_btn.visibility = View.GONE
             activity_mid_done1_btn.visibility = View.VISIBLE
         }
-        if(isMediaDownloaded(SAMPLES[1].id)){
+        if(isTrackDownloaded(SAMPLES[1].url)){
             activity_mid_download2_btn.visibility = View.GONE
             activity_mid_done2_btn.visibility = View.VISIBLE
         }
-        if(isMediaDownloaded(SAMPLES[2].id)){
+        if(isTrackDownloaded(SAMPLES[2].url)){
             activity_mid_download3_btn.visibility = View.GONE
             activity_mid_done3_btn.visibility = View.VISIBLE
         }

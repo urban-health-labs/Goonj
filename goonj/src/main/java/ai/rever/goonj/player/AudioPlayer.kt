@@ -1,12 +1,12 @@
-package ai.rever.goonj.interfaces
+package ai.rever.goonj.player
 
 import ai.rever.goonj.manager.GoonjPlayerManager
 import androidx.mediarouter.media.MediaRouter
 import ai.rever.goonj.models.Track
+import io.reactivex.disposables.Disposable
 
-internal interface AudioPlayer {
+internal interface AudioPlayer: Disposable {
 
-    fun release()
     fun seekTo(positionMs : Long)
     fun pause()
     fun resume()

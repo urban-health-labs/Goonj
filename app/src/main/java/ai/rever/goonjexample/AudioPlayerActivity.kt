@@ -1,8 +1,7 @@
 package ai.rever.goonjexample
 
 import ai.rever.goonj.GoonjPlayerState
-import ai.rever.goonj.interfaces.GoonjPlayer
-import ai.rever.goonj.models.SAMPLES
+import ai.rever.goonj.GoonjPlayer
 import ai.rever.goonj.models.Track
 import android.content.Context
 import android.media.AudioManager

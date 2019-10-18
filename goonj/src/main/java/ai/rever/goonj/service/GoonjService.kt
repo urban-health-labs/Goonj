@@ -2,9 +2,12 @@ package ai.rever.goonj.service
 
 import android.content.Intent
 import android.os.IBinder
-import ai.rever.goonj.interfaces.GoonjPlayerServiceInterface
 import ai.rever.goonj.manager.GoonjPlayerManager
 import android.app.Service
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
 
 open class GoonjService: Service(), GoonjPlayerServiceInterface {
 
@@ -12,6 +15,7 @@ open class GoonjService: Service(), GoonjPlayerServiceInterface {
 //    private val mediaRouter: MediaRouter by lazy { MediaRouter.getInstance(this) }
 
     private val binder = Binder()
+    private val compositeDisposable = CompositeDisposable()
 
 //    private val selector: MediaRouteSelector by lazy {
 //        MediaRouteSelector.Builder()
@@ -46,7 +50,7 @@ open class GoonjService: Service(), GoonjPlayerServiceInterface {
 
     override fun onCreate() {
         super.onCreate()
-        GoonjPlayerManager.onStart()
+        GoonjPlayerManager.subscribe.addTo(compositeDisposable)
 
 //        mediaRouter.addCallback(selector, mediaRouterCallback,
 //            MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
@@ -59,7 +63,7 @@ open class GoonjService: Service(), GoonjPlayerServiceInterface {
     }
 
     override fun onDestroy() {
-        GoonjPlayerManager.release()
+        compositeDisposable.clear()
         super.onDestroy()
     }
 

@@ -1,4 +1,4 @@
-package ai.rever.goonj.interfaces
+package ai.rever.goonj
 
 import ai.rever.goonj.Goonj
 import ai.rever.goonj.GoonjPlayerState
