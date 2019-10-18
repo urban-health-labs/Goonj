@@ -1,8 +1,10 @@
 package ai.rever.goonj.download
 
+import ai.rever.goonj.Goonj
 import ai.rever.goonj.Goonj.appContext
 import ai.rever.goonj.R
 import ai.rever.goonj.models.Track
+import android.net.Uri
 import android.os.Environment.DIRECTORY_MUSIC
 import androidx.core.net.toUri
 import com.google.android.exoplayer2.database.ExoDatabaseProvider
@@ -19,18 +21,16 @@ import java.io.File
 import java.util.*
 
 enum class DownloadState{
-    IDLE, DOWNLOAD_CHANGE, INITIALIZED, REQUIREMENT_STATE_CHANGED, DOWNLOAD_REMOVED
+    IDLE, DOWNLOAD_CHANGE, DOWNLOADING, INITIALIZED, REQUIREMENT_STATE_CHANGED, DOWNLOAD_REMOVED
 }
 
 object GoonjDownloadManager {
-
-    val maxCacheBytes: Long = 200 * 1024 * 1024
 
     internal val downloadStateBehaviorSubject = BehaviorSubject.createDefault<DownloadState>(DownloadState.INITIALIZED)
 
     internal val cache: Cache by lazy {
         SimpleCache(File(appContext?.getExternalFilesDir(DIRECTORY_MUSIC),
-            "downloads"), GoonjLRUCacheEvictor(maxCacheBytes),
+            "downloads"), GoonjLRUCacheEvictor(Goonj.maxCacheBytes),
             ExoDatabaseProvider(appContext))
     }
 
@@ -83,44 +83,22 @@ object GoonjDownloadManager {
             isDispose = true
             downloadManager.removeListener(listener)
         }
-
     }
 
-    fun addDownload(track: Track) {
+    fun addDownload(trackId: String, uri: Uri) {
         DownloadService.sendAddDownload(appContext,
             AudioDownloadService::class.java, DownloadRequest(
-                track.url, DownloadRequest.TYPE_PROGRESSIVE,
-                track.url.toUri(), Collections.emptyList(),
-                null, track.toByteArray),
-            false)
+                trackId, DownloadRequest.TYPE_PROGRESSIVE,
+                uri, Collections.emptyList(),
+                trackId, null), false)                 //, track.toByteArray))
     }
 
-    val allDownloads: DownloadCursor get() = downloadManager.downloadIndex.getDownloads(STATE_COMPLETED)
-
-    fun isTrackDownloaded(url: String): Boolean {
-        val download = downloadManager
-            .downloadIndex.getDownload(url)
-        return download?.state == STATE_COMPLETED
+    fun removeDownload(trackId: String) {
+        DownloadService.sendRemoveDownload(appContext,
+                AudioDownloadService::class.java,
+                trackId, false)
     }
 
-    fun getMediaDownloadPercentage(url: String): Float? {
-        val download = downloadManager
-            .downloadIndex.getDownload(url)
-        return download?.percentDownloaded
-    }
-
-    fun getDownloadState(state: Int) : String{
-        return when(state){
-            0 -> "STATE_QUEUED"
-            1 -> "STATE_STOPPED"
-            2 -> "STATE_DOWNLOADING"
-            3 -> "STATE_COMPLETED"
-            4 -> "STATE_FAILED"
-            5 -> "STATE_REMOVING"
-            7 -> "STATE_RESTARTING"
-            else -> {
-                "STATE_UNKNOWN"
-            }
-        }
-    }
+    fun isDownloaded(trackId: String) = downloadManager.downloadIndex
+            .getDownload(trackId)?.state == STATE_COMPLETED
 }
