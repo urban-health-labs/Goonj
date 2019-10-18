@@ -22,19 +22,21 @@ import com.google.android.gms.common.images.WebImage
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 import android.os.Parcel
+import io.reactivex.Flowable
+import kotlinx.android.parcel.IgnoredOnParcel
 import java.io.IOException
 
-private val ByteArray.track: Track? get() = run {
-    val parcel = Parcel.obtain()
-    parcel.unmarshall(this, 0, size)
-    parcel.setDataPosition(0) // This is extremely important!
+//private val ByteArray.track: Track? get() = run {
+//    val parcel = Parcel.obtain()
+//    parcel.unmarshall(this, 0, size)
+//    parcel.setDataPosition(0) // This is extremely important!
+//
+//    val result = Track.CREATOR.createFromParcel(parcel)
+//    parcel.recycle()
+//    result
+//}
 
-    val result = Track.CREATOR.createFromParcel(parcel)
-    parcel.recycle()
-    result
-}
-
-val Download.track get() = request.data.track
+//val Download.track get() = request.data.track
 
 internal val Track.Companion.CREATOR get() = TrackCreator.getCreator()
 
@@ -51,6 +53,7 @@ class Track (var id: String = "",
 
     companion object{}
 
+    @IgnoredOnParcel
     private val mediaInfo: MediaInfo? get() {
         if (url.isEmpty()) return null
         val musicMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
@@ -69,12 +72,14 @@ class Track (var id: String = "",
             .build()
     }
 
+    @IgnoredOnParcel
     val mediaLoadRequestData: MediaLoadRequestData? get() {
         return MediaLoadRequestData.Builder()
             .setMediaInfo(mediaInfo?: return null)
             .build()
     }
 
+    @IgnoredOnParcel
     val mediaDescription: MediaDescriptionCompat get() {
         val extras = Bundle()
 
@@ -121,23 +126,28 @@ class Track (var id: String = "",
         }
     }
 
-    val toByteArray: ByteArray get() = run {
-        val parcel = Parcel.obtain()
-        writeToParcel(parcel, 0)
-        val bytes = parcel.marshall()
-        parcel.recycle()
-        return bytes
-    }
+//    @IgnoredOnParcel
+//    val toByteArray: ByteArray get() = run {
+//        val parcel = Parcel.obtain()
+//        writeToParcel(parcel, 0)
+//        val bytes = parcel.marshall()
+//        parcel.recycle()
+//        return bytes
+//    }
 
+    @IgnoredOnParcel
     val download: Download? get() = try {
-        GoonjDownloadManager.downloadManager.downloadIndex.getDownload(url)
+        GoonjDownloadManager.downloadManager.downloadIndex.getDownload(id)
     } catch (e: IOException) {
         null
     }
 
-    val downloadFlowable get() = downloadStateFlowable.skipWhile {
-        it == DownloadState.REQUIREMENT_STATE_CHANGED
-    }.map { download }
+    @IgnoredOnParcel
+    val isDownloadActiveFlowable: Flowable<Boolean?> get() = downloadStateFlowable.map { download != null }
+
+    fun requestDownload() = GoonjDownloadManager.addDownload(id, url.toUri())
+
+    fun removeDownload() = GoonjDownloadManager.removeDownload(id)
 }
 
 

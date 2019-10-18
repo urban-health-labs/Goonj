@@ -236,7 +236,8 @@ internal class LocalAudioPlayer: AudioPlayer {
     private var isNotPrepared = true
     override fun enqueue(track: Track, index : Int) {
         val mediaSource = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-            .createMediaSource(track.url.toUri())
+                .setCustomCacheKey(track.id)
+                .createMediaSource(track.url.toUri())
 
         concatenatingMediaSource.addMediaSource(index, mediaSource)
 

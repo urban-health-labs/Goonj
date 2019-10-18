@@ -1,5 +1,6 @@
 package ai.rever.goonj.download
 
+import ai.rever.goonj.Goonj
 import ai.rever.goonj.R
 import android.app.Notification
 import androidx.annotation.Nullable
@@ -19,10 +20,12 @@ internal class AudioDownloadService : DownloadService (
     R.string.channel_download_name
 ) {
 
-    override fun getForegroundNotification(downloads: MutableList<Download>?): Notification =
-        DownloadNotificationHelper(this, DOWNLOAD_CHANNEL_ID)
-            .buildProgressNotification(R.drawable.exo_icon_play,
-                null, null, downloads)
+    override fun getForegroundNotification(downloads: MutableList<Download>?): Notification {
+        GoonjDownloadManager.downloadStateBehaviorSubject.onNext(DownloadState.DOWNLOADING)
+        return DownloadNotificationHelper(this, DOWNLOAD_CHANNEL_ID)
+                .buildProgressNotification(Goonj.iconWhileDownload,
+                        null, null, downloads)
+    }
 
     override fun getDownloadManager(): DownloadManager {
         return GoonjDownloadManager.downloadManager
