@@ -1,8 +1,6 @@
 package ai.rever.goonjexample
 
 import ai.rever.goonj.Goonj
-import ai.rever.goonj.download.GoonjDownloadManager.addDownload
-import ai.rever.goonj.download.GoonjDownloadManager.isTrackDownloaded
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -39,28 +37,28 @@ class MidActivity : AppCompatActivity() {
 
     private fun setupDownloads(){
         activity_mid_download1_btn.setOnClickListener {
-            addDownload(SAMPLES[0])
+            SAMPLES[0].requestDownload()
         }
 
         activity_mid_download2_btn.setOnClickListener {
-            addDownload(SAMPLES[1])
+            SAMPLES[1].requestDownload()
         }
         activity_mid_download3_btn.setOnClickListener {
-            addDownload(SAMPLES[2])
+            SAMPLES[2].requestDownload()
         }
         updateDownloadState()
     }
 
     private fun updateDownloadState(){
-        if(isTrackDownloaded(SAMPLES[0].url)){
+        if(Goonj.isDownloaded(SAMPLES[0].id)){
             activity_mid_download1_btn.visibility = View.GONE
             activity_mid_done1_btn.visibility = View.VISIBLE
         }
-        if(isTrackDownloaded(SAMPLES[1].url)){
+        if(Goonj.isDownloaded(SAMPLES[1].id)){
             activity_mid_download2_btn.visibility = View.GONE
             activity_mid_done2_btn.visibility = View.VISIBLE
         }
-        if(isTrackDownloaded(SAMPLES[2].url)){
+        if(Goonj.isDownloaded(SAMPLES[2].id)){
             activity_mid_download3_btn.visibility = View.GONE
             activity_mid_done3_btn.visibility = View.VISIBLE
         }

@@ -1,10 +1,20 @@
 package ai.rever.goonj.analytics
 
 import ai.rever.goonj.analytics.GoonjAnalytics.logEvent
+import android.util.Log.e
+import android.view.Surface
 import com.google.android.exoplayer2.ExoPlaybackException
+import com.google.android.exoplayer2.Format
+import com.google.android.exoplayer2.PlaybackParameters
 import com.google.android.exoplayer2.analytics.AnalyticsListener
+import com.google.android.exoplayer2.audio.AudioAttributes
+import com.google.android.exoplayer2.decoder.DecoderCounters
 import com.google.android.exoplayer2.metadata.Metadata
 import com.google.android.exoplayer2.source.MediaSourceEventListener
+import com.google.android.exoplayer2.source.TrackGroupArray
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray
+import java.io.IOException
+import java.lang.Exception
 
 object ExoPlayerAnalyticsListenerImp: AnalyticsListener {
     override fun onSeekProcessed(eventTime: AnalyticsListener.EventTime?) {
@@ -51,6 +61,7 @@ object ExoPlayerAnalyticsListenerImp: AnalyticsListener {
             map
         )
     }
+
 
     override fun onLoadCompleted(
         eventTime: AnalyticsListener.EventTime?,

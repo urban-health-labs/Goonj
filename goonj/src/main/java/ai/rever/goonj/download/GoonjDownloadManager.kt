@@ -21,7 +21,7 @@ import java.io.File
 import java.util.*
 
 enum class DownloadState{
-    IDLE, DOWNLOAD_CHANGE, DOWNLOADING, INITIALIZED, REQUIREMENT_STATE_CHANGED, DOWNLOAD_REMOVED
+    IDLE, DOWNLOAD_CHANGE, DOWNLOADING, INITIALIZED, REQUIREMENT_STATE_CHANGED, DOWNLOAD_REMOVED, DOWNLOADED
 }
 
 object GoonjDownloadManager {
@@ -101,4 +101,18 @@ object GoonjDownloadManager {
 
     fun isDownloaded(trackId: String) = downloadManager.downloadIndex
             .getDownload(trackId)?.state == STATE_COMPLETED
+
+    fun getAllDownloads(): List<String> {
+        val downloadCursor = downloadManager.downloadIndex.getDownloads(STATE_COMPLETED)
+        val downloadedTrackList = mutableListOf<String>()
+        if(downloadCursor.count == 0) {
+            return downloadedTrackList
+        }
+        downloadCursor.moveToFirst()
+        do {
+            downloadedTrackList.add(downloadCursor.download.request.id)
+        } while (downloadCursor.moveToNext())
+
+        return downloadedTrackList
+    }
 }

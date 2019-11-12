@@ -9,7 +9,6 @@ import androidx.mediarouter.media.RemotePlaybackClient
 open class ItemActionCallbackImp(var operation: String, var onSuccess: ((String?, MediaItemStatus?) -> Unit)? = null) : RemotePlaybackClient.ItemActionCallback() {
 
 
-
     override fun onResult(
         data: Bundle?,
         sessionId: String?,
@@ -24,7 +23,6 @@ open class ItemActionCallbackImp(var operation: String, var onSuccess: ((String?
 
     override fun onError(error: String?, code: Int, data: Bundle?) {
         logError("$operation: failed", error , code)
-
     }
 }
 

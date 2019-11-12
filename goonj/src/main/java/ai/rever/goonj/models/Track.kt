@@ -159,7 +159,14 @@ data class TrackState(var index: Int = 0,
                       var playedAt: Date? = Date(),
                       var completedAt: Date? = Date(),
                       var remoteItemId: String? = null): Parcelable {
-    val progress: Double get() = position.toDouble() / duration.toDouble()
+    val progress: Double get() = run {
+        val progress = position.toDouble() / duration.toDouble()
+        if (progress in 0.0..1.0) {
+            progress
+        } else {
+            2.0
+        }
+    }
 }
 
 

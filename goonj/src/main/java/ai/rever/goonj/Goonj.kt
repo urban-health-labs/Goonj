@@ -47,7 +47,17 @@ object Goonj {
             runOnSet()
         }
 
-    private var mServiceConnection: ServiceConnection? = null
+    private var mServiceConnection: ServiceConnection = object : ServiceConnection{
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            (binder as? GoonjService.Binder)?.goonjPlayerServiceInterface?.let {
+                goonjPlayerServiceInterface = it
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            goonjPlayerServiceInterface = null
+        }
+    }
 
     private var runs = ArrayList<GoonjPlayerServiceInterface.() -> Unit>()
 
@@ -88,6 +98,7 @@ object Goonj {
      *
      * Note: GoonjService must added to app manifest
      */
+
     fun <S: GoonjService> register(context: Context, activityIntent: Intent, audioServiceClass: Class<S>) {
         if (appContext == null) {
             val ctx = if (context.applicationContext == null) context else context.applicationContext
@@ -98,38 +109,14 @@ object Goonj {
         changeActivityIntentForNotification(activityIntent)
     }
 
-    private fun <T: GoonjService> register(audioServiceClass: Class<T>) {
-        if(mServiceConnection == null){
-            mServiceConnection = object : ServiceConnection{
-                override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-                    (binder as? GoonjService.Binder)?.goonjPlayerServiceInterface?.let {
-                        goonjPlayerServiceInterface = it
-                    }
-                }
-
-                override fun onServiceDisconnected(name: ComponentName?) {
-                    goonjPlayerServiceInterface = null
-                }
-
-                override fun onBindingDied(name: ComponentName?) {
-                    unregister()
-                    register(audioServiceClass)
-                }
-            }
-        }
-
-        mServiceConnection?.let {
-            appContext?.bindService(
-                Intent(appContext, audioServiceClass),
-                it, Context.BIND_AUTO_CREATE
-            )
-        }
+    private fun <S: GoonjService> register(audioServiceClass: Class<S>) {
+        appContext?.bindService(Intent(appContext, audioServiceClass),
+            mServiceConnection, Context.BIND_AUTO_CREATE
+        )
     }
 
     fun unregister() {
-        mServiceConnection?.let {
-            appContext?.unbindService(it)
-        }
+        appContext?.unbindService(mServiceConnection)
         imageLoader = null
         weakContext = null
         goonjPlayerServiceInterface = null

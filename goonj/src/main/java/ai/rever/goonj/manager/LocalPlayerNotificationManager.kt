@@ -83,9 +83,9 @@ internal object LocalPlayerNotificationManager {
 
     private val notificationListener = object : PlayerNotificationManager.NotificationListener {
 
-        override fun onNotificationStarted(notificationId: Int, notification: Notification?) {
-            Goonj.startForeground(notificationId, notification)
-        }
+//        override fun onNotificationStarted(notificationId: Int, notification: Notification?) {
+//            Goonj.startForeground(notificationId, notification)
+//        }
 
         override fun onNotificationCancelled(notificationId: Int) {
             Goonj.stopForeground(true)
@@ -101,6 +101,10 @@ internal object LocalPlayerNotificationManager {
                 activityIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT
             )
+
+            if (ongoing) {
+                Goonj.startForeground(notificationId, notification)
+            }
         }
     }
 

@@ -12,6 +12,7 @@ import ai.rever.goonj.manager.GoonjPlayerManager
 import ai.rever.goonj.manager.LocalPlayerSMCManager
 import ai.rever.goonj.models.Track
 import ai.rever.goonj.player.AudioPlayer
+import android.util.Log.e
 import androidx.core.net.toUri
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayerFactory
@@ -65,6 +66,8 @@ internal class LocalAudioPlayer: AudioPlayer {
     private val compositeDisposable = CompositeDisposable()
     private var timerDisposable: Disposable? = null
     private val trackList get() = GoonjPlayerManager.trackList
+    private val autoplay get() = GoonjPlayerManager.autoplayTrackSubject.value
+    private val currentTrack get() = GoonjPlayerManager.currentTrackSubject.value
 
     private val cacheDataSourceFactory by lazy {
         with (DefaultDataSourceFactory(appContext, Util.getUserAgent(appContext, appContext?.getString(R.string.app_name)))) {
@@ -111,6 +114,13 @@ internal class LocalAudioPlayer: AudioPlayer {
     private fun onTrackPositionChange(position: Long = getTrackPosition())  {
         GoonjPlayerManager.currentTrackSubject.value?.let { track ->
             track.state.position = position
+            if (track.state.duration < 2) {
+                player?.duration?.let {
+                    if (it > 1) {
+                        track.state.duration = it
+                    }
+                }
+            }
             GoonjPlayerManager.currentTrackSubject.onNext(track)
         }
     }
@@ -118,19 +128,13 @@ internal class LocalAudioPlayer: AudioPlayer {
 
     private val eventListener = object: ExoPlayerEvenListenerImp() {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-            super.onPlayerStateChanged(playWhenReady, playbackState)
 
             updateCurrentlyPlayingTrack()
 
             GoonjPlayerManager.playerStateSubject.onNext(
                 when (playbackState) {
                     Player.STATE_BUFFERING -> GoonjPlayerState.BUFFERING
-                    Player.STATE_ENDED -> {
-                        GoonjPlayerManager.currentTrackSubject.value?.let {
-                            GoonjPlayerManager.onTrackComplete(it)
-                        }
-                        GoonjPlayerState.ENDED
-                    }
+                    Player.STATE_ENDED -> GoonjPlayerState.ENDED
                     Player.STATE_IDLE -> GoonjPlayerState.IDLE
                     else -> if (playWhenReady) {
                         GoonjPlayerState.PLAYING
@@ -139,21 +143,25 @@ internal class LocalAudioPlayer: AudioPlayer {
                         GoonjPlayerState.PAUSED
                     }
                 })
+            super.onPlayerStateChanged(playWhenReady, playbackState)
         }
 
         override fun onPositionDiscontinuity(reason: Int) {
-            super.onPositionDiscontinuity(reason)
             updateCurrentlyPlayingTrack()
-
+            super.onPositionDiscontinuity(reason)
         }
+
     }
 
     private fun updateCurrentlyPlayingTrack() {
         player?.apply {
-            if (trackList.size <= currentWindowIndex) return
-            trackList[currentWindowIndex].let { exoTrack ->
-                val lastKnownTrack = GoonjPlayerManager.currentTrackSubject.value
 
+            // todo: figure out, why this could happen
+            if (trackList.size <= currentWindowIndex) {
+                return
+            }
+
+            trackList[currentWindowIndex].let { exoTrack ->
                 if (contentDuration > 0) {
                     exoTrack.state.duration = contentDuration
                 }
@@ -164,16 +172,28 @@ internal class LocalAudioPlayer: AudioPlayer {
                     exoTrack.state.position = 0
                 }
 
-                GoonjPlayerManager.currentTrackSubject.onNext(exoTrack)
+                val lastKnownTrack: Track? = currentTrack
 
-                if (exoTrack.id != lastKnownTrack?.id) {
+                if (exoTrack.id != lastKnownTrack?.id
+                        || exoTrack.state.index != lastKnownTrack.state.index) {
                     exoTrack.state.playedAt = Date()
-                    GoonjPlayerManager.onTrackComplete(lastKnownTrack ?: return)
-                    GoonjPlayerManager.autoplayTrackSubject.value?.let {
-                        if (!it) {
+                    if (lastKnownTrack != null) { // could be null if first track just started to play
+                        if (newSession) {
+                            newSession = false
+                        } else{
+                            GoonjPlayerManager.onTrackComplete(lastKnownTrack)
+                        }
+
+                        if (autoplay != true) {
                             pause()
                         }
+                        GoonjPlayerManager.currentTrackSubject.onNext(exoTrack)
+                    } else {
+                        newSession = false
+                        GoonjPlayerManager.currentTrackSubject.onNext(exoTrack)
                     }
+                } else {
+                    GoonjPlayerManager.currentTrackSubject.onNext(exoTrack)
                 }
             }
         }
@@ -189,13 +209,21 @@ internal class LocalAudioPlayer: AudioPlayer {
         player?.removeListener(eventListener)
     }
 
+    private var newSession = false
 
     override fun startNewSession(){
+        if (player?.playbackError != null) {
+            player?.retry()
+        }
+        newSession = true
         concatenatingMediaSource.clear()
         LocalPlayerNotificationManager.setPlayer(player)
     }
 
     override fun seekTo(positionMs: Long) {
+        if (player?.playbackError != null) {
+            player?.retry()
+        }
         if (positionMs < player?.duration?: 0) {
             player?.seekTo(positionMs)
         }
@@ -221,10 +249,16 @@ internal class LocalAudioPlayer: AudioPlayer {
     }
 
     override fun pause() {
+        if (player?.playbackError != null) {
+            player?.retry()
+        }
         player?.playWhenReady = false
     }
 
     override fun resume() {
+        if (player?.playbackError != null) {
+            player?.retry()
+        }
         player?.playWhenReady = true
         LocalPlayerNotificationManager.setPlayer(player)
     }

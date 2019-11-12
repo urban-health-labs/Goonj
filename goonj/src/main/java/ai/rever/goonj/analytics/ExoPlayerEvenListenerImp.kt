@@ -1,6 +1,8 @@
 package ai.rever.goonj.analytics
 
 import ai.rever.goonj.analytics.GoonjAnalytics.logEvent
+import android.util.Log.e
+import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.PlaybackParameters
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Timeline
