@@ -79,6 +79,9 @@ internal object LocalPlayerNotificationManager {
             return track.bitmap
         }
 
+        override fun getCurrentSubText(player: Player?): String? {
+            return "Goonj"
+        }
     }
 
     private val notificationListener = object : PlayerNotificationManager.NotificationListener {
