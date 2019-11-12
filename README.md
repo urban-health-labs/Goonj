@@ -19,11 +19,15 @@ allprojects {
 Add following in build.gradle (App level):
 ```
 dependencies {
-	implementation 'com.github.rever-ai:goonj:0.5'
+   implementation 'com.github.rever-ai:goonj:0.5.8'
 	// Exo Player
     implementation 'com.google.android.exoplayer:exoplayer-core:2.10.3'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.10.3'
     implementation 'com.google.android.exoplayer:extension-mediasession:2.10.0'
+    // Rx
+    implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+
 
 }
 ```
@@ -95,7 +99,22 @@ Goonj.someMethod() or Goonj.someProperty
 |__playerStateFlowable__|Flowable of (GoonjPlayerState) that tells if the Player state. Helps in updating Play/Pause Icon/Button in UI.|
 |__currentTrackFlowable__|Flowable of (Track) that contains details of the Current Track that is playing.|
 |__autoplayFlowable__|Flowable of (Track) that contains details of the Current Track that is playing.|
+|__downloadStateFlowable__|Flowable of (DownloadState).|
+|__isDownloaded(trackId: String)__|Check if given track is downloaded.|
 |__trackCompletionObservable__|Observable of (Track) that get completed after subscription.|
+|__iconWhileDownload__|Drawable int used as icon while download active in notification.|
+|__maxCacheBytes__|Max cache size in bytes.|
+
+
+    val downloadStateFlowable: Flowable<DownloadState> get() = GoonjDownloadManager.downloadStateBehaviorSubject.toFlowable(BackpressureStrategy.LATEST).observeOn(AndroidSchedulers.mainThread())
+
+    fun isDownloaded(trackId: String) = GoonjDownloadManager.isDownloaded(trackId)
+
+    val trackCompletionObservable: Observable<Track> get() = GoonjPlayerManager.trackCompleteSubject.observeOn(AndroidSchedulers.mainThread())
+
+    var iconWhileDownload: Int = R.drawable.ic_album
+
+    var maxCacheBytes: Long = 200 * 1024 * 1024
 
 
 ### Cast
