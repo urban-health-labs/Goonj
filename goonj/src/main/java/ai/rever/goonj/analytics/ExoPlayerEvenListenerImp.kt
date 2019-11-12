@@ -84,4 +84,12 @@ open class ExoPlayerEvenListenerImp : Player.EventListener {
             map
         )
     }
+
+    override fun onSeekProcessed() {
+        super.onSeekProcessed()
+    }
+
+    override fun onPlayerError(error: ExoPlaybackException?) {
+        super.onPlayerError(error)
+    }
 }
