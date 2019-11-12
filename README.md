@@ -106,16 +106,5 @@ Goonj.someMethod() or Goonj.someProperty
 |__maxCacheBytes__|Max cache size in bytes.|
 
 
-    val downloadStateFlowable: Flowable<DownloadState> get() = GoonjDownloadManager.downloadStateBehaviorSubject.toFlowable(BackpressureStrategy.LATEST).observeOn(AndroidSchedulers.mainThread())
-
-    fun isDownloaded(trackId: String) = GoonjDownloadManager.isDownloaded(trackId)
-
-    val trackCompletionObservable: Observable<Track> get() = GoonjPlayerManager.trackCompleteSubject.observeOn(AndroidSchedulers.mainThread())
-
-    var iconWhileDownload: Int = R.drawable.ic_album
-
-    var maxCacheBytes: Long = 200 * 1024 * 1024
-
-
 ### Cast
 Feature under development
